@@ -1,0 +1,66 @@
+﻿<Window
+    x:Class="DesktopTools.BindingView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="浮窗"
+    Width="Auto"
+    Height="Auto"
+    AllowsTransparency="True"
+    Background="Transparent"
+    BorderThickness="0"
+    Loaded="Window_Loaded"
+    MouseDown="MoveWindow"
+    ResizeMode="NoResize"
+    ShowInTaskbar="False"
+    Topmost="True"
+    WindowStartupLocation="CenterScreen"
+    WindowStyle="None"
+    mc:Ignorable="d">
+    <Grid x:Name="AlwaysShowLayout">
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+        </Grid.Style>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="28" />
+        </Grid.RowDefinitions>
+        <Border
+            Grid.Row="0"
+            Grid.Column="1"
+            Padding="8,0"
+            CornerRadius="0,0,8,8"
+            Cursor="Arrow">
+            <Border.Effect>
+                <DropShadowEffect
+                    BlurRadius="5"
+                    ShadowDepth="-4"
+                    Color="LightGray" />
+            </Border.Effect>
+            <Border.BorderBrush>
+                <SolidColorBrush Opacity="0.5" Color="Black" />
+            </Border.BorderBrush>
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Cursor" Value="Arrow" />
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <SolidColorBrush Opacity="0.5" Color="Black" />
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Border.Style>
+            <StackPanel
+                x:Name="bar"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Orientation="Horizontal" />
+
+        </Border>
+    </Grid>
+</Window>

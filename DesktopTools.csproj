@@ -1,0 +1,62 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<ApplicationIcon>icon.ico</ApplicationIcon>
+		<SignAssembly>False</SignAssembly>
+		<Title>桌面工具</Title>
+		<Version>1.0.0.2</Version>
+		<Authors>baique</Authors>
+		<Description>桌面工具</Description>
+		<Copyright>Copyright @ baique</Copyright>
+		<PackageIcon>icon.ico</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/baique/DesktopTools</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<Platforms>AnyCPU;x86</Platforms>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Fonts\**" />
+	  <EmbeddedResource Remove="Fonts\**" />
+	  <None Remove="Fonts\**" />
+	  <Page Remove="Fonts\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="icon.ico">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </Resource>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Resource Include="font\13pxbus.TTF" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="font\13pxbus.TTF">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </None>
+	  <None Update="icon.ico">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Update="README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Page Update="views\BindView.xaml">
+	    <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+	    <SubType>Designer</SubType>
+	  </Page>
+	</ItemGroup>
+
+</Project>
