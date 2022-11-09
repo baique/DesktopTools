@@ -19,6 +19,7 @@
 		<RepositoryUrl>https://github.com/baique/DesktopTools</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<Platforms>AnyCPU;x86</Platforms>
+		<AssemblyName>$(MSBuildProjectName)</AssemblyName>
 	</PropertyGroup>
 
 	<ItemGroup>
