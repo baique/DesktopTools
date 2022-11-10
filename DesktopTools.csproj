@@ -18,46 +18,34 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/baique/DesktopTools</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<Platforms>AnyCPU;x86</Platforms>
-		<AssemblyName>$(MSBuildProjectName)</AssemblyName>
+		<Platforms>AnyCPU</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Fonts\**" />
-	  <EmbeddedResource Remove="Fonts\**" />
-	  <None Remove="Fonts\**" />
-	  <Page Remove="Fonts\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Resource Include="icon.ico">
-	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	  </Resource>
+	  <None Remove="icon.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Resource Include="font\13pxbus.TTF" />
+		<Resource Include="font\clockicons.TTF" />
+		<Resource Include="icon.ico">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+		</Resource>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="font\13pxbus.TTF">
-	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	  </None>
-	  <None Update="icon.ico">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	  <None Update="README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
+		<None Update="README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Page Update="views\BindView.xaml">
-	    <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-	    <SubType>Designer</SubType>
-	  </Page>
+		<Page Update="views\BindView.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
 	</ItemGroup>
 
 </Project>

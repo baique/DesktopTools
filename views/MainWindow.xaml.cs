@@ -1,4 +1,5 @@
-﻿using DesktopTools.model;
+﻿using DesktopTools;
+using DesktopTools.model;
 using DesktopTools.views;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
