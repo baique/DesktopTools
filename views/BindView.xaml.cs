@@ -27,6 +27,7 @@ namespace DesktopTools
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            HideAltTab(new WindowInteropHelper(this).Handle);
         }
         public void Show()
         {

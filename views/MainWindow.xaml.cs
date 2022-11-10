@@ -43,10 +43,11 @@ namespace DesktopTools
         {
             InitializeComponent();
             Instance = this;
-
         }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            HideAltTab(new WindowInteropHelper(this).Handle);
             MiniWindow();
             RegisterTimeJump();
             RegisterAutoChangeBackground();
