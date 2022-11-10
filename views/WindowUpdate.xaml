@@ -1,0 +1,59 @@
+﻿<Window
+    x:Class="DesktopTools.WindowUpdate"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:DesktopTools"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="WindowsUpdate"
+    Width="800"
+    Height="450"
+    Background="#1656a2"
+    Closed="WindowClose"
+    FontFamily="微软雅黑"
+    FontSize="18"
+    WindowState="Maximized"
+    WindowStyle="None"
+    mc:Ignorable="d">
+    <StackPanel
+        Name="pn"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center">
+        <local:CustomCircularProgressBar HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <Label
+            Width="Auto"
+            HorizontalAlignment="Center"
+            Content="正在配置 Windows 11 更新"
+            Foreground="White" />
+        <Grid HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Label
+                Name="bfb"
+                Grid.Column="0"
+                Width="Auto"
+                HorizontalAlignment="Center"
+                Content="0%"
+                Foreground="White" />
+            <Label
+                Grid.Column="1"
+                Width="Auto"
+                HorizontalAlignment="Center"
+                Content="已完成"
+                Foreground="White" />
+        </Grid>
+
+        <Label
+            HorizontalAlignment="Center"
+            Content="请坐和放宽，执行此任务需要一定的时间。"
+            Foreground="White" />
+        <Label
+            Margin="0,30,0,0"
+            HorizontalAlignment="Center"
+            Content="你的电脑将重启几次。"
+            FontSize="14"
+            Foreground="White" />
+    </StackPanel>
+</Window>

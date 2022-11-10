@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="设置"
     Width="350"
-    Height="360"
+    Height="340"
     Loaded="WinLoaded"
     MouseDown="MoveWindow"
     ResizeMode="NoResize"
@@ -117,7 +117,7 @@
         </StackPanel>
         <StackPanel Orientation="Horizontal">
             <Label Style="{StaticResource FormLabel}">
-                挥手模式：
+                下班时间：
             </Label>
             <CheckBox
                 x:Name="EnableGoodbyeMode"
@@ -165,6 +165,7 @@
                 <ComboBoxItem Content="60" />
             </ComboBox>
         </StackPanel>
+        <!--
         <StackPanel Orientation="Horizontal">
             <Label Style="{StaticResource FormLabel}">
                 暴力挥手：
@@ -173,7 +174,7 @@
                 x:Name="EnableMouseGoodbyeMode"
                 Width="Auto"
                 VerticalAlignment="Center" />
-        </StackPanel>
+        </StackPanel>-->
         <StackPanel>
             <Button Width="80px" Click="SaveChange">保存</Button>
         </StackPanel>

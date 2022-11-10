@@ -22,67 +22,6 @@
     WindowStartupLocation="Manual"
     WindowStyle="None"
     mc:Ignorable="d">
-    <Window.Resources>
-        <Storyboard x:Key="Storyboard2">
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="DateNumber" Storyboard.TargetProperty="(UIElement.Visibility)">
-                <DiscreteObjectKeyFrame
-                    x:Name="discreteObjectKeyFrame"
-                    KeyTime="00:00:00.1"
-                    Value="{x:Static Visibility.Collapsed}" />
-            </ObjectAnimationUsingKeyFrames>
-            <StringAnimationUsingKeyFrames Storyboard.TargetName="TimeNumber" Storyboard.TargetProperty="(TextBlock.Text)">
-                <DiscreteStringKeyFrame KeyTime="00:00:00.2" Value="G" />
-            </StringAnimationUsingKeyFrames>
-            <StringAnimationUsingKeyFrames Storyboard.TargetName="TimeNumber" Storyboard.TargetProperty="(TextBlock.Text)">
-                <DiscreteStringKeyFrame KeyTime="00:00:00.3" Value="G" />
-            </StringAnimationUsingKeyFrames>
-            <StringAnimationUsingKeyFrames Storyboard.TargetName="TimeNumber" Storyboard.TargetProperty="(TextBlock.Text)">
-                <DiscreteStringKeyFrame KeyTime="00:00:00.4" Value="Go" />
-            </StringAnimationUsingKeyFrames>
-            <StringAnimationUsingKeyFrames Storyboard.TargetName="TimeNumber" Storyboard.TargetProperty="(TextBlock.Text)">
-                <DiscreteStringKeyFrame KeyTime="00:00:00.5" Value="Goo" />
-            </StringAnimationUsingKeyFrames>
-            <StringAnimationUsingKeyFrames Storyboard.TargetName="TimeNumber" Storyboard.TargetProperty="(TextBlock.Text)">
-                <DiscreteStringKeyFrame KeyTime="00:00:00.6" Value="Good" />
-            </StringAnimationUsingKeyFrames>
-            <StringAnimationUsingKeyFrames Storyboard.TargetName="TimeNumber" Storyboard.TargetProperty="(TextBlock.Text)">
-                <DiscreteStringKeyFrame KeyTime="00:00:00.7" Value="Goodb" />
-            </StringAnimationUsingKeyFrames>
-            <StringAnimationUsingKeyFrames Storyboard.TargetName="TimeNumber" Storyboard.TargetProperty="(TextBlock.Text)">
-                <DiscreteStringKeyFrame KeyTime="00:00:00.8" Value="Goodby" />
-            </StringAnimationUsingKeyFrames>
-            <StringAnimationUsingKeyFrames Storyboard.TargetName="TimeNumber" Storyboard.TargetProperty="(TextBlock.Text)">
-                <DiscreteStringKeyFrame KeyTime="00:00:00.9" Value="Goodbye" />
-            </StringAnimationUsingKeyFrames>
-            <StringAnimationUsingKeyFrames Storyboard.TargetName="TimeNumber" Storyboard.TargetProperty="(TextBlock.Text)">
-                <DiscreteStringKeyFrame KeyTime="00:00:01.1" Value="Goodbye" />
-            </StringAnimationUsingKeyFrames>
-        </Storyboard>
-        <Storyboard x:Key="Storyboard1" Completed="Replay">
-            <ColorAnimationUsingKeyFrames Storyboard.TargetName="TimeNumber" Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)">
-                <EasingColorKeyFrame KeyTime="00:00:00" Value="White" />
-                <EasingColorKeyFrame KeyTime="00:00:01" Value="Red" />
-                <EasingColorKeyFrame KeyTime="00:00:02" Value="LightGreen" />
-                <EasingColorKeyFrame KeyTime="00:00:03" Value="Blue" />
-            </ColorAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="stackPanel" Storyboard.TargetProperty="(FrameworkElement.Width)">
-                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="130" />
-                <EasingDoubleKeyFrame KeyTime="00:00:01.5" Value="500" />
-                <EasingDoubleKeyFrame KeyTime="00:00:03" Value="130" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="stackPanel" Storyboard.TargetProperty="(FrameworkElement.Height)">
-                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="60" />
-                <EasingDoubleKeyFrame KeyTime="00:00:01.5" Value="120" />
-                <EasingDoubleKeyFrame KeyTime="00:00:03" Value="60" />
-            </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="TimeNumber" Storyboard.TargetProperty="(TextBlock.FontSize)">
-                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="34" />
-                <EasingDoubleKeyFrame KeyTime="00:00:01.5" Value="160" />
-                <EasingDoubleKeyFrame KeyTime="00:00:03" Value="34" />
-            </DoubleAnimationUsingKeyFrames>
-
-        </Storyboard>
-    </Window.Resources>
     <Grid
         x:Name="AlwaysShowLayout"
         MouseDown="ToggleKeyMapPanel"
@@ -99,6 +38,7 @@
             <Style TargetType="Grid">
                 <Setter Property="Background" Value="Transparent" />
             </Style>
+
         </Grid.Style>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -117,7 +57,7 @@
                     <Setter Property="Cursor" Value="Arrow" />
                     <Setter Property="Background">
                         <Setter.Value>
-                            <SolidColorBrush Opacity="0.5" Color="Black" />
+                            <SolidColorBrush Opacity="0.5" Color="#000" />
                         </Setter.Value>
                     </Setter>
                 </Style>
@@ -137,14 +77,14 @@
                     FontSize="30"
                     FontWeight="Bold"
                     Foreground="White"
-                    Text=""
+                    Text="00:00:00"
                     TextAlignment="Center" />
                 <TextBlock
                     x:Name="DateNumber"
                     FontSize="16"
                     FontWeight="Bold"
                     Foreground="White"
-                    Text=""
+                    Text="01-01 周一"
                     TextAlignment="Center" />
             </StackPanel>
         </Border>

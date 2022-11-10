@@ -1,0 +1,49 @@
+﻿<Window
+    x:Class="DesktopTools.views.GoodbyeMode"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:DesktopTools.views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="window"
+    Title="GoodbyeMode"
+    AllowsTransparency="True"
+    FontSize="18"
+    Loaded="WindowLoaded"
+    WindowStartupLocation="CenterScreen"
+    WindowState="Maximized"
+    WindowStyle="None"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <WindowChrome x:Key="WindowChromeKey">
+            <WindowChrome.ResizeBorderThickness>
+                <Thickness>0</Thickness>
+            </WindowChrome.ResizeBorderThickness>
+        </WindowChrome>
+        <Storyboard x:Key="Storyboard1">
+            <StringAnimationUsingKeyFrames
+                Completed="Completed"
+                Storyboard.TargetName="textBlock"
+                Storyboard.TargetProperty="(TextBlock.Text)">
+                <DiscreteStringKeyFrame KeyTime="00:00:00" Value="" />
+                <DiscreteStringKeyFrame KeyTime="00:00:00.5000000" Value="下" />
+                <DiscreteStringKeyFrame KeyTime="00:00:01" Value="下班" />
+                <DiscreteStringKeyFrame KeyTime="00:00:01.5000000" Value="下班！" />
+                <DiscreteStringKeyFrame KeyTime="00:00:05" Value="下班！" />
+            </StringAnimationUsingKeyFrames>
+        </Storyboard>
+    </Window.Resources>
+    <Window.Background>
+        <SolidColorBrush Opacity="0" Color="White" />
+    </Window.Background>
+    <StackPanel
+        x:Name="stackPanel"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center">
+        <TextBlock
+            x:Name="textBlock"
+            FontFamily="{StaticResource Aa破竹体}"
+            FontSize="520px"
+            Text="下班！" />
+    </StackPanel>
+</Window>

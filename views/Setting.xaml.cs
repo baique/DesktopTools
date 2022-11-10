@@ -98,7 +98,7 @@ namespace DesktopTools.views
             this.UnWindowBindOrChange.Text = GetSetting(UnWindowBindOrChangeKey, "LeftCtrl + LeftAlt + Back");
             this.ErrorMode.Text = GetSetting(ErrorModeKey, "LeftCtrl + LeftShift + Space");
             this.EnableGoodbyeMode.IsChecked = "1".Equals(GetSetting(EnableGoodbyeModeKey));
-            this.EnableMouseGoodbyeMode.IsChecked = "1".Equals(GetSetting(EnableMouseGoodbyeModeKey));
+            //this.EnableMouseGoodbyeMode.IsChecked = "1".Equals(GetSetting(EnableMouseGoodbyeModeKey));
             this.EnableDisableLockScreen.IsChecked = "1".Equals(GetSetting(EnableDisableLockScreenKey, "1"));
             this.EnableGoodbyeH.Text = GetSetting(EnableGoodbyeHKey, "17");
             this.EnableGoodbyeM.Text = GetSetting(EnableGoodbyeMKey, "30");
@@ -117,7 +117,7 @@ namespace DesktopTools.views
             SetSetting(EnableGoodbyeHKey, this.EnableGoodbyeH.Text);
             SetSetting(EnableGoodbyeMKey, this.EnableGoodbyeM.Text);
             SetSetting(EnableGoodbyeModeKey, this.EnableGoodbyeMode.IsChecked.Value ? "1" : "0");
-            SetSetting(EnableMouseGoodbyeModeKey, this.EnableMouseGoodbyeMode.IsChecked.Value ? "1" : "0");
+            //SetSetting(EnableMouseGoodbyeModeKey, this.EnableMouseGoodbyeMode.IsChecked.Value ? "1" : "0");
             SetSetting(EnableDisableLockScreenKey, this.EnableDisableLockScreen.IsChecked.Value ? "1" : "0");
             SetSetting(ChangeEnableDisableLockScreenKey, this.ChangeEnableDisableLockScreen.Text);
             MainWindow.Notify.ShowBalloonTip(300, "修改成功", "新的配置已被应用", ToolTipIcon.Info);

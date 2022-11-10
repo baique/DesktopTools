@@ -78,7 +78,7 @@ namespace DesktopTools
         private void RegisterGoodbyeMode()
         {
             DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(50);
+            timer.Interval = TimeSpan.FromSeconds(30);
             timer.Tick += (a, e) =>
             {
                 if (!"1".Equals(Setting.GetSetting(Setting.EnableGoodbyeModeKey)))
@@ -88,112 +88,13 @@ namespace DesktopTools
                 var h = int.Parse(Setting.GetSetting(Setting.EnableGoodbyeHKey));
                 var m = int.Parse(Setting.GetSetting(Setting.EnableGoodbyeMKey));
 
-                if (DateTime.Now.Hour > h + 1 || DateTime.Now.Hour >= h && DateTime.Now.Minute > m)
+                if (DateTime.Now.Hour > h + 1 || DateTime.Now.Hour >= h && DateTime.Now.Minute >= m)
                 {
-                    MoveRandom();
+                    GoodbyeMode gm = new GoodbyeMode();
+                    gm.ShowDialog();
                 }
             };
             timer.Start();
-        }
-        private bool ReplayStoped = true;
-        private void Replay(object sender, EventArgs e)
-        {
-            if (ReplayStoped)
-            {
-                Dispatcher.InvokeAsync(() =>
-                {
-                    Storyboard f;
-                    f = (Storyboard)this.FindResource("Storyboard2");
-                    f.Stop();
-
-                    f = (Storyboard)this.FindResource("Storyboard1");
-                    f.Stop();
-                    this.DateNumber.Visibility = Visibility.Visible;
-                    Setting.SetSetting("main-view-left", "" + this.Left);
-                    Setting.SetSetting("main-view-top", "" + this.Top);
-                });
-                return;
-            }
-            ReplayStoped = false;
-            var f = (Storyboard)this.FindResource("Storyboard1");
-            f.Begin();
-        }
-        private async void MoveRandom()
-        {
-            var i = 0;
-            var rLeft = this.Left;
-            var rTop = this.Top;
-            var left = SystemParameters.WorkArea.Width / 2 - this.Width / 2;
-            var top = SystemParameters.WorkArea.Height / 2;
-
-            await Task.Run(() =>
-            {
-                Move(left, top);
-                Dispatcher.InvokeAsync(() =>
-                {
-                    ReplayStoped = false;
-                    Storyboard f;
-                    f = (Storyboard)this.FindResource("Storyboard2");
-                    f.Begin();
-
-                    f = (Storyboard)this.FindResource("Storyboard1");
-                    f.Begin();
-
-
-                });
-                Thread.Sleep(2000);
-                do
-                {
-                    Move(left, top);
-                    if ("1".Equals(Setting.GetSetting(Setting.EnableMouseGoodbyeModeKey)))
-                    {
-                        SetCursorPos((int)left, (int)top);
-                    }
-                    Dispatcher.InvokeAsync(() =>
-                    {
-                        string d = ((SystemParameters.WorkArea.Width - this.Width) + "");
-                        var l = new Random().NextInt64(0, (long)double.Parse(d));
-                        var t = new Random().NextInt64(0, (long)double.Parse((SystemParameters.WorkArea.Height - this.Height) + ""));
-                        left = l;
-                        top = t;
-                    });
-
-                } while (i++ < 60);
-                ReplayStoped = true;
-                Move(rLeft, rTop);
-            });
-        }
-        private void Move(double left, double top)
-        {
-            Dispatcher.InvokeAsync(() =>
-            {
-                {
-                    DoubleAnimationUsingKeyFrames vs = new DoubleAnimationUsingKeyFrames();
-                    EasingDoubleKeyFrame ef = new EasingDoubleKeyFrame();
-                    ef.KeyTime = KeyTime.FromTimeSpan(new TimeSpan(0));
-                    ef.Value = this.Left;
-                    vs.KeyFrames.Add(ef);
-                    ef = new EasingDoubleKeyFrame();
-                    ef.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(500));
-                    ef.Value = left;
-                    vs.KeyFrames.Add(ef);
-                    this.SelfWindow.BeginAnimation(Window.LeftProperty, vs);
-                }
-
-                {
-                    DoubleAnimationUsingKeyFrames vs = new DoubleAnimationUsingKeyFrames();
-                    EasingDoubleKeyFrame eft = new EasingDoubleKeyFrame();
-                    eft.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(0));
-                    eft.Value = this.Top;
-                    vs.KeyFrames.Add(eft);
-                    eft = new EasingDoubleKeyFrame();
-                    eft.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(500));
-                    eft.Value = top;
-                    vs.KeyFrames.Add(eft);
-                    this.SelfWindow.BeginAnimation(Window.TopProperty, vs);
-                }
-            });
-            Thread.Sleep(500);
         }
         #endregion
 
@@ -283,7 +184,7 @@ namespace DesktopTools
                 if (!inTheErrorMode)
                 {
                     inTheErrorMode = true;
-                    Loading loading = new Loading();
+                    WindowUpdate loading = new WindowUpdate();
                     loading.ShowDialog();
                     inTheErrorMode = false;
                 }

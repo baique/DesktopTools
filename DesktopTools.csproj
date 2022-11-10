@@ -28,6 +28,7 @@
 	<ItemGroup>
 		<Resource Include="font\13pxbus.TTF" />
 		<Resource Include="font\clockicons.TTF" />
+		<Resource Include="font\Aa破竹体.TTF" />
 		<Resource Include="icon.ico">
 		  <Pack>True</Pack>
 		  <PackagePath>\</PackagePath>

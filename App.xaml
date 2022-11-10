@@ -9,6 +9,7 @@
                 <ResourceDictionary>
                     <FontFamily x:Key="13pxbus">pack://application:,,,/font/#13pxbus</FontFamily>
                     <FontFamily x:Key="clockicons">pack://application:,,,/font/#clockicons</FontFamily>
+                    <FontFamily x:Key="Aa破竹体">pack://application:,,,/font/#Aa破竹体</FontFamily>
                     <Image x:Key="application_icon" Source="pack://application:,,,/icon.ico" />
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
