@@ -9,7 +9,9 @@
     Title="GoodbyeMode"
     AllowsTransparency="True"
     FontSize="18"
+    IsHitTestVisible="False"
     Loaded="WindowLoaded"
+    ShowInTaskbar="False"
     WindowStartupLocation="CenterScreen"
     WindowState="Maximized"
     WindowStyle="None"
@@ -26,10 +28,10 @@
                 Storyboard.TargetName="textBlock"
                 Storyboard.TargetProperty="(TextBlock.Text)">
                 <DiscreteStringKeyFrame KeyTime="00:00:00" Value="" />
-                <DiscreteStringKeyFrame KeyTime="00:00:00.5000000" Value="下" />
-                <DiscreteStringKeyFrame KeyTime="00:00:01" Value="下班" />
-                <DiscreteStringKeyFrame KeyTime="00:00:01.5000000" Value="下班！" />
-                <DiscreteStringKeyFrame KeyTime="00:00:05" Value="下班！" />
+                <DiscreteStringKeyFrame KeyTime="00:00:01.5" Value="下" />
+                <DiscreteStringKeyFrame KeyTime="00:00:02" Value="下班" />
+                <DiscreteStringKeyFrame KeyTime="00:00:02.5" Value="下班！" />
+                <DiscreteStringKeyFrame KeyTime="00:00:5" Value="下班！" />
             </StringAnimationUsingKeyFrames>
         </Storyboard>
     </Window.Resources>
@@ -40,10 +42,13 @@
         x:Name="stackPanel"
         HorizontalAlignment="Center"
         VerticalAlignment="Center">
+
         <TextBlock
             x:Name="textBlock"
             FontFamily="{StaticResource Aa破竹体}"
             FontSize="520px"
+            Foreground="Black"
+            IsHitTestVisible="False"
             Text="下班！" />
     </StackPanel>
 </Window>

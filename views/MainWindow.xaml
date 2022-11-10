@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="SelfWindow"
-    Title="浮窗"
+    Title=""
     Width="Auto"
     Height="Auto"
     AllowsTransparency="True"

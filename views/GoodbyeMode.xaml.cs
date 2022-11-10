@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using DesktopTools.util;
+using Microsoft.VisualBasic.ApplicationServices;
+using System;
+using System.Drawing;
+using System.IO.IsolatedStorage;
+using System.Reflection.Metadata;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using static DesktopTools.util.Win32;
 
 namespace DesktopTools.views
 {
@@ -21,23 +20,27 @@ namespace DesktopTools.views
     /// </summary>
     public partial class GoodbyeMode : Window
     {
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr GetDC(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        static extern bool UpdateWindow(IntPtr hWnd);
         public GoodbyeMode()
         {
             InitializeComponent();
+            this.Topmost = true;
         }
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            this.Topmost = true;
             Storyboard Run1 = FindResource("Storyboard1") as Storyboard;
             Run1.Begin();
+            HideAltTab(new WindowInteropHelper(this).Handle);
         }
 
         private void Completed(object sender, EventArgs e)
         {
-            Storyboard Run1 = FindResource("Storyboard1") as Storyboard;
-            Run1.Stop();
-            this.Close();
+            this.Hide();
         }
     }
 }

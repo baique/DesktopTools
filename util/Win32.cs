@@ -47,6 +47,14 @@ namespace DesktopTools.util
             exStyle = new IntPtr(exStyle.ToInt64() | WS_EX_TOOLWINDOW);
             SetWindowLong(ptr, GWL_EXSTYLE, exStyle);
         }
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr GetDC(IntPtr hWnd);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr FindWindow(string lpWindowClass, string lpWindowName);
+        [DllImport("user32.dll")]
+        public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string className, string windowTitle);
         [DllImport("user32.dll")]
         public static extern IntPtr GetWindowLong(IntPtr hWnd, int nIndex);
 

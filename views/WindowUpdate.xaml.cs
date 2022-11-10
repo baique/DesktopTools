@@ -27,12 +27,7 @@ namespace DesktopTools
     {
         private DispatcherTimer d;
         private int i = 0;
-        //引入系统API
-        [DllImport("user32.dll")]
-        private static extern bool RegisterHotKey(IntPtr hWnd, int id, int modifiers, Keys vk);
-        [DllImport("user32.dll")]
-        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-
+        
         public WindowUpdate()
         {
             InitializeComponent();

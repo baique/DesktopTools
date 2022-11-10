@@ -7,6 +7,8 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows;
@@ -15,10 +17,13 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 using static DesktopTools.util.Win32;
 using Application = System.Windows.Application;
 using DateTime = System.DateTime;
+using Image = System.Drawing.Image;
 using KeyEventArgs = System.Windows.Forms.KeyEventArgs;
 using KeyEventHandler = System.Windows.Forms.KeyEventHandler;
 using MessageBox = System.Windows.Forms.MessageBox;
@@ -75,26 +80,117 @@ namespace DesktopTools
 
 
         #region 挥手模式
+        private GoodbyeMode? gm;
+        private bool IsInGoodbyeTime()
+        {
+            if (!"1".Equals(Setting.GetSetting(Setting.EnableGoodbyeModeKey)))
+            {
+                return false;
+            }
+            var h = int.Parse(Setting.GetSetting(Setting.EnableGoodbyeHKey));
+            var m = int.Parse(Setting.GetSetting(Setting.EnableGoodbyeMKey));
+
+            if (DateTime.Now.Hour > h + 1 || DateTime.Now.Hour >= h && DateTime.Now.Minute >= m)
+            {
+                return true;
+            }
+            return false;
+        }
         private void RegisterGoodbyeMode()
         {
             DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(30);
+            timer.Interval = TimeSpan.FromSeconds(3);
             timer.Tick += (a, e) =>
             {
-                if (!"1".Equals(Setting.GetSetting(Setting.EnableGoodbyeModeKey)))
+                if (IsInGoodbyeTime())
                 {
-                    return;
-                }
-                var h = int.Parse(Setting.GetSetting(Setting.EnableGoodbyeHKey));
-                var m = int.Parse(Setting.GetSetting(Setting.EnableGoodbyeMKey));
+                    if (gm != null)
+                    {
+                        return;
+                    }
+                    gm = new GoodbyeMode();
+                    gm.Show();
+                    //Task.Run(() =>
+                    //{
+                    //Dispatcher.Invoke(() => createTextOnTop());
+                    //Thread.Sleep(2000);
+                    //doChangeBackground();
 
-                if (DateTime.Now.Hour > h + 1 || DateTime.Now.Hour >= h && DateTime.Now.Minute >= m)
+                    //});
+                    //timer.Stop();
+                }
+                else
                 {
-                    GoodbyeMode gm = new GoodbyeMode();
-                    gm.ShowDialog();
+                    gm = null;
                 }
             };
             timer.Start();
+        }
+
+        private void createTextOnTop()
+        {
+            using (Graphics g = Graphics.FromHdc(GetDC(IntPtr.Zero)))
+            {
+                var s = Application.GetResourceStream(new Uri("pack://application:,,,/font/Aa破竹体.TTF"));
+                try
+                {
+
+                    byte[] buf = new byte[1024 * 1024];
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        int rawReadLength = 0;
+                        while ((rawReadLength = s.Stream.Read(buf, 0, buf.Length)) > 0)
+                        {
+                            ms.Write(buf, 0, rawReadLength);
+                        }
+                        g.DrawString("下班！", GetResoruceFont(ms.ToArray(), 538), new SolidBrush(Color.Black), new PointF(400, 300));
+                    }
+                }
+                finally
+                {
+                    s.Stream.Close();
+                }
+            }
+        }
+
+        private Bitmap createText(Image img)
+        {
+            Bitmap bmp = new Bitmap(img.Width, img.Height);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                var s = Application.GetResourceStream(new Uri("pack://application:,,,/font/Aa破竹体.TTF"));
+                try
+                {
+
+                    byte[] buf = new byte[1024 * 1024];
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        int rawReadLength = 0;
+                        while ((rawReadLength = s.Stream.Read(buf, 0, buf.Length)) > 0)
+                        {
+                            ms.Write(buf, 0, rawReadLength);
+                        }
+                        g.DrawImage(img, 0, 0, img.Width, img.Height);
+                        g.DrawString("下班！", GetResoruceFont(ms.ToArray(), 328), new SolidBrush(Color.Black), new PointF(150, 150));
+                    }
+                }
+                finally
+                {
+                    s.Stream.Close();
+                }
+            }
+
+            return bmp;
+
+        }
+
+        public Font GetResoruceFont(byte[] bytes, int size)
+        {
+            System.Drawing.Text.PrivateFontCollection pfc = new System.Drawing.Text.PrivateFontCollection();
+            IntPtr MeAdd = Marshal.AllocHGlobal(bytes.Length);
+            Marshal.Copy(bytes, 0, MeAdd, bytes.Length);
+            pfc.AddMemoryFont(MeAdd, bytes.Length);
+            return new Font(pfc.Families[0], size);
         }
         #endregion
 
@@ -460,10 +556,6 @@ namespace DesktopTools
             autoChangeBackgroundTimer.Interval = new TimeSpan(1, 0, 0);
             autoChangeBackgroundTimer.Tick += (a, e) =>
             {
-                if (!"1".Equals(Setting.GetSetting(Setting.EnableBiYingKey)))
-                {
-                    return;
-                }
                 doChangeBackground();
             };
             autoChangeBackgroundTimer.Start();
@@ -488,21 +580,34 @@ namespace DesktopTools
         }
         private async void doChangeBackground()
         {
+            if (!"1".Equals(Setting.GetSetting(Setting.EnableBiYingKey)))
+            {
+                return;
+            }
             await Task.Run(() =>
             {
+                //using (var client = new HttpClient())
+                //{
+                //    Task tk = client.GetByteArrayAsync("https://bingw.jasonzeng.dev/?index=random");
+                //    tk.ContinueWith((task) =>
+                //    {
+
+                //    });
+                //}
                 using (var client = new WebClient())
                 {
-
                     var imgData = client.DownloadData("https://bingw.jasonzeng.dev/?index=random");
                     var image = byteArrayToImage(imgData);
-                    Bitmap img = new Bitmap(image);
-                    FileInfo f = new FileInfo(Path.GetTempPath() + "/tmp_background.bmp");
-                    Dispatcher.InvokeAsync(() =>
+                    //using (Bitmap img = IsInGoodbyeTime()? createText(image) : new Bitmap(image))
+                    using (Bitmap img = new Bitmap(image))
                     {
-                        img.Save(f.FullName);
-                        SystemParametersInfo(0x0014, 0, f.FullName, 2);
-                    });
-
+                        FileInfo f = new FileInfo(Path.GetTempPath() + "/tmp_background.bmp");
+                        Dispatcher.Invoke(() =>
+                        {
+                            img.Save(f.FullName);
+                            SystemParametersInfo(0x0014, 0, f.FullName, 2);
+                        });
+                    }
                 }
             });
         }
@@ -564,7 +669,14 @@ namespace DesktopTools
             }
             if (windowBinding.Count == 0)
             {
-                bv.Hide();
+                try
+                {
+                    bv.Hide();
+                }
+                catch
+                {
+
+                }
                 return;
             }
             if (bv.IsVisible)
@@ -573,7 +685,16 @@ namespace DesktopTools
             }
             else
             {
-                bv.Show();
+                try
+                {
+
+                    bv.Show();
+                }
+                catch
+                {
+                    bv = new BindingView();
+                    bv.Refresh();
+                }
             }
         }
         #endregion
