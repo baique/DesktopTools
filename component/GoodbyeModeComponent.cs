@@ -1,43 +1,53 @@
 ﻿using DesktopTools.views;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DesktopTools.component
 {
     public class GoodbyeModeComponent
     {
-        private static GoodbyeMode? gm;
         public static bool IsInGoodbyeTime()
         {
             if (!"1".Equals(Setting.GetSetting(Setting.EnableGoodbyeModeKey)))
             {
-                gm = new GoodbyeMode();
                 return false;
             }
             var h = int.Parse(Setting.GetSetting(Setting.EnableGoodbyeHKey));
             var m = int.Parse(Setting.GetSetting(Setting.EnableGoodbyeMKey));
 
-            if (DateTime.Now.Hour > h + 1 || DateTime.Now.Hour >= h && DateTime.Now.Minute >= m)
+            if (DateTime.Now.Hour > h || (DateTime.Now.Hour == h && DateTime.Now.Minute >= m))
             {
                 return true;
             }
-            gm = new GoodbyeMode();
             return false;
         }
+        private static bool Stop = false;
 
         public static void Show()
         {
-            if (gm == null)
+            if ("1".Equals(Setting.GetSetting(Setting.EnableMouseGoodbyeModeKey)))
             {
-                gm = new GoodbyeMode();
-                gm.Show();
+                for (int i = 0; i < 3; i++)
+                {
+                    new GoodbyeMode(i).Show();
+                }
             }
-        }
+            else
+            {
+                if (Stop)
+                {
+                    return;
+                }
+                Stop = true; ;
+                GoodbyeMode gm = new GoodbyeMode();
+                gm.Show();
+                gm.Closed += (a, e) =>
+                {
+                    Stop = false;
+                };
+            }
 
-        public void Handler(KeyEventArgs e)
-        {
-            throw new NotImplementedException();
         }
-
     }
 }

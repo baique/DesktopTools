@@ -7,8 +7,9 @@
     xmlns:local="clr-namespace:DesktopTools.views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="设置"
-    Width="350"
-    Height="340"
+    Width="Auto"
+    Height="Auto"
+    Closed="OnCloseReset"
     Loaded="WinLoaded"
     MouseDown="MoveWindow"
     ResizeMode="NoResize"
@@ -22,44 +23,48 @@
     </Window.Resources>
     <StackPanel Margin="15">
         <StackPanel Orientation="Horizontal">
-            <Label Style="{StaticResource FormLabel}">
-                禁止自动锁屏：
-            </Label>
-            <CheckBox x:Name="EnableDisableLockScreen" VerticalAlignment="Center" />
+            <StackPanel Orientation="Horizontal">
+                <Label Style="{StaticResource FormLabel}">
+                    禁止自动锁屏：
+                </Label>
+                <CheckBox x:Name="EnableDisableLockScreen" VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Style="{StaticResource FormLabel}">
+                    切换禁止锁屏：
+                </Label>
+                <TextBox
+                    x:Name="ChangeEnableDisableLockScreen"
+                    Width="150px"
+                    VerticalAlignment="Center"
+                    IsReadOnly="True"
+                    KeyDown="KeyBind"
+                    Text="CTRL + SHIFT + E + L" />
+            </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <Label Style="{StaticResource FormLabel}">
-                开关禁止锁屏：
-            </Label>
-            <TextBox
-                x:Name="ChangeEnableDisableLockScreen"
-                Width="150px"
-                VerticalAlignment="Center"
-                IsReadOnly="True"
-                KeyDown="KeyBind"
-                Text="CTRL + SHIFT + E + L" />
-        </StackPanel>
-        <StackPanel Orientation="Horizontal">
-            <Label Style="{StaticResource FormLabel}">
-                开启必应壁纸：
-            </Label>
-            <CheckBox
-                x:Name="EnableBiYingBackground"
-                Grid.Row="0"
-                Grid.Column="1"
-                VerticalAlignment="Center" />
-        </StackPanel>
-        <StackPanel Orientation="Horizontal">
-            <Label Style="{StaticResource FormLabel}">
-                切换必应壁纸：
-            </Label>
-            <TextBox
-                x:Name="ChangeBiYingBackground"
-                Width="150px"
-                VerticalAlignment="Center"
-                IsReadOnly="True"
-                KeyDown="KeyBind"
-                Text="CTRL + ALT + B + N" />
+            <StackPanel Orientation="Horizontal">
+                <Label Style="{StaticResource FormLabel}">
+                    开启必应壁纸：
+                </Label>
+                <CheckBox
+                    x:Name="EnableBiYingBackground"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Style="{StaticResource FormLabel}">
+                    切换必应壁纸：
+                </Label>
+                <TextBox
+                    x:Name="ChangeBiYingBackground"
+                    Width="150px"
+                    VerticalAlignment="Center"
+                    IsReadOnly="True"
+                    KeyDown="KeyBind"
+                    Text="CTRL + ALT + B + N" />
+            </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
             <Label Style="{StaticResource FormLabel}">
@@ -116,65 +121,92 @@
                 Text="CTRL + ALT + Space" />
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <Label Style="{StaticResource FormLabel}">
-                下班提醒：
-            </Label>
-            <CheckBox
-                x:Name="EnableGoodbyeMode"
-                Width="Auto"
-                VerticalAlignment="Center" />
-            <ComboBox
-                Name="EnableGoodbyeH"
-                Height="20"
-                Margin="5,0,0,0">
-                <ComboBoxItem Content="0" />
-                <ComboBoxItem Content="1" />
-                <ComboBoxItem Content="2" />
-                <ComboBoxItem Content="3" />
-                <ComboBoxItem Content="4" />
-                <ComboBoxItem Content="5" />
-                <ComboBoxItem Content="6" />
-                <ComboBoxItem Content="7" />
-                <ComboBoxItem Content="8" />
-                <ComboBoxItem Content="9" />
-                <ComboBoxItem Content="10" />
-                <ComboBoxItem Content="11" />
-                <ComboBoxItem Content="12" />
-                <ComboBoxItem Content="13" />
-                <ComboBoxItem Content="14" />
-                <ComboBoxItem Content="15" />
-                <ComboBoxItem Content="16" />
-                <ComboBoxItem Content="17" />
-                <ComboBoxItem Content="18" />
-                <ComboBoxItem Content="19" />
-                <ComboBoxItem Content="20" />
-                <ComboBoxItem Content="21" />
-                <ComboBoxItem Content="22" />
-                <ComboBoxItem Content="23" />
-            </ComboBox>
-            <ComboBox
-                x:Name="EnableGoodbyeM"
-                Height="20"
-                Margin="5,0,0,0">
-                <ComboBoxItem Content="0" />
-                <ComboBoxItem Content="10" />
-                <ComboBoxItem Content="20" />
-                <ComboBoxItem Content="30" />
-                <ComboBoxItem Content="40" />
-                <ComboBoxItem Content="50" />
-                <ComboBoxItem Content="60" />
-            </ComboBox>
+            <StackPanel Orientation="Horizontal">
+                <Label Style="{StaticResource FormLabel}">
+                    下班提醒：
+                </Label>
+                <CheckBox
+                    x:Name="EnableGoodbyeMode"
+                    Width="Auto"
+                    VerticalAlignment="Center" />
+                <ComboBox
+                    Name="EnableGoodbyeH"
+                    Height="20"
+                    Margin="5,0,0,0">
+                    <ComboBoxItem Content="0" />
+                    <ComboBoxItem Content="1" />
+                    <ComboBoxItem Content="2" />
+                    <ComboBoxItem Content="3" />
+                    <ComboBoxItem Content="4" />
+                    <ComboBoxItem Content="5" />
+                    <ComboBoxItem Content="6" />
+                    <ComboBoxItem Content="7" />
+                    <ComboBoxItem Content="8" />
+                    <ComboBoxItem Content="9" />
+                    <ComboBoxItem Content="10" />
+                    <ComboBoxItem Content="11" />
+                    <ComboBoxItem Content="12" />
+                    <ComboBoxItem Content="13" />
+                    <ComboBoxItem Content="14" />
+                    <ComboBoxItem Content="15" />
+                    <ComboBoxItem Content="16" />
+                    <ComboBoxItem Content="17" />
+                    <ComboBoxItem Content="18" />
+                    <ComboBoxItem Content="19" />
+                    <ComboBoxItem Content="20" />
+                    <ComboBoxItem Content="21" />
+                    <ComboBoxItem Content="22" />
+                    <ComboBoxItem Content="23" />
+                </ComboBox>
+                <ComboBox
+                    x:Name="EnableGoodbyeM"
+                    Height="20"
+                    Margin="5,0,0,0">
+                    <ComboBoxItem Content="0" />
+                    <ComboBoxItem Content="10" />
+                    <ComboBoxItem Content="20" />
+                    <ComboBoxItem Content="30" />
+                    <ComboBoxItem Content="40" />
+                    <ComboBoxItem Content="50" />
+                    <ComboBoxItem Content="60" />
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Style="{StaticResource FormLabel}">
+                    （慎用）暴力提醒：
+                </Label>
+                <CheckBox
+                    x:Name="EnableMouseGoodbyeMode"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    VerticalAlignment="Center" />
+            </StackPanel>
         </StackPanel>
-        <!--
+
+
         <StackPanel Orientation="Horizontal">
             <Label Style="{StaticResource FormLabel}">
-                暴力挥手：
+                透明度：
+            </Label>
+            <Slider
+                x:Name="OpacityValue"
+                Width="250px"
+                VerticalAlignment="Center"
+                Maximum="1"
+                Minimum="0.2"
+                ValueChanged="OpacityValueChange"
+                Value="0.3" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <Label Style="{StaticResource FormLabel}">
+                呼吸效果：
             </Label>
             <CheckBox
-                x:Name="EnableMouseGoodbyeMode"
-                Width="Auto"
+                x:Name="EnableViewHeartbeat"
+                Grid.Row="0"
+                Grid.Column="1"
                 VerticalAlignment="Center" />
-        </StackPanel>-->
+        </StackPanel>
         <StackPanel>
             <Button Width="80px" Click="SaveChange">保存</Button>
         </StackPanel>

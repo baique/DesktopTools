@@ -31,6 +31,7 @@
             <RowDefinition Height="28" />
         </Grid.RowDefinitions>
         <Border
+            x:Name="border"
             Grid.Row="0"
             Grid.Column="1"
             Padding="8,0"
@@ -48,11 +49,7 @@
             <Border.Style>
                 <Style TargetType="Border">
                     <Setter Property="Cursor" Value="Arrow" />
-                    <Setter Property="Background">
-                        <Setter.Value>
-                            <SolidColorBrush Opacity="0.5" Color="Black" />
-                        </Setter.Value>
-                    </Setter>
+                    <Setter Property="Background" Value="{DynamicResource OpacityValue}" />
                 </Style>
             </Border.Style>
             <StackPanel

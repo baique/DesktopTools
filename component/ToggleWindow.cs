@@ -3,6 +3,7 @@ using DesktopTools.views;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Forms;
@@ -240,6 +241,11 @@ namespace DesktopTools.component
                 {
                 }
             }
+        }
+
+        public static Window IconPanel()
+        {
+            return bv;
         }
     }
 }

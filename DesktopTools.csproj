@@ -23,16 +23,19 @@
 
 	<ItemGroup>
 	  <None Remove="icon.ico" />
+	  <None Remove="image\exit.png" />
+	  <None Remove="image\setting.png" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Resource Include="font\13pxbus.TTF" />
 		<Resource Include="font\clockicons.TTF" />
 		<Resource Include="font\Aa破竹体.TTF" />
 		<Resource Include="icon.ico">
 		  <Pack>True</Pack>
 		  <PackagePath>\</PackagePath>
 		</Resource>
+		<Resource Include="image\exit.png" />
+		<Resource Include="image\setting.png" />
 	</ItemGroup>
 
 	<ItemGroup>

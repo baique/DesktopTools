@@ -4,11 +4,31 @@ using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Input;
 
 namespace DesktopTools.util
 {
     public class AppUtil
     {
+        public static void DisableAltF4(Window win)
+        {
+            win.KeyDown += (a, e) =>
+            {
+                Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
+                if (key == Key.F4 && (Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt)))
+                {
+                    e.Handled = true;
+                }
+            };
+            win.KeyUp += (a, e) =>
+            {
+                Key key = (e.Key == Key.System ? e.SystemKey : e.Key);
+                if (key == Key.F4 && (Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt)))
+                {
+                    e.Handled = true;
+                }
+            };
+        }
 
         /// <summary>
         /// 下载文件到字节数组

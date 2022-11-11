@@ -4,6 +4,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using Application = System.Windows.Application;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using TextBox = System.Windows.Controls.TextBox;
 
@@ -88,9 +91,14 @@ namespace DesktopTools.views
         internal static string EnableMouseGoodbyeModeKey = "enable-mouse-goodbye";
         internal static string EnableDisableLockScreenKey = "enable-disable-lock-screen";
         internal static string ChangeEnableDisableLockScreenKey = "global-change-enable-disable-lock-screen";
+        internal static string EnableViewHeartbeatKey = "enable-view-heartbeat";
+        internal static string OpacityValueKey = "opacity-value";
 
         private void WinLoaded(object sender, RoutedEventArgs e)
         {
+            this.SizeToContent = SizeToContent.WidthAndHeight;
+            this.Left = SystemParameters.WorkArea.Width / 2 - this.Width / 2;
+            this.Top = SystemParameters.WorkArea.Height / 2 - this.Height / 2;
             this.EnableBiYingBackground.IsChecked = "1".Equals(GetSetting(EnableBiYingKey));
             this.ChangeBiYingBackground.Text = GetSetting(ChangeBiYingBackgroundKey, "LeftCtrl + LeftAlt + B + N");
             this.WindowBindOrChange.Text = GetSetting(WindowBindOrChangeKey, "LeftCtrl");
@@ -98,9 +106,11 @@ namespace DesktopTools.views
             this.UnWindowBindOrChange.Text = GetSetting(UnWindowBindOrChangeKey, "LeftCtrl + LeftAlt + Back");
             this.ErrorMode.Text = GetSetting(ErrorModeKey, "LeftCtrl + LeftShift + Space");
             this.EnableGoodbyeMode.IsChecked = "1".Equals(GetSetting(EnableGoodbyeModeKey));
-            //this.EnableMouseGoodbyeMode.IsChecked = "1".Equals(GetSetting(EnableMouseGoodbyeModeKey));
+            this.EnableMouseGoodbyeMode.IsChecked = "1".Equals(GetSetting(EnableMouseGoodbyeModeKey));
             this.EnableDisableLockScreen.IsChecked = "1".Equals(GetSetting(EnableDisableLockScreenKey, "1"));
+            this.EnableViewHeartbeat.IsChecked = "1".Equals(GetSetting(EnableViewHeartbeatKey));
             this.EnableGoodbyeH.Text = GetSetting(EnableGoodbyeHKey, "17");
+            this.OpacityValue.Value = double.Parse(GetSetting(OpacityValueKey, "0.5"));
             this.EnableGoodbyeM.Text = GetSetting(EnableGoodbyeMKey, "30");
             this.ChangeEnableDisableLockScreen.Text = GetSetting(ChangeEnableDisableLockScreenKey, "LeftCtrl + LeftAlt + Space");
         }
@@ -113,11 +123,12 @@ namespace DesktopTools.views
             SetSetting(ForceWindowBindOrChangeKey, this.ForceWindowBindOrChange.Text);
             SetSetting(UnWindowBindOrChangeKey, this.UnWindowBindOrChange.Text);
             SetSetting(ErrorModeKey, this.ErrorMode.Text);
-            SetSetting(ErrorModeKey, this.ErrorMode.Text);
+            SetSetting(OpacityValueKey, this.OpacityValue.Value + "");
             SetSetting(EnableGoodbyeHKey, this.EnableGoodbyeH.Text);
             SetSetting(EnableGoodbyeMKey, this.EnableGoodbyeM.Text);
             SetSetting(EnableGoodbyeModeKey, this.EnableGoodbyeMode.IsChecked.Value ? "1" : "0");
-            //SetSetting(EnableMouseGoodbyeModeKey, this.EnableMouseGoodbyeMode.IsChecked.Value ? "1" : "0");
+            SetSetting(EnableViewHeartbeatKey, this.EnableViewHeartbeat.IsChecked.Value ? "1" : "0");
+            SetSetting(EnableMouseGoodbyeModeKey, this.EnableMouseGoodbyeMode.IsChecked.Value ? "1" : "0");
             SetSetting(EnableDisableLockScreenKey, this.EnableDisableLockScreen.IsChecked.Value ? "1" : "0");
             SetSetting(ChangeEnableDisableLockScreenKey, this.ChangeEnableDisableLockScreen.Text);
             MainWindow.Notify.ShowBalloonTip(300, "修改成功", "新的配置已被应用", ToolTipIcon.Info);
@@ -142,6 +153,21 @@ namespace DesktopTools.views
                 }
             }
             ((TextBox)sender).Text = String.Join(" + ", keys.Select(f => f.ToString()).ToArray());
+        }
+
+        private void OpacityValueChange(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            var s = Application.Current.Resources["OpacityValue"] as SolidColorBrush;
+            Application.Current.Resources["OpacityValue"] = new SolidColorBrush
+            {
+                Color = s.Color,
+                Opacity = this.OpacityValue.Value
+            };
+        }
+
+        private void OnCloseReset(object sender, EventArgs e)
+        {
+            App.RefreshOpacityValue();
         }
     }
 }

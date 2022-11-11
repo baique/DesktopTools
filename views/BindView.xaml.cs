@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using static DesktopTools.util.Win32;
 using DesktopTools.views;
 using DesktopTools.component;
+using DesktopTools.util;
 
 namespace DesktopTools
 {
@@ -28,6 +29,7 @@ namespace DesktopTools
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            AppUtil.DisableAltF4(this);
             var ptr = new WindowInteropHelper(this).Handle;
             HideAltTab(ptr);
             SetWindowPos(ptr, -1, 0, 0, 0, 0, 3);

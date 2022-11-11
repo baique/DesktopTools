@@ -7,13 +7,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="window"
     Title="GoodbyeMode"
+    Width="400"
+    Height="160"
     AllowsTransparency="True"
     FontSize="18"
     IsHitTestVisible="False"
     Loaded="WindowLoaded"
     ShowInTaskbar="False"
     WindowStartupLocation="CenterScreen"
-    WindowState="Maximized"
+    WindowState="Normal"
     WindowStyle="None"
     mc:Ignorable="d">
     <Window.Resources>
@@ -22,17 +24,23 @@
                 <Thickness>0</Thickness>
             </WindowChrome.ResizeBorderThickness>
         </WindowChrome>
-        <Storyboard x:Key="Storyboard1">
-            <StringAnimationUsingKeyFrames
-                Completed="Completed"
+        <Storyboard x:Key="Storyboard1" Completed="Go">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="stackPanel" Storyboard.TargetProperty="(UIElement.Opacity)">
+                <EasingDoubleKeyFrame KeyTime="00:00:02" Value="1" />
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="Storyboard2">
+            <ColorAnimationUsingKeyFrames
+                Completed="ChangeColorContinue"
                 Storyboard.TargetName="textBlock"
-                Storyboard.TargetProperty="(TextBlock.Text)">
-                <DiscreteStringKeyFrame KeyTime="00:00:00" Value="" />
-                <DiscreteStringKeyFrame KeyTime="00:00:01.5" Value="下" />
-                <DiscreteStringKeyFrame KeyTime="00:00:02" Value="下班" />
-                <DiscreteStringKeyFrame KeyTime="00:00:02.5" Value="下班！" />
-                <DiscreteStringKeyFrame KeyTime="00:00:5" Value="下班！" />
-            </StringAnimationUsingKeyFrames>
+                Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)">
+                <EasingColorKeyFrame KeyTime="00:00:00" Value="#FFF70505" />
+                <EasingColorKeyFrame KeyTime="00:00:00.2000000" Value="#FF05F75A" />
+                <EasingColorKeyFrame KeyTime="00:00:00.4000000" Value="#FF05E8F7" />
+                <EasingColorKeyFrame KeyTime="00:00:00.6000000" Value="#FF0525F7" />
+                <EasingColorKeyFrame KeyTime="00:00:00.8000000" Value="#FFCD05F7" />
+                <EasingColorKeyFrame KeyTime="00:00:01" Value="Black" />
+            </ColorAnimationUsingKeyFrames>
         </Storyboard>
     </Window.Resources>
     <Window.Background>
@@ -41,14 +49,15 @@
     <StackPanel
         x:Name="stackPanel"
         HorizontalAlignment="Center"
-        VerticalAlignment="Center">
+        VerticalAlignment="Center"
+        Opacity="1">
 
         <TextBlock
             x:Name="textBlock"
             FontFamily="{StaticResource Aa破竹体}"
-            FontSize="520px"
+            FontSize="48"
             Foreground="Black"
             IsHitTestVisible="False"
-            Text="下班！" />
+            Text="ヾ(￣▽￣)Bye~Bye~" />
     </StackPanel>
 </Window>

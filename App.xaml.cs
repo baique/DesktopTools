@@ -1,6 +1,9 @@
-﻿using System.Diagnostics;
+﻿using DesktopTools.views;
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Media;
 
 namespace DesktopTools
 {
@@ -9,6 +12,16 @@ namespace DesktopTools
     /// </summary>
     public partial class App : Application
     {
+        public static void RefreshOpacityValue()
+        {
+            var s = Application.Current.Resources["OpacityValue"] as SolidColorBrush;
+            Application.Current.Resources["OpacityValue"] = new SolidColorBrush
+            {
+                Color = s.Color,
+                Opacity = double.Parse(Setting.GetSetting(Setting.OpacityValueKey, "0.4"))
+            };
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             DispatcherUnhandledException += App_DispatcherUnhandledException;

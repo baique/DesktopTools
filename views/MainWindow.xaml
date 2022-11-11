@@ -15,6 +15,9 @@
     Left="0"
     Loaded="Window_Loaded"
     MouseDown="Window_MouseDown"
+    MouseEnter="HeartbeatStop"
+    MouseLeave="HeartbeatRestart"
+    MouseRightButtonDown="ToggleMenuVisible"
     ResizeMode="NoResize"
     ShowInTaskbar="False"
     Top="0"
@@ -22,6 +25,68 @@
     WindowStartupLocation="Manual"
     WindowStyle="None"
     mc:Ignorable="d">
+    <Window.Resources>
+        <Storyboard x:Key="Storyboard1">
+            <DoubleAnimationUsingKeyFrames
+                Completed="HeartbeatStoryboard"
+                Storyboard.TargetName="border"
+                Storyboard.TargetProperty="(UIElement.Opacity)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="1" />
+                <EasingDoubleKeyFrame KeyTime="00:00:02" Value="0.4" />
+                <EasingDoubleKeyFrame KeyTime="00:00:04" Value="1" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames
+                Completed="HeartbeatStoryboard"
+                Storyboard.TargetName="MenuView"
+                Storyboard.TargetProperty="(UIElement.Opacity)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="1" />
+                <EasingDoubleKeyFrame KeyTime="00:00:02" Value="0.4" />
+                <EasingDoubleKeyFrame KeyTime="00:00:05" Value="1" />
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="SettingButtonInView">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border1" Storyboard.TargetProperty="(Canvas.Left)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="-32" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="0" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.5000000" Value="32" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border2" Storyboard.TargetProperty="(Canvas.Right)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="-32" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="0" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.5000000" Value="32" />
+            </DoubleAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="border1" Storyboard.TargetProperty="(UIElement.Visibility)">
+                <DiscreteObjectKeyFrame KeyTime="00:00:00" Value="{x:Static Visibility.Collapsed}" />
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.2000000" Value="{x:Static Visibility.Visible}" />
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.5000000" Value="{x:Static Visibility.Visible}" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="border2" Storyboard.TargetProperty="(UIElement.Visibility)">
+                <DiscreteObjectKeyFrame KeyTime="00:00:00" Value="{x:Static Visibility.Collapsed}" />
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.2000000" Value="{x:Static Visibility.Visible}" />
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.5000000" Value="{x:Static Visibility.Visible}" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="MenuView" Storyboard.TargetProperty="(UIElement.Visibility)">
+                <DiscreteObjectKeyFrame KeyTime="00:00:00" Value="{x:Static Visibility.Visible}" />
+            </ObjectAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="SettingButtonOutView">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border1" Storyboard.TargetProperty="(Canvas.Left)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00.5000000" Value="-32" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border2" Storyboard.TargetProperty="(Canvas.Right)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00.5000000" Value="-32" />
+            </DoubleAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="border1" Storyboard.TargetProperty="(UIElement.Visibility)">
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.45" Value="{x:Static Visibility.Collapsed}" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="border2" Storyboard.TargetProperty="(UIElement.Visibility)">
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.45" Value="{x:Static Visibility.Collapsed}" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="MenuView" Storyboard.TargetProperty="(UIElement.Visibility)">
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.5" Value="{x:Static Visibility.Collapsed}" />
+            </ObjectAnimationUsingKeyFrames>
+        </Storyboard>
+    </Window.Resources>
     <Grid
         x:Name="AlwaysShowLayout"
         MouseDown="ToggleKeyMapPanel"
@@ -45,21 +110,19 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" MaxHeight="32px" />
         </Grid.RowDefinitions>
         <Border
             x:Name="border"
             Grid.Row="0"
             Grid.Column="1"
             CornerRadius="5"
-            Cursor="Arrow">
+            Cursor="Arrow"
+            Opacity="1">
             <Border.Style>
                 <Style TargetType="Border">
                     <Setter Property="Cursor" Value="Arrow" />
-                    <Setter Property="Background">
-                        <Setter.Value>
-                            <SolidColorBrush Opacity="0.5" Color="#000" />
-                        </Setter.Value>
-                    </Setter>
+                    <Setter Property="Background" Value="{DynamicResource OpacityValue}" />
                 </Style>
             </Border.Style>
             <StackPanel
@@ -76,17 +139,59 @@
                     VerticalAlignment="Center"
                     FontSize="30"
                     FontWeight="Bold"
-                    Foreground="White"
+                    Foreground="{DynamicResource FontColor}"
                     Text="00:00:00"
                     TextAlignment="Center" />
                 <TextBlock
                     x:Name="DateNumber"
                     FontSize="16"
                     FontWeight="Bold"
-                    Foreground="White"
+                    Foreground="{DynamicResource FontColor}"
                     Text="01-01 周一"
                     TextAlignment="Center" />
             </StackPanel>
         </Border>
+        <Canvas
+            x:Name="MenuView"
+            Grid.Row="1"
+            Width="130px"
+            Height="32px"
+            HorizontalAlignment="Center"
+            Visibility="Collapsed">
+            <Border
+                x:Name="border1"
+                Canvas.Left="-32"
+                Width="Auto"
+                Margin="1"
+                Padding="2"
+                VerticalAlignment="Center"
+                Background="{DynamicResource OpacityValue}"
+                CornerRadius="5"
+                MouseLeftButtonDown="OpenSettingView"
+                Visibility="Visible">
+                <Image
+                    x:Name="image"
+                    Width="24px"
+                    Height="24px"
+                    Margin="0,0,0,0"
+                    Source="pack://application:,,,/image/setting.png" />
+            </Border>
+            <Border
+                x:Name="border2"
+                Canvas.Right="-32"
+                Width="Auto"
+                Margin="1"
+                Padding="2"
+                VerticalAlignment="Center"
+                Background="{DynamicResource OpacityValue}"
+                CornerRadius="5"
+                MouseLeftButtonDown="ExitApp"
+                Visibility="Visible">
+                <Image
+                    Width="24px"
+                    Height="24px"
+                    Source="pack://application:,,,/image/exit.png" />
+            </Border>
+        </Canvas>
     </Grid>
 </Window>

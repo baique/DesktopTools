@@ -1,4 +1,5 @@
 ﻿using DesktopTools.component;
+using DesktopTools.util;
 using DesktopTools.views;
 using System;
 using System.Drawing;
@@ -6,6 +7,8 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using static DesktopTools.util.Win32;
 using Application = System.Windows.Application;
@@ -30,6 +33,8 @@ namespace DesktopTools
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            AppUtil.DisableAltF4(this);
+            HeartbeatStoryboard(null, null);
             ToggleWindow.addIgnorePtr(this);
             HideAltTab(new WindowInteropHelper(this).Handle);
             MiniWindow();
@@ -118,7 +123,7 @@ namespace DesktopTools
         private void RegisterGoodbyeMode()
         {
             DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(3);
+            timer.Interval = TimeSpan.FromSeconds(20);
             timer.Tick += (a, e) =>
             {
                 if (GoodbyeModeComponent.IsInGoodbyeTime())
@@ -177,16 +182,7 @@ namespace DesktopTools
                 Visible = true
             };
             Notify.ContextMenuStrip = new ContextMenuStrip();
-            Notify.BalloonTipTitle = "桌面工具";
-            ToolStripItem item = new ToolStripLabel();
-            item.Text = "设置";
-            item.Click += (o, e) =>
-            {
-                Setting setting = new Setting();
-                setting.Show();
-            };
-            Notify.ContextMenuStrip.Items.Add(item);
-            item = new ToolStripLabel();
+            var item = new ToolStripLabel();
             item.Text = "退出";
             item.Click += (o, e) =>
             {
@@ -264,5 +260,68 @@ namespace DesktopTools
             ToggleWindow.ToggleIconPanel();
         }
         #endregion
+
+        #region 呼吸效果
+        private void HeartbeatStoryboard(object sender, EventArgs e)
+        {
+            if ("1".Equals(Setting.GetSetting(Setting.EnableViewHeartbeatKey, ""))) (this.FindResource("Storyboard1") as Storyboard).Begin();
+        }
+
+        private void HeartbeatStop(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            ((Storyboard)this.FindResource("Storyboard1")).Stop();
+            this.border.Opacity = 1;
+        }
+
+        private void HeartbeatRestart(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if ("1".Equals(Setting.GetSetting(Setting.EnableViewHeartbeatKey, ""))) ((Storyboard)this.FindResource("Storyboard1")).Begin();
+        }
+        #endregion
+
+        private void ToggleMenuVisible(object sender, MouseButtonEventArgs e)
+        {
+            if (this.MenuView.Visibility == Visibility.Collapsed)
+            {
+                ((Storyboard)this.FindResource("SettingButtonOutView")).Stop();
+                ((Storyboard)this.FindResource("SettingButtonInView")).Begin();
+            }
+            else
+            {
+                ((Storyboard)this.FindResource("SettingButtonInView")).Stop();
+                ((Storyboard)this.FindResource("SettingButtonOutView")).Begin();
+            }
+        }
+
+        private void OpenSettingView(object sender, MouseButtonEventArgs e)
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                ToggleMenuVisible(sender, e);
+                GlobalKeyboardEvent.GlobalKeybordEventStatus = false;
+                try
+                {
+                    Setting setting = new Setting();
+                    setting.ShowDialog();
+                    if (!"1".Equals(Setting.GetSetting(Setting.EnableViewHeartbeatKey, "")))
+                    {
+                        HeartbeatStop(null, null);
+                    }
+                    else
+                    {
+                        HeartbeatRestart(null, null);
+                    }
+                }
+                finally
+                {
+                    GlobalKeyboardEvent.GlobalKeybordEventStatus = true;
+                }
+            });
+        }
+
+        private void ExitApp(object sender, MouseButtonEventArgs e)
+        {
+            App.Current.Shutdown();
+        }
     }
 }
