@@ -10,6 +10,8 @@ using System.Windows.Threading;
 using static DesktopTools.util.Win32;
 using Application = System.Windows.Application;
 using DateTime = System.DateTime;
+using MessageBox = System.Windows.Forms.MessageBox;
+using MessageBoxOptions = System.Windows.Forms.MessageBoxOptions;
 
 namespace DesktopTools
 {
@@ -54,6 +56,17 @@ namespace DesktopTools
                     WindowUpdate loading = new WindowUpdate();
                     loading.ShowDialog();
                     GlobalKeyboardEvent.GlobalKeybordEventStatus = true;
+                }
+            );
+            //移除快捷键
+            GlobalKeyboardEvent.Register(
+                Setting.GetSetting(Setting.UnWindowBindOrChangeKey, "LeftCtrl + LeftAlt + Back"),
+                e =>
+                {
+                    if (MessageBox.Show("当前窗体将被移除全部快捷访问,是否继续？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification) == System.Windows.Forms.DialogResult.Yes)
+                    {
+                        ToggleWindow.RemoveKeyWindow();
+                    }
                 }
             );
             //强制注册快捷键到窗体
