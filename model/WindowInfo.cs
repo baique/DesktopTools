@@ -12,7 +12,13 @@ namespace DesktopTools.model
         public string Title { get; set; }
         public IntPtr Ptr { get; set; }
         public Process P { get; set; }
-        public string StartFile { get; set; }
+
+        public WindowInfo(string title, IntPtr ptr, Process p)
+        {
+            Title = title;
+            Ptr = ptr;
+            P = p;
+        }
 
         public override bool Equals(object? obj)
         {

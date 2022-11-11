@@ -117,7 +117,7 @@
         </StackPanel>
         <StackPanel Orientation="Horizontal">
             <Label Style="{StaticResource FormLabel}">
-                下班时间：
+                下班提醒：
             </Label>
             <CheckBox
                 x:Name="EnableGoodbyeMode"

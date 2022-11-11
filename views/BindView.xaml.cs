@@ -13,6 +13,7 @@ using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using static DesktopTools.util.Win32;
 using DesktopTools.views;
+using DesktopTools.component;
 
 namespace DesktopTools
 {
@@ -28,8 +29,9 @@ namespace DesktopTools
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             HideAltTab(new WindowInteropHelper(this).Handle);
+            ToggleWindow.addIgnorePtr(this);
         }
-        public void Show()
+        public new void Show()
         {
             base.Show();
             this.Top = 0;
@@ -47,62 +49,73 @@ namespace DesktopTools
         }
         public void Refresh()
         {
-            this.bar.Children.Clear();
-            int addSize = 0;
-            foreach (var item in MainWindow.windowBinding)
+            Dispatcher.InvokeAsync(() =>
             {
-                try
+                this.bar.Children.Clear();
+                int addSize = 0;
+                foreach (var item in ToggleWindow.GetAllWindow())
                 {
-                    StackPanel sp = new StackPanel
+                    try
                     {
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Orientation = Orientation.Vertical,
-                        Margin = new Thickness(5, 0, 5, 0)
-                    };
-                    var icon = System.Drawing.Icon.ExtractAssociatedIcon(item.Value.P.MainModule.FileName);
+                        StackPanel sp = new StackPanel
+                        {
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            VerticalAlignment = VerticalAlignment.Center,
+                            Orientation = Orientation.Vertical,
+                            Margin = new Thickness(5, 0, 5, 0)
+                        };
+                        if (item.Value.P.MainModule == null)
+                        {
+                            throw new Exception("进程模块获取异常");
+                        }
+                        var fn = item.Value.P.MainModule.FileName;
+                        if (fn == null)
+                        {
+                            throw new Exception("进程模块获取异常");
+                        }
+                        var icon = System.Drawing.Icon.ExtractAssociatedIcon(fn);
 
-                    Image image = new Image
-                    {
-                        Height = 18,
-                        Width = 18,
-                        Source = ToImageSource(icon)
-                    };
+                        Image image = new Image
+                        {
+                            Height = 18,
+                            Width = 18,
+                            Source = ToImageSource(icon)
+                        };
 
-                    sp.Children.Add(image);
+                        sp.Children.Add(image);
 
-                    TextBlock tb = new TextBlock
+                        TextBlock tb = new TextBlock
+                        {
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            VerticalAlignment = VerticalAlignment.Center,
+                            FontSize = 8,
+                            Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                            TextAlignment = TextAlignment.Center,
+                            Text = item.Key.ToString(),
+                        };
+                        sp.MouseLeftButtonDown += (a, e) =>
+                        {
+                            ToggleWindow.ToggleWindowToTop(item.Key, item.Value);
+                        };
+                        sp.MouseRightButtonDown += (a, e) =>
+                        {
+                            ToggleWindow.RemoveKeyWindow(item.Key);
+                        };
+                        sp.Children.Add(tb);
+                        this.bar.Children.Add(sp);
+                        addSize++;
+                    }
+                    catch (Exception e)
                     {
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        FontSize = 8,
-                        Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
-                        TextAlignment = TextAlignment.Center,
-                        Text = item.Key.ToString(),
-                    };
-                    sp.MouseLeftButtonDown += (a, e) =>
-                    {
-                        MainWindow.Instance.ToggleWindowToTop(item.Key, item.Value);
-                    };
-                    sp.MouseRightButtonDown += (a, e) =>
-                    {
-                        MainWindow.Instance.RemoveKeyWindow(item.Key);
-                    };
-                    sp.Children.Add(tb);
-                    this.bar.Children.Add(sp);
-                    addSize++;
+                        MessageBox.Show(e.Message);
+                    }
                 }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.Message);
-                }
-            }
-            this.SizeToContent = SizeToContent.WidthAndHeight;
-            if (addSize > 0)
-                this.Show();
-            else
-                this.Hide();
-
+                this.SizeToContent = SizeToContent.WidthAndHeight;
+                if (addSize > 0)
+                    this.Show();
+                else
+                    this.Hide();
+            });
         }
 
         public static ImageSource ToImageSource(Icon icon)

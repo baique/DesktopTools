@@ -27,7 +27,7 @@ namespace DesktopTools
     {
         private DispatcherTimer d;
         private int i = 0;
-        
+
         public WindowUpdate()
         {
             InitializeComponent();

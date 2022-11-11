@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -10,9 +11,9 @@ namespace DesktopTools
     /// </summary>
     class KeyboardHook
     {
-        public event KeyEventHandler KeyDownEvent;
-        public event KeyPressEventHandler KeyPressEvent;
-        public event KeyEventHandler KeyUpEvent;
+        public event KeyEventHandler? KeyDownEvent;
+        public event KeyPressEventHandler? KeyPressEvent;
+        public event KeyEventHandler? KeyUpEvent;
 
         public delegate int HookProc(int nCode, Int32 wParam, IntPtr lParam);
         static int hKeyboardHook = 0; //声明键盘钩子处理的初始值
@@ -56,7 +57,17 @@ namespace DesktopTools
             if (hKeyboardHook == 0)
             {
                 KeyboardHookProcedure = new HookProc(KeyboardHookProc);
-                hKeyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardHookProcedure, GetModuleHandle(System.Diagnostics.Process.GetCurrentProcess().MainModule.ModuleName), 0);
+                var currProc = Process.GetCurrentProcess();
+                if (currProc.MainModule == null)
+                {
+                    throw new Exception("主模块初始化异常");
+                }
+                var mn = currProc.MainModule.ModuleName;
+                if (mn == null)
+                {
+                    throw new Exception("主模块初始化异常");
+                }
+                hKeyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardHookProcedure, GetModuleHandle(mn), 0);
                 //hKeyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardHookProcedure, Marshal.GetHINSTANCE(Assembly.GetExecutingAssembly().GetModules()[0]), 0);
                 //************************************
                 //键盘线程钩子
@@ -116,7 +127,11 @@ namespace DesktopTools
             // 侦听键盘事件
             if ((nCode >= 0) && (KeyDownEvent != null || KeyUpEvent != null || KeyPressEvent != null))
             {
-                KeyboardHookStruct MyKeyboardHookStruct = (KeyboardHookStruct)Marshal.PtrToStructure(lParam, typeof(KeyboardHookStruct));
+                KeyboardHookStruct? MyKeyboardHookStruct = Marshal.PtrToStructure(lParam, typeof(KeyboardHookStruct)) as KeyboardHookStruct;
+                if (MyKeyboardHookStruct == null)
+                {
+                    return CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
+                }
                 // raise KeyDown
                 if (KeyDownEvent != null && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN))
                 {
@@ -146,10 +161,6 @@ namespace DesktopTools
                     KeyEventArgs e = new KeyEventArgs(keyData);
                     KeyUpEvent(this, e);
                 }
-            }
-            if (disabledAllKeyword)
-            {
-                return 1;
             }
             //如果返回1，则结束消息，这个消息到此为止，不再传递。
             //如果返回0或调用CallNextHookEx函数则消息出了这个钩子继续往下传递，也就是传给消息真正的接受者

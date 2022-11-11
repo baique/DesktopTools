@@ -33,8 +33,11 @@ namespace DesktopTools.views
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
+#pragma warning disable CS8600 // 将 null 字面量或可能为 null 的值转换为非 null 类型。
             Storyboard Run1 = FindResource("Storyboard1") as Storyboard;
+#pragma warning disable CS8602 // 解引用可能出现空引用。
             Run1.Begin();
+
             HideAltTab(new WindowInteropHelper(this).Handle);
         }
 
