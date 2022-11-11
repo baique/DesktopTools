@@ -18,11 +18,8 @@ namespace DesktopTools
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static BindingView bv = new BindingView();
         public static NotifyIcon Notify { get; private set; }
         private GlobalKeyboardEvent KeyboardEvent;
-
-
         public MainWindow()
         {
             InitializeComponent();
@@ -218,7 +215,6 @@ namespace DesktopTools
             }
             //保证当前窗体永远前置
             SetWindowPos(new WindowInteropHelper(this).Handle, -1, 0, 0, 0, 0, 3);
-            SetWindowPos(new WindowInteropHelper(bv).Handle, -1, 0, 0, 0, 0, 3);
         }
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -256,35 +252,7 @@ namespace DesktopTools
             {
                 return;
             }
-            if (ToggleWindow.HasItem())
-            {
-                try
-                {
-                    bv.Hide();
-                }
-                catch
-                {
-
-                }
-                return;
-            }
-            if (bv.IsVisible)
-            {
-                bv.Hide();
-            }
-            else
-            {
-                try
-                {
-
-                    bv.Show();
-                }
-                catch
-                {
-                    bv = new BindingView();
-                    bv.Refresh();
-                }
-            }
+            ToggleWindow.ToggleIconPanel();
         }
         #endregion
     }

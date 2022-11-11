@@ -209,5 +209,37 @@ namespace DesktopTools.component
                 RegisterKeyWindow(e.KeyData, GetForegroundWindow());
             }
         }
+
+        public static void ToggleIconPanel()
+        {
+            if (windowBinding.Count > 0)
+            {
+                try
+                {
+                    if (!bv.IsVisible)
+                    {
+                        bv.Show();
+                    }
+                }
+                catch
+                {
+                    bv = new BindingView();
+                    bv.Show();
+                }
+            }
+            else
+            {
+                try
+                {
+                    if (bv.IsVisible)
+                    {
+                        bv.Hide();
+                    }
+                }
+                catch
+                {
+                }
+            }
+        }
     }
 }
