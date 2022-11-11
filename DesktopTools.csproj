@@ -49,4 +49,8 @@
 		</Page>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Include=".github\release_node\V1.0.0.3.md" />
+	</ItemGroup>
+
 </Project>

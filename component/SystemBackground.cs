@@ -11,6 +11,10 @@ namespace DesktopTools.component
 {
     public class SystemBackground : GlobalKeyboardEvent.Event
     {
+        public static string getImgPath()
+        {
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "desktop_tools_generate_bg_img.bmp");
+        }
         public static async void ChangeBackground()
         {
             await Task.Run(() =>
@@ -20,7 +24,7 @@ namespace DesktopTools.component
                 //using (Bitmap img = IsInGoodbyeTime()? createText(image) : new Bitmap(image))
                 using (Bitmap img = new Bitmap(image))
                 {
-                    FileInfo f = new FileInfo(Path.GetTempPath() + "/tmp_background.bmp");
+                    FileInfo f = new FileInfo(getImgPath());
                     App.Current.Dispatcher.Invoke(() =>
                     {
                         img.Save(f.FullName);
@@ -34,7 +38,7 @@ namespace DesktopTools.component
         {
             StringBuilder sb = new StringBuilder();
             Win32.SystemParametersInfo(0x0073, 65535, sb, 0);
-            if (Path.Equals(sb.ToString(), Path.GetTempPath() + "tmp_background.bmp"))
+            if (Path.Equals(sb.ToString(), getImgPath()))
             {
                 return;
             }

@@ -31,7 +31,7 @@ jobs:
       with:
         name: ${{ github.ref_name }}
         tag: ${{ github.ref_name }}
-        bodyFile: ./README.md
+        bodyFile: ./.github/release_node/${{ github.ref_name }}.md
         replacesArtifacts: true
         allowUpdates: true
         artifacts: ./publish/*.exe
