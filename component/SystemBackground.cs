@@ -17,6 +17,10 @@ namespace DesktopTools.component
         }
         public static async void ChangeBackground()
         {
+            if (!IsEnableBiYing())
+            {
+                return;
+            }
             await Task.Run(() =>
             {
                 var imgData = AppUtil.DownloadFileToByteArray("https://bingw.jasonzeng.dev/?index=random");
@@ -36,6 +40,10 @@ namespace DesktopTools.component
 
         internal static void ChangeBackgroundIfModify()
         {
+            if (!IsEnableBiYing())
+            {
+                return;
+            }
             StringBuilder sb = new StringBuilder();
             Win32.SystemParametersInfo(0x0073, 65535, sb, 0);
             if (Path.Equals(sb.ToString(), getImgPath()))
@@ -48,6 +56,11 @@ namespace DesktopTools.component
         public void Handler(KeyEventArgs e)
         {
             ChangeBackground();
+        }
+
+        private static bool IsEnableBiYing()
+        {
+            return "1".Equals(Setting.GetSetting(Setting.EnableBiYingKey));
         }
 
         public string Key()

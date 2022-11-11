@@ -148,10 +148,6 @@ namespace DesktopTools
             checkTimer.Interval = new TimeSpan(0, 0, 10);
             checkTimer.Tick += (a, e) =>
             {
-                if (!"1".Equals(Setting.GetSetting(Setting.EnableBiYingKey)))
-                {
-                    return;
-                }
                 SystemBackground.ChangeBackgroundIfModify();
             };
             checkTimer.Start();
