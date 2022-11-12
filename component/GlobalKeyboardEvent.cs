@@ -91,7 +91,7 @@ namespace DesktopTools.component
             return true;
         }
 
-        public static void Register(string keyPath, Action<KeyEventArgs> action)
+        public static void Register(Func<string> keyPath, Action<KeyEventArgs> action)
         {
             events.Add(new DefaultEvent(keyPath, action));
         }
@@ -108,10 +108,10 @@ namespace DesktopTools.component
 
         private class DefaultEvent : Event
         {
-            private string keyPath;
+            private Func<string> keyPath;
             private Action<KeyEventArgs> action;
 
-            public DefaultEvent(string keyPath, Action<KeyEventArgs> action)
+            public DefaultEvent(Func<string> keyPath, Action<KeyEventArgs> action)
             {
                 this.keyPath = keyPath;
                 this.action = action;
@@ -125,7 +125,7 @@ namespace DesktopTools.component
 
             public string Key()
             {
-                return keyPath;
+                return keyPath.Invoke();
             }
         }
     }

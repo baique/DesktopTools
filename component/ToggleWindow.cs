@@ -54,9 +54,8 @@ namespace DesktopTools.component
                             return;
                         }
                         item.Title = newText;
-                        bv.Refresh();
                     }
-
+                    bv.Refresh();
                 }
             }
         }

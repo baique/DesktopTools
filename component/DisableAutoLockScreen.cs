@@ -11,7 +11,6 @@ using static DesktopTools.component.GlobalKeyboardEvent;
 namespace DesktopTools.component
 {
     public class DisableAutoLockScreen : Event
-
     {
         public static void TriggerUserMouseEvent()
         {

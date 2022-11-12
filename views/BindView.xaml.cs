@@ -59,8 +59,6 @@ namespace DesktopTools
                 this.bar.Children.Clear();
                 int addSize = 0;
                 var allWindow = ToggleWindow.GetAllWindow();
-                ;
-
                 foreach (var item in allWindow.OrderBy((item) => item.Key))
                 {
                     try

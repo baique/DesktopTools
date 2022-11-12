@@ -54,7 +54,7 @@ namespace DesktopTools
             GlobalKeyboardEvent.Register(new SystemBackground());
             //紧急避险
             GlobalKeyboardEvent.Register(
-                Setting.GetSetting(Setting.ErrorModeKey, "LeftCtrl + LeftShift + Space"),
+                ()=> Setting.GetSetting(Setting.ErrorModeKey, "LeftCtrl + LeftShift + Space"),
                 e =>
                 {
                     GlobalKeyboardEvent.GlobalKeybordEventStatus = false;
@@ -65,7 +65,7 @@ namespace DesktopTools
             );
             //移除快捷键
             GlobalKeyboardEvent.Register(
-                Setting.GetSetting(Setting.UnWindowBindOrChangeKey, "LeftCtrl + LeftAlt + Back"),
+                ()=> Setting.GetSetting(Setting.UnWindowBindOrChangeKey, "LeftCtrl + LeftAlt + Back"),
                 e =>
                 {
                     if (MessageBox.Show("当前窗体将被移除全部快捷访问,是否继续？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification) == System.Windows.Forms.DialogResult.Yes)
@@ -75,7 +75,7 @@ namespace DesktopTools
                 }
             );
             //强制注册快捷键到窗体
-            GlobalKeyboardEvent.Register(Setting.GetSetting(Setting.ForceWindowBindOrChangeKey, "LeftCtrl + LeftAlt"), e =>
+            GlobalKeyboardEvent.Register(()=> Setting.GetSetting(Setting.ForceWindowBindOrChangeKey, "LeftCtrl + LeftAlt"), e =>
             {
                 if ((e.KeyValue >= (int)Keys.NumPad0 && e.KeyValue <= (int)Keys.NumPad9) || e.KeyValue >= (int)Keys.D0 && e.KeyValue <= (int)Keys.D9)
                 {
@@ -83,7 +83,7 @@ namespace DesktopTools
                 }
             });
             //注册或切换窗体状态
-            GlobalKeyboardEvent.Register(Setting.GetSetting(Setting.WindowBindOrChangeKey, "LeftCtrl"), e =>
+            GlobalKeyboardEvent.Register(()=> Setting.GetSetting(Setting.WindowBindOrChangeKey, "LeftCtrl"), e =>
             {
                 if ((e.KeyValue >= (int)Keys.NumPad0 && e.KeyValue <= (int)Keys.NumPad9) || e.KeyValue >= (int)Keys.D0 && e.KeyValue <= (int)Keys.D9)
                 {
