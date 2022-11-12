@@ -24,7 +24,8 @@ jobs:
     - name: Build
       run: |
         dotnet publish -r win-x64 -c Release --sc false -f net6.0-windows -o ./publish/ -p:PublishSingleFile=true /p:EnableWindowsTargeting=true
-
+        dotnet publish -r win-x64 -c Release -f net6.0-windows -o ./publish/full/ -p:PublishSingleFile=true   --self-contained true /p:EnableWindowsTargeting=true /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true
+        MOVE ./publish/full/DesktopTools.exe ./publish/DesktopTools-full.exe
     - name: Create release
       id: create_release
       uses: ncipollo/release-action@v1.10.0
