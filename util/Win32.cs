@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using static DesktopTools.KeyboardHook;
 
 namespace DesktopTools.util
 {
@@ -38,6 +39,94 @@ namespace DesktopTools.util
             Move = 0x0001,
         }
 
+        /// <summary>
+        /// Enumerates the valid hook types passed as the idHook parameter into a call to SetWindowsHookEx.
+        /// </summary>
+        public enum HookType : int
+        {
+            /// <summary>
+            /// Installs a hook procedure that monitors messages generated as a result of an input event in a dialog box,
+            /// message box, menu, or scroll bar. For more information, see the MessageProc hook procedure.
+            /// </summary>
+            WH_MSGFILTER = -1,
+            /// <summary>
+            /// Installs a hook procedure that records input messages posted to the system message queue. This hook is
+            /// useful for recording macros. For more information, see the JournalRecordProc hook procedure.
+            /// </summary>
+            WH_JOURNALRECORD = 0,
+            /// <summary>
+            /// Installs a hook procedure that posts messages previously recorded by a WH_JOURNALRECORD hook procedure.
+            /// For more information, see the JournalPlaybackProc hook procedure.
+            /// </summary>
+            WH_JOURNALPLAYBACK = 1,
+            /// <summary>
+            /// Installs a hook procedure that monitors keystroke messages. For more information, see the KeyboardProc
+            /// hook procedure.
+            /// </summary>
+            WH_KEYBOARD = 2,
+            /// <summary>
+            /// Installs a hook procedure that monitors messages posted to a message queue. For more information, see the
+            /// GetMsgProc hook procedure.
+            /// </summary>
+            WH_GETMESSAGE = 3,
+            /// <summary>
+            /// Installs a hook procedure that monitors messages before the system sends them to the destination window
+            /// procedure. For more information, see the CallWndProc hook procedure.
+            /// </summary>
+            WH_CALLWNDPROC = 4,
+            /// <summary>
+            /// Installs a hook procedure that receives notifications useful to a CBT application. For more information,
+            /// see the CBTProc hook procedure.
+            /// </summary>
+            WH_CBT = 5,
+            /// <summary>
+            /// Installs a hook procedure that monitors messages generated as a result of an input event in a dialog box,
+            /// message box, menu, or scroll bar. The hook procedure monitors these messages for all applications in the
+            /// same desktop as the calling thread. For more information, see the SysMsgProc hook procedure.
+            /// </summary>
+            WH_SYSMSGFILTER = 6,
+            /// <summary>
+            /// Installs a hook procedure that monitors mouse messages. For more information, see the MouseProc hook
+            /// procedure.
+            /// </summary>
+            WH_MOUSE = 7,
+            /// <summary>
+            ///
+            /// </summary>
+            WH_HARDWARE = 8,
+            /// <summary>
+            /// Installs a hook procedure useful for debugging other hook procedures. For more information, see the
+            /// DebugProc hook procedure.
+            /// </summary>
+            WH_DEBUG = 9,
+            /// <summary>
+            /// Installs a hook procedure that receives notifications useful to shell applications. For more information,
+            /// see the ShellProc hook procedure.
+            /// </summary>
+            WH_SHELL = 10,
+            /// <summary>
+            /// Installs a hook procedure that will be called when the application's foreground thread is about to become
+            /// idle. This hook is useful for performing low priority tasks during idle time. For more information, see the
+            /// ForegroundIdleProc hook procedure.
+            /// </summary>
+            WH_FOREGROUNDIDLE = 11,
+            /// <summary>
+            /// Installs a hook procedure that monitors messages after they have been processed by the destination window
+            /// procedure. For more information, see the CallWndRetProc hook procedure.
+            /// </summary>
+            WH_CALLWNDPROCRET = 12,
+            /// <summary>
+            /// Installs a hook procedure that monitors low-level keyboard input events. For more information, see the
+            /// LowLevelKeyboardProc hook procedure.
+            /// </summary>
+            WH_KEYBOARD_LL = 13,
+            /// <summary>
+            /// Installs a hook procedure that monitors low-level mouse input events. For more information, see the
+            /// LowLevelMouseProc hook procedure.
+            /// </summary>
+            WH_MOUSE_LL = 14
+        }
+
         public static long WS_EX_TOOLWINDOW = 0x00000080L;
         public static int GWL_EXSTYLE = (-20);
         public static void HideAltTab(IntPtr ptr)
@@ -47,6 +136,41 @@ namespace DesktopTools.util
             exStyle = new IntPtr(exStyle.ToInt64() | WS_EX_TOOLWINDOW);
             SetWindowLong(ptr, GWL_EXSTYLE, exStyle);
         }
+        public delegate int HookProc(int nCode, Int32 wParam, IntPtr lParam);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+        public static extern int SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hInstance, int threadId);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+        public static extern bool UnhookWindowsHookEx(int idHook);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+        public static extern int CallNextHookEx(int idHook, int nCode, Int32 wParam, IntPtr lParam);
+
+        [DllImport("kernel32.dll")]
+        public static extern int GetCurrentThreadId();
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetModuleHandle(string name);
+        public enum WinEventFlags : uint
+        {
+            WINEVENT_OUTOFCONTEXT = 0x0000, // Events are ASYNC
+            WINEVENT_SKIPOWNTHREAD = 0x0001, // Don't call back for events on installer's thread
+            WINEVENT_SKIPOWNPROCESS = 0x0002, // Don't call back for events on installer's process
+            WINEVENT_INCONTEXT = 0x0004, // Events are SYNC, this causes your dll to be injected into every process
+        }
+
+        public enum WinEvents : uint
+        {
+            EVENT_OBJECT_DESTROY = 0x8001,
+            EVENT_OBJECT_NAMECHANGE = 0x800C,
+        }
+        [DllImport("user32.dll")]
+        public static extern IntPtr SetWinEventHook(WinEvents eventMin, WinEvents eventMax, IntPtr hmodWinEventProc, WinEventDelegate lpfnWinEventProc, uint idProcess, uint idThread, WinEventFlags dwFlags);
+        public delegate void WinEventDelegate(IntPtr hWinEventHook, uint eventType,
+    IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime);
+        [DllImport("user32.dll")]
+        public static extern bool UnhookWinEvent(IntPtr hWinEventHook);
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr GetDC(IntPtr hWnd);
         [DllImport("user32.dll", SetLastError = true)]
@@ -140,8 +264,6 @@ namespace DesktopTools.util
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool IsWindowVisible(IntPtr hWnd);
-        [DllImport("kernel32.dll")]
-        public static extern uint GetCurrentThreadId();
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr SetActiveWindow(IntPtr hWnd);
         [DllImport("user32.dll", SetLastError = true)]

@@ -1,4 +1,5 @@
-﻿using DesktopTools.views;
+﻿using DesktopTools.component;
+using DesktopTools.views;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -42,6 +43,12 @@ namespace DesktopTools
                 }
             }
             SetSelfStarting(true, "desk_date");
+            RefreshOpacityValue();
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            base.OnExit(e);
         }
 
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using static DesktopTools.util.Win32;
 
 namespace DesktopTools
 {
@@ -15,7 +16,6 @@ namespace DesktopTools
         public event KeyPressEventHandler? KeyPressEvent;
         public event KeyEventHandler? KeyUpEvent;
 
-        public delegate int HookProc(int nCode, Int32 wParam, IntPtr lParam);
         static int hKeyboardHook = 0; //声明键盘钩子处理的初始值
         //值在Microsoft SDK的Winuser.h里查询
         // http://www.bianceng.cn/Programming/csharp/201410/45484.htm
@@ -31,26 +31,6 @@ namespace DesktopTools
             public int time; // 指定的时间戳记的这个讯息
             public int dwExtraInfo; // 指定额外信息相关的信息
         }
-        //使用此功能，安装了一个钩子
-        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        public static extern int SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hInstance, int threadId);
-
-        //调用此函数卸载钩子
-        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        public static extern bool UnhookWindowsHookEx(int idHook);
-
-        //使用此功能，通过信息钩子继续下一个钩子
-        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        public static extern int CallNextHookEx(int idHook, int nCode, Int32 wParam, IntPtr lParam);
-
-        // 取得当前线程编号（线程钩子需要用到）
-        [DllImport("kernel32.dll")]
-        static extern int GetCurrentThreadId();
-
-        //使用WINDOWS API函数代替获取当前实例的函数,防止钩子失效
-        [DllImport("kernel32.dll")]
-        public static extern IntPtr GetModuleHandle(string name);
-
         public void Start()
         {
             // 安装键盘钩子

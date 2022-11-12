@@ -9,7 +9,9 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Interop;
 using static DesktopTools.component.GlobalKeyboardEvent;
+using static DesktopTools.KeyboardHook;
 using static DesktopTools.util.Win32;
+using HookProc = DesktopTools.util.Win32.HookProc;
 using MessageBox = System.Windows.Forms.MessageBox;
 using MessageBoxOptions = System.Windows.Forms.MessageBoxOptions;
 
@@ -17,9 +19,50 @@ namespace DesktopTools.component
 {
     public class ToggleWindow : Event
     {
+        private static object doubleWriteLock = new object();
         private static Dictionary<Keys, WindowInfo> windowBinding = new Dictionary<Keys, WindowInfo>();
+        private static Dictionary<IntPtr, List<Keys>> windowBindingIndex = new Dictionary<IntPtr, List<Keys>>();
         private static List<IntPtr> IgnorePtr = new List<IntPtr>();
         private static BindingView bv = new BindingView();
+        private static WinEventDelegate hookProc = new WinEventDelegate(ToggleWindow.procMsg);
+
+        private static void procMsg(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
+        {
+            if (!(idObject == 0 && idChild == 0))
+            {
+                return;
+            }
+            if (eventType == 0x8001)
+            {
+                //窗体关闭
+                if (windowBindingIndex.ContainsKey(hwnd))
+                {
+                    RemoveKeyWindow(windowBindingIndex[hwnd].ToArray());
+                }
+            }
+            else if (eventType == 0x800C)
+            {
+                //标题变更
+                if (windowBindingIndex.ContainsKey(hwnd))
+                {
+                    lock (doubleWriteLock)
+                    {
+                        var newText = GetText(hwnd);
+                        var item = windowBinding[windowBindingIndex[hwnd][0]];
+                        if (newText.Equals(item.Title))
+                        {
+                            return;
+                        }
+                        item.Title = newText;
+                        bv.Refresh();
+                    }
+
+                }
+            }
+        }
+        public static void Close()
+        {
+        }
         public static void addIgnorePtr(Window windowInstance)
         {
             var ptr = new WindowInteropHelper(windowInstance).Handle;
@@ -80,7 +123,7 @@ namespace DesktopTools.component
         {
             var fs = GetForegroundWindow();
             var targetInputProcessId = GetWindowThreadProcessId(fs, IntPtr.Zero);
-            var curThread = GetCurrentThreadId();
+            var curThread = (uint)GetCurrentThreadId();
             if (fs == needToTopWindow.Ptr)
             {
                 return;
@@ -119,6 +162,7 @@ namespace DesktopTools.component
             return windowBinding.ContainsKey(keyData);
         }
 
+
         public static void RegisterKeyWindow(Keys keyData, IntPtr wd)
         {
             if (IgnorePtr.Contains(wd))
@@ -128,12 +172,14 @@ namespace DesktopTools.component
 
             int pid = 0;
             GetWindowThreadProcessId(wd, out pid);
+
             Process proc = Process.GetProcessById(pid);
             var wi = new WindowInfo
             (
                 GetText(wd),
                 wd,
-                proc
+                proc,
+                IntPtr.Zero
             );
             if (String.IsNullOrWhiteSpace(wi.Title))
             {
@@ -150,6 +196,7 @@ namespace DesktopTools.component
             {
                 return;
             }
+
             if (windowBinding.ContainsValue(wi))
             {
                 if (MessageBox.Show(
@@ -164,7 +211,31 @@ namespace DesktopTools.component
                     return;
                 }
             }
-            windowBinding[keyData] = wi;
+            else
+            {
+                IntPtr hook = SetWinEventHook(
+                    WinEvents.EVENT_OBJECT_DESTROY, WinEvents.EVENT_OBJECT_NAMECHANGE,
+                    wd,
+                    hookProc, 0, 0,
+                    WinEventFlags.WINEVENT_OUTOFCONTEXT | WinEventFlags.WINEVENT_SKIPOWNPROCESS
+                );
+                if (hook == IntPtr.Zero)
+                {
+                    throw new Exception("对指定窗体的事件监听注册失败");
+                }
+                wi.Hook = hook;
+            }
+
+
+            lock (doubleWriteLock)
+            {
+                windowBinding[keyData] = wi;
+                if (!windowBindingIndex.ContainsKey(wi.Ptr))
+                {
+                    windowBindingIndex[wi.Ptr] = new List<Keys>();
+                }
+                windowBindingIndex[wi.Ptr].Add(keyData);
+            }
             bv.Refresh();
         }
 
@@ -175,15 +246,34 @@ namespace DesktopTools.component
             {
                 if (item.Value.Ptr == w)
                 {
-                    windowBinding.Remove(item.Key);
+                    lock (doubleWriteLock)
+                    {
+                        windowBinding.Remove(item.Key);
+                        windowBindingIndex.Remove(w);
+                        UnhookWinEvent(w);
+                    }
                 }
             }
             bv.Refresh();
         }
 
-        public static void RemoveKeyWindow(Keys key)
+        public static void RemoveKeyWindow(params Keys[] keys)
         {
-            windowBinding.Remove(key);
+            foreach (var key in keys)
+            {
+                var e = windowBinding[key].Ptr;
+                lock (doubleWriteLock)
+                {
+                    UnhookWinEvent(e);
+                    windowBinding.Remove(key);
+                    windowBindingIndex[e].Remove(key);
+                    if (windowBindingIndex[e].Count == 0)
+                    {
+                        windowBindingIndex.Remove(e);
+                    }
+                }
+            }
+
             bv.Refresh();
         }
 

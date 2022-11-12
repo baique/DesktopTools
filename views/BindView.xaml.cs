@@ -15,6 +15,7 @@ using static DesktopTools.util.Win32;
 using DesktopTools.views;
 using DesktopTools.component;
 using DesktopTools.util;
+using System.Linq;
 
 namespace DesktopTools
 {
@@ -57,7 +58,10 @@ namespace DesktopTools
             {
                 this.bar.Children.Clear();
                 int addSize = 0;
-                foreach (var item in ToggleWindow.GetAllWindow())
+                var allWindow = ToggleWindow.GetAllWindow();
+                ;
+
+                foreach (var item in allWindow.OrderBy((item) => item.Key))
                 {
                     try
                     {
@@ -105,6 +109,7 @@ namespace DesktopTools
                         {
                             ToggleWindow.RemoveKeyWindow(item.Key);
                         };
+                        sp.ToolTip = item.Value.Title;
                         sp.Children.Add(tb);
                         this.bar.Children.Add(sp);
                         addSize++;
