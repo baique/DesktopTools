@@ -3,8 +3,10 @@ using System.Drawing;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 
 namespace DesktopTools.util
 {
@@ -124,6 +126,19 @@ namespace DesktopTools.util
             Marshal.Copy(bytes, 0, MeAdd, bytes.Length);
             pfc.AddMemoryFont(MeAdd, bytes.Length);
             return new Font(pfc.Families[0], size);
+        }
+
+        public static void AlwaysToTop(Window view)
+        {
+            var ptr = new WindowInteropHelper(view).Handle;
+            Task.Run(async () =>
+            {
+                for (; ; )
+                {
+                    await Task.Delay(10);
+                    Win32.SetWindowPos(ptr, -1, 0, 0, 0, 0, 3);
+                }
+            });
         }
     }
 }

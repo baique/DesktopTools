@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DesktopTools.util;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -38,7 +39,6 @@ namespace DesktopTools
             d.Start();
             D_Tick(null, null);
             i = new Random().Next(10);
-
         }
 
         private async void D_Tick(object? sender, EventArgs e)

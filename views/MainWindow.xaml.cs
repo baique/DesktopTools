@@ -34,6 +34,7 @@ namespace DesktopTools
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             AppUtil.DisableAltF4(this);
+            AppUtil.AlwaysToTop(this);
             HeartbeatStoryboard(null, null);
             ToggleWindow.addIgnorePtr(this);
             HideAltTab(new WindowInteropHelper(this).Handle);
@@ -54,18 +55,27 @@ namespace DesktopTools
             GlobalKeyboardEvent.Register(new SystemBackground());
             //紧急避险
             GlobalKeyboardEvent.Register(
-                ()=> Setting.GetSetting(Setting.ErrorModeKey, "LeftCtrl + LeftShift + Space"),
+                () => Setting.GetSetting(Setting.ErrorModeKey, "LeftCtrl + LeftShift + Space"),
                 e =>
                 {
                     GlobalKeyboardEvent.GlobalKeybordEventStatus = false;
+                    GoodbyeModeComponent.GlobalEnable = false;
+                    var wd = ToggleWindow.IconPanel();
+                    var t1 = wd.Top;
+                    var t2 = this.Top;
+                    wd.Top = -1000;
+                    this.Top = -1000;
                     WindowUpdate loading = new WindowUpdate();
                     loading.ShowDialog();
+                    GoodbyeModeComponent.GlobalEnable = true;
                     GlobalKeyboardEvent.GlobalKeybordEventStatus = true;
+                    wd.Top = t1;
+                    this.Top = t2;
                 }
             );
             //移除快捷键
             GlobalKeyboardEvent.Register(
-                ()=> Setting.GetSetting(Setting.UnWindowBindOrChangeKey, "LeftCtrl + LeftAlt + Back"),
+                () => Setting.GetSetting(Setting.UnWindowBindOrChangeKey, "LeftCtrl + LeftAlt + Back"),
                 e =>
                 {
                     if (MessageBox.Show("当前窗体将被移除全部快捷访问,是否继续？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification) == System.Windows.Forms.DialogResult.Yes)
@@ -75,7 +85,7 @@ namespace DesktopTools
                 }
             );
             //强制注册快捷键到窗体
-            GlobalKeyboardEvent.Register(()=> Setting.GetSetting(Setting.ForceWindowBindOrChangeKey, "LeftCtrl + LeftAlt"), e =>
+            GlobalKeyboardEvent.Register(() => Setting.GetSetting(Setting.ForceWindowBindOrChangeKey, "LeftCtrl + LeftAlt"), e =>
             {
                 if ((e.KeyValue >= (int)Keys.NumPad0 && e.KeyValue <= (int)Keys.NumPad9) || e.KeyValue >= (int)Keys.D0 && e.KeyValue <= (int)Keys.D9)
                 {
@@ -83,7 +93,7 @@ namespace DesktopTools
                 }
             });
             //注册或切换窗体状态
-            GlobalKeyboardEvent.Register(()=> Setting.GetSetting(Setting.WindowBindOrChangeKey, "LeftCtrl"), e =>
+            GlobalKeyboardEvent.Register(() => Setting.GetSetting(Setting.WindowBindOrChangeKey, "LeftCtrl"), e =>
             {
                 if ((e.KeyValue >= (int)Keys.NumPad0 && e.KeyValue <= (int)Keys.NumPad9) || e.KeyValue >= (int)Keys.D0 && e.KeyValue <= (int)Keys.D9)
                 {
@@ -154,11 +164,18 @@ namespace DesktopTools
         private DispatcherTimer? autoChangeBackgroundTimer = null;
         private void RegisterAutoChangeBackground()
         {
+
             autoChangeBackgroundTimer = new DispatcherTimer();
-            autoChangeBackgroundTimer.Interval = new TimeSpan(1, 0, 0);
+            autoChangeBackgroundTimer.Interval = new TimeSpan(0, 5, 0);
+#if DEBUG
+            autoChangeBackgroundTimer.Interval = new TimeSpan(0, 0, 10);
+#endif
             autoChangeBackgroundTimer.Tick += (a, e) =>
             {
-                SystemBackground.ChangeBackground();
+                if (DateTime.Now.Subtract(SystemBackground.getLastChangeBackgroundTime()).Hours >= 1)
+                {
+                    SystemBackground.ChangeBackground();
+                }
             };
             autoChangeBackgroundTimer.Start();
 
@@ -193,7 +210,6 @@ namespace DesktopTools
         }
         private void MiniWindow()
         {
-            this.Topmost = true;
             this.SizeToContent = SizeToContent.WidthAndHeight;
 
 
@@ -218,8 +234,6 @@ namespace DesktopTools
             {
                 this.Top = double.Parse(top);
             }
-            //保证当前窗体永远前置
-            SetWindowPos(new WindowInteropHelper(this).Handle, -1, 0, 0, 0, 0, 3);
         }
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {

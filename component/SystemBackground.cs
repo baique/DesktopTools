@@ -1,7 +1,9 @@
 ﻿using DesktopTools.util;
 using DesktopTools.views;
+using Microsoft.Win32;
 using System;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,12 +17,25 @@ namespace DesktopTools.component
         {
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "desktop_tools_generate_bg_img.bmp");
         }
+
+        public static DateTime getLastChangeBackgroundTime()
+        {
+            try
+            {
+                return DateTime.ParseExact(Setting.GetSetting("last-change-background-time"), "yyyy-MM-dd HH:mm:ss", CultureInfo.CurrentCulture);
+            }
+            catch
+            {
+                return new DateTime();
+            }
+        }
         public static async void ChangeBackground()
         {
             if (!IsEnableBiYing())
             {
                 return;
             }
+            Setting.SetSetting("last-change-background-time", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             await Task.Run(() =>
             {
                 var imgData = AppUtil.DownloadFileToByteArray("https://bingw.jasonzeng.dev/?index=random");
@@ -32,7 +47,14 @@ namespace DesktopTools.component
                     App.Current.Dispatcher.Invoke(() =>
                     {
                         img.Save(f.FullName);
-                        Win32.SystemParametersInfo(0x0014, 0, f.FullName, 2);
+
+                        using (RegistryKey myRegKey = Registry.CurrentUser.CreateSubKey("Control Panel//Desktop"))
+                        {
+                            myRegKey.SetValue("TileWallpaper", "0");
+                            myRegKey.SetValue("WallpaperStyle", "2");
+                            myRegKey.SetValue("Wallpaper", f.FullName);
+                        }
+                        Win32.SystemParametersInfo(0x0014, 0, f.FullName, 0x2 | 0x1);
                     });
                 }
             });

@@ -31,9 +31,10 @@ namespace DesktopTools
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             AppUtil.DisableAltF4(this);
+            AppUtil.AlwaysToTop(this);
             var ptr = new WindowInteropHelper(this).Handle;
             HideAltTab(ptr);
-            SetWindowPos(ptr, -1, 0, 0, 0, 0, 3);
+            
             ToggleWindow.addIgnorePtr(this);
         }
         public new void Show()

@@ -241,7 +241,7 @@ namespace DesktopTools.component
         public static void RemoveKeyWindow()
         {
             var w = GetForegroundWindow();
-            foreach (var item in windowBinding)
+            foreach (var item in new Dictionary<Keys, WindowInfo>(windowBinding))
             {
                 if (item.Value.Ptr == w)
                 {
