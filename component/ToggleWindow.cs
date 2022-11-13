@@ -188,7 +188,10 @@ namespace DesktopTools.component
             {
                 int pid = 0;
                 GetWindowThreadProcessId(wd, out pid);
-
+                if(pid == 0)
+                {
+                    throw new Exception("进程模块获取异常");
+                }
                 Process proc = Process.GetProcessById(pid);
                 var wi = new WindowInfo
                 (
