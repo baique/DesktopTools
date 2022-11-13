@@ -117,7 +117,12 @@ namespace DesktopTools
                 {
                     Keys keyData = (Keys)MyKeyboardHookStruct.vkCode;
                     KeyEventArgs e = new KeyEventArgs(keyData);
-                    KeyDownEvent(this, e);
+                    bool stopEvent = false;
+                    KeyDownEvent(() => { stopEvent = true; }, e);
+                    if (stopEvent)
+                    {
+                        return 1;
+                    }
                 }
 
                 //键盘按下
@@ -130,7 +135,12 @@ namespace DesktopTools
                     if (ToAscii(MyKeyboardHookStruct.vkCode, MyKeyboardHookStruct.scanCode, keyState, inBuffer, MyKeyboardHookStruct.flags) == 1)
                     {
                         KeyPressEventArgs e = new KeyPressEventArgs((char)inBuffer[0]);
-                        KeyPressEvent(this, e);
+                        bool stopEvent = false;
+                        KeyPressEvent(() => { stopEvent = true; }, e);
+                        if (stopEvent)
+                        {
+                            return 1;
+                        }
                     }
                 }
 

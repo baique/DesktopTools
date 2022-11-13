@@ -92,7 +92,7 @@ namespace DesktopTools.component
             }
             else
             {
-                ShowWindow(ptr, 2);
+                ShowWindow(ptr, 6);
             }
         }
 

@@ -36,7 +36,7 @@ namespace DesktopTools.component
             k_hook.Start();//安装键盘钩子
         }
 
-        private void hook_KeyDown(object? sender, KeyEventArgs e)
+        private void hook_KeyDown(object done, KeyEventArgs e)
         {
             if (!GlobalKeybordEventStatus)
             {
@@ -47,7 +47,8 @@ namespace DesktopTools.component
                 if (CheckKeyDown(item.Key(), e))
                 {
                     item.Handler(e);
-                    break;
+                    ((Action)done)();
+                    return;
                 }
             }
         }
@@ -57,36 +58,45 @@ namespace DesktopTools.component
             var keys = v.Split(" + ");
             foreach (var k in keys)
             {
-                Key key = (Key)Enum.Parse(typeof(Key), k);
-                if (key == Key.LeftCtrl || key == Key.RightCtrl)
+                try
                 {
-                    if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+                    Key key = (Key)Enum.Parse(typeof(Key), k);
+                    if (key == Key.LeftCtrl || key == Key.RightCtrl)
+                    {
+                        if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+                        {
+                            continue;
+                        }
+                        return false;
+                    }
+                    if (key == Key.LeftShift || key == Key.RightShift)
+                    {
+                        if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+                        {
+                            continue;
+                        }
+                        return false;
+                    }
+                    if (key == Key.LeftAlt || key == Key.RightAlt)
+                    {
+                        if (Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt))
+                        {
+                            continue;
+                        }
+                        return false;
+                    }//`
+                    if (key == Key.OemTilde && eventArgs.KeyCode == System.Windows.Forms.Keys.Oemtilde)
+                    {
+                        return true;
+                    }
+                    if (eventArgs.KeyCode.ToString().Equals(key.ToString()) || Keyboard.IsKeyDown(key))
                     {
                         continue;
                     }
                     return false;
                 }
-                if (key == Key.LeftShift || key == Key.RightShift)
-                {
-                    if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
-                    {
-                        continue;
-                    }
-                    return false;
-                }
-                if (key == Key.LeftAlt || key == Key.RightAlt)
-                {
-                    if (Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt))
-                    {
-                        continue;
-                    }
-                    return false;
-                }
-                if (eventArgs.KeyCode.ToString().Equals(key.ToString()) || Keyboard.IsKeyDown(key))
-                {
-                    continue;
-                }
-                return false;
+                catch (Exception e) { throw e; }
+
             }
             return true;
         }

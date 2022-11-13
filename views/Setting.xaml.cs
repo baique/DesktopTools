@@ -38,6 +38,7 @@ namespace DesktopTools.views
 
         internal static bool SetSetting(string key, string value)
         {
+            CacheValue[key] = value;
             Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\desktop_tools");
             try
             {
@@ -179,7 +180,6 @@ namespace DesktopTools.views
             SetSetting(OpacityValueKey, this.OpacityValue.Value + "");
             //呼吸效果
             SetSetting(EnableViewHeartbeatKey, this.EnableViewHeartbeat.IsChecked.Value ? "1" : "0");
-            CacheValue.Clear();
             MainWindow.Notify.ShowBalloonTip(300, "修改成功", "新的配置已被应用", ToolTipIcon.Info);
             this.Close();
         }
@@ -201,7 +201,7 @@ namespace DesktopTools.views
 
                 }
             }
-            ((TextBox)sender).Text = String.Join(" + ", keys.Select(f => f.ToString()).ToArray());
+            ((TextBox)sender).Text = String.Join(" + ", keys.Select(f => f.ToString()).DistinctBy(f => f).ToArray());
         }
 
         private void OpacityValueChange(object sender, RoutedPropertyChangedEventArgs<double> e)
