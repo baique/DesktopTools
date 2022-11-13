@@ -10,7 +10,7 @@ namespace DesktopTools.component
         public interface Event
         {
             public string Key();
-            public void Handler(KeyEventArgs e);
+            public bool Handler(KeyEventArgs e);
         }
         /// <summary>
         /// 全局键盘钩子
@@ -46,8 +46,10 @@ namespace DesktopTools.component
             {
                 if (CheckKeyDown(item.Key(), e))
                 {
-                    item.Handler(e);
-                    ((Action)done)();
+                    if (item.Handler(e))
+                    {
+                        ((Action)done)();
+                    }
                     return;
                 }
             }
@@ -101,7 +103,7 @@ namespace DesktopTools.component
             return true;
         }
 
-        public static void Register(Func<string> keyPath, Action<KeyEventArgs> action)
+        public static void Register(Func<string> keyPath, Func<KeyEventArgs, bool> action)
         {
             events.Add(new DefaultEvent(keyPath, action));
         }
@@ -119,17 +121,18 @@ namespace DesktopTools.component
         private class DefaultEvent : Event
         {
             private Func<string> keyPath;
-            private Action<KeyEventArgs> action;
+            private Func<KeyEventArgs, bool> action;
 
-            public DefaultEvent(Func<string> keyPath, Action<KeyEventArgs> action)
+            public DefaultEvent(Func<string> keyPath, Func<KeyEventArgs, bool> action)
             {
                 this.keyPath = keyPath;
                 this.action = action;
             }
 
-            public void Handler(KeyEventArgs e)
+            public bool Handler(KeyEventArgs e)
             {
-                this.action.Invoke(e);
+                return this.action.Invoke(e);
+
             }
 
 

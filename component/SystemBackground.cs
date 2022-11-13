@@ -92,9 +92,10 @@ namespace DesktopTools.component
             ChangeBackground();
         }
 
-        public void Handler(KeyEventArgs e)
+        public bool Handler(KeyEventArgs e)
         {
             ChangeBackground();
+            return true;
         }
 
         private static bool IsEnableBiYing()

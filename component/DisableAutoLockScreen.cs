@@ -17,7 +17,7 @@ namespace DesktopTools.component
             Win32.mouse_event(Win32.MouseEventFlag.Move, 0, 0, 0, UIntPtr.Zero);
         }
 
-        public void Handler(KeyEventArgs e)
+        public bool Handler(KeyEventArgs e)
         {
             if ("1".Equals(Setting.GetSetting(Setting.EnableDisableLockScreenKey, "1")))
             {
@@ -29,6 +29,7 @@ namespace DesktopTools.component
                 Setting.SetSetting(Setting.EnableDisableLockScreenKey, "1");
                 MainWindow.Notify.ShowBalloonTip(300, "提示", "禁止自动锁屏已开启", ToolTipIcon.Info);
             }
+            return true;
         }
 
         public string Key()

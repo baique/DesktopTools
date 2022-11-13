@@ -161,81 +161,114 @@ namespace DesktopTools.component
             return windowBinding.ContainsKey(keyData);
         }
 
+        public static void RestoreKeyWindow()
+        {
+            var currentBinding = Setting.GetSetting("last-binding-key-window");
+            Setting.SetSetting("last-binding-key-window", "");
+            var bindItems = currentBinding.Split(";");
+            foreach (var b in bindItems)
+            {
+                if (string.IsNullOrWhiteSpace(b))
+                {
+                    continue;
+                }
+                var keyAndData = b.Split(":");
+                Keys k = (Keys)Enum.Parse(typeof(Keys), keyAndData[0]);
+                RegisterKeyWindow(k, new IntPtr(long.Parse(keyAndData[1])), true);
+            }
+        }
 
-        public static void RegisterKeyWindow(Keys keyData, IntPtr wd)
+        public static void RegisterKeyWindow(Keys keyData, IntPtr wd, bool ignoreError = false)
         {
             if (IgnorePtr.Contains(wd))
             {
                 return;
             }
-
-            int pid = 0;
-            GetWindowThreadProcessId(wd, out pid);
-
-            Process proc = Process.GetProcessById(pid);
-            var wi = new WindowInfo
-            (
-                GetText(wd),
-                wd,
-                proc,
-                IntPtr.Zero
-            );
-            if (String.IsNullOrWhiteSpace(wi.Title))
+            try
             {
-                if (proc != null)
+                int pid = 0;
+                GetWindowThreadProcessId(wd, out pid);
+
+                Process proc = Process.GetProcessById(pid);
+                var wi = new WindowInfo
+                (
+                    GetText(wd),
+                    wd,
+                    pid,
+                    proc,
+                    IntPtr.Zero
+                );
+                if (String.IsNullOrWhiteSpace(wi.Title))
                 {
-                    if (proc.ProcessName != null)
+                    if (proc != null)
                     {
-                        wi.Title = proc.ProcessName;
+                        if (proc.ProcessName != null)
+                        {
+                            wi.Title = proc.ProcessName;
+                        }
                     }
                 }
-            }
 
-            if (string.IsNullOrWhiteSpace(wi.Title))
-            {
-                return;
-            }
-
-            if (windowBinding.ContainsValue(wi))
-            {
-                if (MessageBox.Show(
-                    "[" + wi.Title + "]已经绑定了一个快捷键，是否仍要绑定？",
-                    "提示",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question,
-                    MessageBoxDefaultButton.Button1,
-                    MessageBoxOptions.ServiceNotification
-                    ) != System.Windows.Forms.DialogResult.Yes)
+                if (string.IsNullOrWhiteSpace(wi.Title))
                 {
                     return;
                 }
-            }
-            else
-            {
-                IntPtr hook = SetWinEventHook(
-                    WinEvents.EVENT_OBJECT_DESTROY, WinEvents.EVENT_OBJECT_NAMECHANGE,
-                    wd,
-                    hookProc, 0, 0,
-                    WinEventFlags.WINEVENT_OUTOFCONTEXT | WinEventFlags.WINEVENT_SKIPOWNPROCESS
-                );
-                if (hook == IntPtr.Zero)
+
+                if (!ignoreError && windowBinding.ContainsValue(wi))
                 {
-                    throw new Exception("对指定窗体的事件监听注册失败");
+                    if (MessageBox.Show(
+                        "[" + wi.Title + "]已经绑定了一个快捷键，是否仍要绑定？",
+                        "提示",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button1,
+                        MessageBoxOptions.ServiceNotification
+                        ) != System.Windows.Forms.DialogResult.Yes)
+                    {
+                        return;
+                    }
                 }
-                wi.Hook = hook;
-            }
+                else
+                {
+                    IntPtr hook = SetWinEventHook(
+                        WinEvents.EVENT_OBJECT_DESTROY, WinEvents.EVENT_OBJECT_NAMECHANGE,
+                        wd,
+                        hookProc, 0, 0,
+                        WinEventFlags.WINEVENT_OUTOFCONTEXT | WinEventFlags.WINEVENT_SKIPOWNPROCESS
+                    );
+                    if (hook == IntPtr.Zero)
+                    {
+                        if (ignoreError)
+                        {
+                            return;
+                        }
+                        throw new Exception("对指定窗体的事件监听注册失败");
+                    }
+                    wi.Hook = hook;
+                }
 
 
-            lock (doubleWriteLock)
-            {
-                windowBinding[keyData] = wi;
-                if (!windowBindingIndex.ContainsKey(wi.Ptr))
+                lock (doubleWriteLock)
                 {
-                    windowBindingIndex[wi.Ptr] = new List<Keys>();
+                    windowBinding[keyData] = wi;
+                    if (!windowBindingIndex.ContainsKey(wi.Ptr))
+                    {
+                        windowBindingIndex[wi.Ptr] = new List<Keys>();
+                    }
+                    windowBindingIndex[wi.Ptr].Add(keyData);
+                    var currentBinding = Setting.GetSetting("last-binding-key-window");
+                    Setting.SetSetting("last-binding-key-window", String.Join(";", currentBinding, keyData.ToString() + ":" + wi.Ptr.ToInt64()));
                 }
-                windowBindingIndex[wi.Ptr].Add(keyData);
+
+                bv.Refresh();
             }
-            bv.Refresh();
+            catch (Exception e)
+            {
+                if (!ignoreError)
+                {
+                    throw e;
+                }
+            }
         }
 
         public static void RemoveKeyWindow()
@@ -248,6 +281,12 @@ namespace DesktopTools.component
                     lock (doubleWriteLock)
                     {
                         windowBinding.Remove(item.Key);
+                        var currentBinding = Setting.GetSetting("last-binding-key-window");
+                        foreach (Keys d in windowBindingIndex[w])
+                        {
+                            currentBinding = currentBinding.Replace(d.ToString() + ":" + w.ToInt64(), "");
+                        }
+                        Setting.SetSetting("last-binding-key-window", currentBinding);
                         windowBindingIndex.Remove(w);
                         UnhookWinEvent(w);
                     }
@@ -270,6 +309,8 @@ namespace DesktopTools.component
                     {
                         windowBindingIndex.Remove(e);
                     }
+                    var currentBinding = Setting.GetSetting("last-binding-key-window");
+                    Setting.SetSetting("last-binding-key-window", currentBinding.Replace(key.ToString() + ":" + e, ""));
                 }
             }
 
@@ -292,12 +333,14 @@ namespace DesktopTools.component
         }
 
 
-        public void Handler(KeyEventArgs e)
+        public bool Handler(KeyEventArgs e)
         {
             if ((e.KeyValue >= (int)Keys.NumPad0 && e.KeyValue <= (int)Keys.NumPad9) || e.KeyValue >= (int)Keys.D0 && e.KeyValue <= (int)Keys.D9)
             {
                 RegisterKeyWindow(e.KeyData, GetForegroundWindow());
+                return true;
             }
+            return false;
         }
 
         public static void ToggleIconPanel()
@@ -332,7 +375,7 @@ namespace DesktopTools.component
             }
         }
 
-        public static Window IconPanel()
+        public static BindingView IconPanel()
         {
             return bv;
         }

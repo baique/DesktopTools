@@ -113,7 +113,8 @@
         Width="130px"
         Height="60px"
         Margin="40"
-        MouseMove="WithMouse">
+        MouseMove="WithMouse"
+        Visibility="Collapsed">
         <Canvas.RenderTransform>
             <TransformGroup>
                 <ScaleTransform />

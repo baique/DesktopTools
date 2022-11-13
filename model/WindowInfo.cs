@@ -12,16 +12,18 @@ namespace DesktopTools.model
         public string Title { get; set; }
         public IntPtr Ptr { get; set; }
         public Process P { get; set; }
+        public int Pid { get; set; }
         public IntPtr Hook { get; set; }
 
-        public WindowInfo(IntPtr ptr) : this("", ptr, null, IntPtr.Zero)
+        public WindowInfo(IntPtr ptr) : this("", ptr, 0, null, IntPtr.Zero)
         {
 
         }
 
-        public WindowInfo(string title, IntPtr ptr, Process p, IntPtr hook)
+        public WindowInfo(string title, IntPtr ptr, int pid, Process p, IntPtr hook)
         {
             Title = title;
+            Pid = pid;
             Ptr = ptr;
             P = p;
             Hook = hook;

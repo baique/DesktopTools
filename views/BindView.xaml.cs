@@ -2,8 +2,11 @@
 using DesktopTools.util;
 using DesktopTools.views;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Management;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -21,6 +24,7 @@ namespace DesktopTools
     /// </summary>
     public partial class BindingView : Window
     {
+        private string currentFlowMode = "";
         public BindingView()
         {
             InitializeComponent();
@@ -31,95 +35,112 @@ namespace DesktopTools
             AppUtil.AlwaysToTop(this);
             var ptr = new WindowInteropHelper(this).Handle;
             HideAltTab(ptr);
-            
             ToggleWindow.addIgnorePtr(this);
         }
         public new void Show()
         {
+            if (this.IsVisible && currentFlowMode == Setting.GetSetting(Setting.FlowModeKey)) return;
+            this.border.Visibility = Visibility.Hidden;
             base.Show();
-            this.Top = 0;
             this.SizeToContent = SizeToContent.WidthAndHeight;
-            var left = Setting.GetSetting("bind-view-left");
-            if (string.IsNullOrWhiteSpace(left))
-            {
-                var width = SystemParameters.WorkArea.Width;
-                this.Left = width / 2 - (this.Width / 2.5);
-            }
-            else
-            {
-                this.Left = Double.Parse(left);
-            }
+            InitPos();
         }
         public void Refresh()
         {
-            Dispatcher.InvokeAsync(() =>
+            this.bar.Children.Clear();
+            int addSize = 0;
+            var allWindow = ToggleWindow.GetAllWindow();
+            var flowMode = Setting.GetSetting(Setting.FlowModeKey, "0");
+            foreach (var item in allWindow.OrderBy((item) => item.Key))
             {
-                this.bar.Children.Clear();
-                int addSize = 0;
-                var allWindow = ToggleWindow.GetAllWindow();
-                foreach (var item in allWindow.OrderBy((item) => item.Key))
+                StackPanel sp = new StackPanel
                 {
-                    try
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Orientation = Orientation.Vertical,
+                    Margin = "0" == flowMode ? new Thickness(5, 0, 5, 0) : new Thickness(0, 5, 0, 5)
+                };
+                string? fn = "";
+                try
+                {
+                    if (item.Value.P.MainModule != null)
                     {
-                        StackPanel sp = new StackPanel
-                        {
-                            HorizontalAlignment = HorizontalAlignment.Center,
-                            VerticalAlignment = VerticalAlignment.Center,
-                            Orientation = Orientation.Vertical,
-                            Margin = new Thickness(5, 0, 5, 0)
-                        };
-                        if (item.Value.P.MainModule == null)
-                        {
-                            throw new Exception("进程模块获取异常");
-                        }
-                        var fn = item.Value.P.MainModule.FileName;
-                        if (fn == null)
-                        {
-                            throw new Exception("进程模块获取异常");
-                        }
-                        var icon = System.Drawing.Icon.ExtractAssociatedIcon(fn);
-
-                        Image image = new Image
-                        {
-                            Height = 18,
-                            Width = 18,
-                            Source = ToImageSource(icon)
-                        };
-
-                        sp.Children.Add(image);
-
-                        TextBlock tb = new TextBlock
-                        {
-                            HorizontalAlignment = HorizontalAlignment.Center,
-                            VerticalAlignment = VerticalAlignment.Center,
-                            FontSize = 8,
-                            Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
-                            TextAlignment = TextAlignment.Center,
-                            Text = item.Key.ToString(),
-                        };
-                        sp.MouseLeftButtonDown += (a, e) =>
-                        {
-                            ToggleWindow.ToggleWindowToTop(item.Key, item.Value);
-                        };
-                        sp.MouseRightButtonDown += (a, e) =>
-                        {
-                            ToggleWindow.RemoveKeyWindow(item.Key);
-                        };
-                        sp.ToolTip = item.Value.Title;
-                        sp.Children.Add(tb);
-                        this.bar.Children.Add(sp);
-                        addSize++;
+                        fn = item.Value.P.MainModule.FileName;
                     }
-                    catch (Exception e)
+                    if (fn == null)
                     {
-                        MessageBox.Show(e.Message);
+                        throw new Exception();
                     }
                 }
-                if (addSize > 0)
-                    this.Show();
-                else
-                    this.Hide();
-            });
+                catch
+                {
+                    fn = getModuleFilePath(item.Value.Pid);
+                }
+
+                if (fn == null)
+                {
+                    throw new Exception("进程模块获取异常");
+                }
+                var icon = System.Drawing.Icon.ExtractAssociatedIcon(fn);
+
+                Image image = new Image
+                {
+                    Height = 18,
+                    Width = 18,
+                    Source = ToImageSource(icon)
+                };
+
+
+                var k = item.Key.ToString();
+                if (k.StartsWith("NumPad"))
+                {
+                    k = k.Substring(6);
+                }
+                TextBlock tb = new TextBlock
+                {
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FontSize = 8,
+                    Margin = new Thickness(2),
+                    Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                    TextAlignment = TextAlignment.Center,
+                    Text = k,
+                };
+                sp.MouseLeftButtonDown += (a, e) =>
+                {
+                    ToggleWindow.ToggleWindowToTop(item.Key, item.Value);
+                };
+                sp.MouseRightButtonDown += (a, e) =>
+                {
+                    ToggleWindow.RemoveKeyWindow(item.Key);
+                };
+                sp.ToolTip = item.Value.Title;
+                sp.Children.Add(image);
+                sp.Children.Add(tb);
+                this.bar.Children.Add(sp);
+                addSize++;
+            }
+            if (addSize > 0)
+                this.Show();
+            else
+                this.Hide();
+        }
+
+        private string getModuleFilePath(int processId)
+        {
+            string wmiQueryString = "SELECT ProcessId, ExecutablePath FROM Win32_Process WHERE ProcessId = " + processId;
+            using (var searcher = new ManagementObjectSearcher(wmiQueryString))
+            {
+                using (var results = searcher.Get())
+                {
+                    ManagementObject mo = results.Cast<ManagementObject>().FirstOrDefault();
+                    if (mo != null)
+                    {
+                        return (string)mo["ExecutablePath"];
+                    }
+                }
+            }
+            return null;
         }
 
         public static ImageSource ToImageSource(Icon icon)
@@ -136,13 +157,99 @@ namespace DesktopTools
         {
             try
             {
-                this.DragMove();
-                this.Top = 0;
-                Setting.SetSetting("bind-view-left", "" + this.Left);
+                if (sender != null) this.DragMove();
+                var flowMode = Setting.GetSetting(Setting.FlowModeKey, "0");
+                if ("0".Equals(flowMode))
+                {
+                    Setting.SetSetting("bind-view-left", "" + this.Left);
+                    this.Top = 0;
+                }
+                else if ("1".Equals(flowMode))
+                {
+                    Setting.SetSetting("bind-view-top", "" + this.Top);
+                    this.Left = SystemParameters.WorkArea.Width - this.Width;
+                }
+                else if ("2".Equals(flowMode))
+                {
+                    Setting.SetSetting("bind-view-top", "" + this.Top);
+                    this.Left = 0;
+                }
             }
             catch
             {
 
+            }
+        }
+        private void InitPos()
+        {
+            var flowMode = Setting.GetSetting(Setting.FlowModeKey, "0");
+            if ("0".Equals(flowMode))
+            {
+
+                this.Top = 0;
+                var left = Setting.GetSetting("bind-view-left");
+                if (string.IsNullOrWhiteSpace(left))
+                {
+                    var width = SystemParameters.WorkArea.Width;
+                    this.Left = width / 2 - (this.Width / 2.5);
+                }
+                else
+                {
+                    this.Left = Double.Parse(left);
+                }
+                this.bar.Orientation = Orientation.Horizontal;
+                this.border.CornerRadius = new CornerRadius(0, 0, 8, 8);
+            }
+            else if ("1".Equals(flowMode))
+            {
+                this.Left = SystemParameters.WorkArea.Width - this.Width;
+                var h = Setting.GetSetting("bind-view-top");
+                if (string.IsNullOrWhiteSpace(h))
+                {
+                    var height = SystemParameters.WorkArea.Height;
+                    this.Top = height / 2 - (this.Height / 1.5);
+                }
+                else
+                {
+                    this.Top = Double.Parse(h);
+                }
+                this.bar.Orientation = Orientation.Vertical;
+                this.border.CornerRadius = new CornerRadius(8, 0, 0, 8);
+            }
+            else if ("2".Equals(flowMode))
+            {
+
+                this.Left = 0;
+                var h = Setting.GetSetting("bind-view-top");
+                if (string.IsNullOrWhiteSpace(h))
+                {
+                    var height = SystemParameters.WorkArea.Height;
+                    this.Top = height / 2 - (this.Height / 1.5);
+                }
+                else
+                {
+                    this.Top = Double.Parse(h);
+                }
+                this.bar.Orientation = Orientation.Vertical;
+                this.border.CornerRadius = new CornerRadius(0, 8, 8, 0);
+            }
+            this.border.Visibility = Visibility.Visible;
+        }
+
+        private void SizeChangedEvent(object sender, SizeChangedEventArgs e)
+        {
+            var flowMode = Setting.GetSetting(Setting.FlowModeKey, "0");
+            if ("0".Equals(flowMode))
+            {
+                this.Top = 0;
+            }
+            else if ("1".Equals(flowMode))
+            {
+                this.Left = SystemParameters.WorkArea.Width - e.NewSize.Width;
+            }
+            else if ("2".Equals(flowMode))
+            {
+                this.Left = 0;
             }
         }
     }

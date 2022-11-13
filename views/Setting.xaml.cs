@@ -112,6 +112,7 @@ namespace DesktopTools.views
         internal static string RandomGoodbyeModeThemeKey = "random-goodbye-mode-theme";
         internal static string GlobalThemeKey = "global-theme";
         internal static string EnableGameTimeKey = "enable-game-time";
+        internal static string FlowModeKey = "flow-mode";
 
         private void WinLoaded(object sender, RoutedEventArgs e)
         {
@@ -147,6 +148,8 @@ namespace DesktopTools.views
             this.OpacityValue.Value = double.Parse(GetSetting(OpacityValueKey, "0.5"));
             //呼吸效果
             this.EnableViewHeartbeat.IsChecked = "1".Equals(GetSetting(EnableViewHeartbeatKey));
+            //任务栏位置
+            this.FlowMode.SelectedIndex = int.Parse(GetSetting(FlowModeKey, "0"));
 
         }
 
@@ -180,6 +183,7 @@ namespace DesktopTools.views
             SetSetting(OpacityValueKey, this.OpacityValue.Value + "");
             //呼吸效果
             SetSetting(EnableViewHeartbeatKey, this.EnableViewHeartbeat.IsChecked.Value ? "1" : "0");
+            SetSetting(FlowModeKey, this.FlowMode.SelectedIndex + "");
             MainWindow.Notify.ShowBalloonTip(300, "修改成功", "新的配置已被应用", ToolTipIcon.Info);
             this.Close();
         }

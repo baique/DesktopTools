@@ -14,6 +14,7 @@
     MouseDown="MoveWindow"
     ResizeMode="NoResize"
     ShowInTaskbar="False"
+    SizeChanged="SizeChangedEvent"
     Topmost="True"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
@@ -28,7 +29,7 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="28" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Border
             x:Name="border"
