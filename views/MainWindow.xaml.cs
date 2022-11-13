@@ -160,7 +160,7 @@ namespace DesktopTools
 #endif
             autoChangeBackgroundTimer.Tick += (a, e) =>
             {
-                if (DateTime.Now.Subtract(SystemBackground.getLastChangeBackgroundTime()).Minutes >= 60) SystemBackground.ChangeBackground();
+                if (DateTime.Now.Subtract(SystemBackground.getLastChangeBackgroundTime()).TotalMinutes >= 60) SystemBackground.ChangeBackground();
             };
             autoChangeBackgroundTimer.Start();
 
