@@ -219,13 +219,31 @@ namespace DesktopTools.views
             ResourceDictionary resource = new ResourceDictionary();
             resource.Source = new Uri("pack://application:,,,/resource/ColorTheme" + this.GlobalTheme.SelectedIndex + ".xaml");
             Application.Current.Resources.MergedDictionaries[0] = resource;
-            var ov = (double)Application.Current.FindResource("minOpacityValue");
-            this.OpacityValue.Minimum = ov;
-            if (this.OpacityValue.Value < ov)
+
+            try
             {
-                this.OpacityValue.Value = ov;
-                OpacityValueChange(null, null);
+                var minOv = Application.Current.TryFindResource("minOpacityValue");
+                if (minOv != null)
+                {
+                    this.OpacityValue.Minimum = (double)minOv;
+                    if (this.OpacityValue.Value < this.OpacityValue.Minimum)
+                    {
+                        this.OpacityValue.Value = this.OpacityValue.Minimum;
+                        OpacityValueChange(null, null);
+                    }
+                }
             }
+            catch { }
+            try
+            {
+                var goodOv = Application.Current.TryFindResource("goodOpacityValue");
+                if (goodOv != null)
+                {
+                    this.OpacityValue.Value = (double)goodOv;
+                    OpacityValueChange(null, null);
+                }
+            }
+            catch { }
 
 
         }

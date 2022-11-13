@@ -7,7 +7,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/resource/ColorTheme1.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/resource/ColorTheme10.xaml" />
                 <ResourceDictionary>
                     <FontFamily x:Key="clockicons">pack://application:,,,/font/#clockicons</FontFamily>
                     <FontFamily x:Key="Aa破竹体">pack://application:,,,/font/#Aa破竹体</FontFamily>
@@ -15,7 +15,7 @@
                     <Image x:Key="application_icon" Source="pack://application:,,,/icon.ico" />
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
-            <sys:Double x:Key="OpacityValue">0.5</sys:Double>
+            <sys:Double x:Key="OpacityValue">0.8</sys:Double>
             <SolidColorBrush
                 x:Key="DefOpacityValue"
                 Opacity="{DynamicResource OpacityValue}"

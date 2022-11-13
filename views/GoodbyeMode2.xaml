@@ -41,7 +41,7 @@
                 Width="220px"
                 Height="220px"
                 Panel.ZIndex="2"
-                Fill="{DynamicResource tColor}"
+                Fill="{DynamicResource fColor}"
                 RenderTransformOrigin="0.5,0.5">
                 <Ellipse.RenderTransform>
                     <TransformGroup>
@@ -95,7 +95,7 @@
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 Panel.ZIndex="2"
-                Fill="{DynamicResource fColor}" />
+                Fill="{DynamicResource tColor}" />
             <Label
                 Canvas.Left="36"
                 HorizontalAlignment="Left"

@@ -1,21 +1,18 @@
-﻿using DesktopTools.model;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿using DesktopTools.component;
+using DesktopTools.util;
+using DesktopTools.views;
 using System;
+using System.Drawing;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using Image = System.Windows.Controls.Image;
-using Color = System.Windows.Media.Color;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using static DesktopTools.util.Win32;
-using DesktopTools.views;
-using DesktopTools.component;
-using DesktopTools.util;
-using System.Linq;
+using Color = System.Windows.Media.Color;
+using Image = System.Windows.Controls.Image;
 
 namespace DesktopTools
 {
@@ -118,7 +115,6 @@ namespace DesktopTools
                         MessageBox.Show(e.Message);
                     }
                 }
-                this.SizeToContent = SizeToContent.WidthAndHeight;
                 if (addSize > 0)
                     this.Show();
                 else

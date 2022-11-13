@@ -33,11 +33,21 @@
                 Margin="0,0,0,0"
                 SelectionChanged="ChangeTheme">
                 <ComboBoxItem Content="默认" />
-                <ComboBoxItem Content="主题1" />
-                <ComboBoxItem Content="主题2" />
-                <ComboBoxItem Content="主题3" />
-                <ComboBoxItem Content="主题4" />
-                <ComboBoxItem Content="主题5" />
+                <ComboBoxItem Content="渐变1" />
+                <ComboBoxItem Content="渐变2" />
+                <ComboBoxItem Content="渐变3" />
+                <ComboBoxItem Content="渐变4" />
+                <ComboBoxItem Content="渐变5" />
+                <ComboBoxItem Content="拼色1" />
+                <ComboBoxItem Content="拼色2" />
+                <ComboBoxItem Content="拼色3" />
+                <ComboBoxItem Content="拼色4" />
+                <ComboBoxItem Content="拼色5" />
+                <ComboBoxItem Content="拼色6" />
+                <ComboBoxItem Content="拼色7" />
+                <ComboBoxItem Content="拼色8" />
+                <ComboBoxItem Content="拼色9" />
+                <ComboBoxItem Content="拼色10" />
             </ComboBox>
         </StackPanel>
         <StackPanel Orientation="Horizontal">

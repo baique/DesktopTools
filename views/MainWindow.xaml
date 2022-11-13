@@ -17,7 +17,6 @@
     MouseDown="Window_MouseDown"
     MouseEnter="HeartbeatStop"
     MouseLeave="HeartbeatStart"
-    MouseMove="WithMouse"
     MouseRightButtonDown="ToggleMenuVisible"
     ResizeMode="NoResize"
     ShowInTaskbar="False"
@@ -105,7 +104,7 @@
         <TransformGroup>
             <ScaleTransform />
             <SkewTransform />
-            <RotateTransform CenterX="71" CenterY="36" />
+            <RotateTransform Angle="0" CenterX="71" CenterY="36" />
             <TranslateTransform />
         </TransformGroup>
     </Window.RenderTransform>
@@ -113,7 +112,8 @@
         x:Name="border"
         Width="130px"
         Height="60px"
-        Margin="6">
+        Margin="40"
+        MouseMove="WithMouse">
         <Canvas.RenderTransform>
             <TransformGroup>
                 <ScaleTransform />

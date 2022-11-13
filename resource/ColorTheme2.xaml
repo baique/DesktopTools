@@ -10,9 +10,10 @@
     <Color x:Key="fontFColorRaw">#feb80c</Color>
     <SolidColorBrush x:Key="fontTColor" Color="{DynamicResource fontTColorRaw}" />
     <SolidColorBrush x:Key="fontFColor" Color="{DynamicResource fontFColorRaw}" />
-    <sys:Double x:Key="minOpacityValue">0.6</sys:Double>
+    <sys:Double x:Key="minOpacityValue">0.5</sys:Double>
+    <sys:Double x:Key="goodOpacityValue">0.6</sys:Double>
     <Color x:Key="vColorRaw">White</Color>
-    <LinearGradientBrush x:Key="mainTimeFontColor" Opacity="1">
+    <LinearGradientBrush x:Key="mainTimeFontColor" Opacity="1" StartPoint="0,1" EndPoint="1,0">
 
         <GradientStop Offset="0" Color="{StaticResource vColorRaw}" />
         <GradientStop Offset="0.19" Color="{StaticResource vColorRaw}" />
@@ -28,8 +29,10 @@
         <GradientStop Offset="1" Color="{StaticResource vColorRaw}" />
 
     </LinearGradientBrush>
-    <LinearGradientBrush x:Key="mainBackColor" Opacity="{DynamicResource OpacityValue}">
+    <LinearGradientBrush x:Key="mainBackColor" Opacity="{DynamicResource OpacityValue}" StartPoint="0,1" EndPoint="1,0">
         <GradientStop Offset="0" Color="{DynamicResource tColorRaw}" />
+        <GradientStop Offset="0.25" Color="{DynamicResource fColorRaw}" />
+        <GradientStop Offset="0.75" Color="{DynamicResource tColorRaw}" />
         <GradientStop Offset="1" Color="{DynamicResource fColorRaw}" />
     </LinearGradientBrush>
     <Style TargetType="Ellipse">

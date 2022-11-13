@@ -2,31 +2,31 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:sys="clr-namespace:System;assembly=netstandard">
-    <Color x:Key="tColorRaw">Black</Color>
-    <Color x:Key="fColorRaw">Black</Color>
-    <Color x:Key="fontTColorRaw">White</Color>
-    <Color x:Key="fontFColorRaw">White</Color>
+    <Color x:Key="tColorRaw">#326663</Color>
+    <Color x:Key="fColorRaw">#604322</Color>
     <SolidColorBrush x:Key="tColor" Color="{DynamicResource tColorRaw}" />
     <SolidColorBrush x:Key="fColor" Color="{DynamicResource fColorRaw}" />
+    <Color x:Key="fontTColorRaw">#eea420</Color>
+    <Color x:Key="fontFColorRaw">#64ced4</Color>
     <SolidColorBrush x:Key="fontTColor" Color="{DynamicResource fontTColorRaw}" />
     <SolidColorBrush x:Key="fontFColor" Color="{DynamicResource fontFColorRaw}" />
+    <sys:Double x:Key="minOpacityValue">0.2</sys:Double>
+    <sys:Double x:Key="goodOpacityValue">0.7</sys:Double>
     <SolidColorBrush
         x:Key="mainTimeFontColor"
         Opacity="1"
-        Color="White" />
-    <sys:Double x:Key="minOpacityValue">0.3</sys:Double>
-    <sys:Double x:Key="goodOpacityValue">0.3</sys:Double>
-    <LinearGradientBrush x:Key="mainBackColor" Opacity="{DynamicResource OpacityValue}">
-        <GradientStop Offset="0" Color="{DynamicResource tColorRaw}" />
-        <GradientStop Offset="1" Color="{DynamicResource fColorRaw}" />
-    </LinearGradientBrush>
+        Color="{DynamicResource fontFColorRaw}" />
+    <SolidColorBrush
+        x:Key="mainBackColor"
+        Opacity="1"
+        Color="{DynamicResource fColorRaw}" />
     <Style TargetType="Ellipse">
         <Setter Property="Effect">
             <Setter.Value>
                 <DropShadowEffect
                     BlurRadius="24"
                     ShadowDepth="-4"
-                    Color="LightGray" />
+                    Color="#000" />
             </Setter.Value>
         </Setter>
     </Style>
