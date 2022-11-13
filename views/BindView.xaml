@@ -49,7 +49,7 @@
             <Border.Style>
                 <Style TargetType="Border">
                     <Setter Property="Cursor" Value="Arrow" />
-                    <Setter Property="Background" Value="{DynamicResource OpacityValue}" />
+                    <Setter Property="Background" Value="{DynamicResource mainBackColor}" />
                 </Style>
             </Border.Style>
             <StackPanel

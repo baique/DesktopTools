@@ -22,6 +22,8 @@ namespace DesktopTools.views
             InitializeComponent();
         }
 
+        private static Dictionary<string, string> CacheValue = new Dictionary<string, string>();
+
         private void MoveWindow(object sender, MouseButtonEventArgs e)
         {
             try
@@ -54,6 +56,15 @@ namespace DesktopTools.views
 
         internal static string GetSetting(string key, string def = "")
         {
+            if (CacheValue.ContainsKey(key))
+            {
+                var v = CacheValue[key];
+                if (string.IsNullOrEmpty(v))
+                {
+                    return def;
+                }
+                return v;
+            }
             Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\desktop_tools");
             try
             {
@@ -65,12 +76,15 @@ namespace DesktopTools.views
                 }
                 if (string.IsNullOrEmpty(val))
                 {
+                    CacheValue[key] = def;
                     return def;
                 }
+                CacheValue[key] = val;
                 return val;
             }
             catch
             {
+                CacheValue[key] = def;
                 return def;
             }
             finally
@@ -93,44 +107,79 @@ namespace DesktopTools.views
         internal static string ChangeEnableDisableLockScreenKey = "global-change-enable-disable-lock-screen";
         internal static string EnableViewHeartbeatKey = "enable-view-heartbeat";
         internal static string OpacityValueKey = "opacity-value";
+        internal static string GoodbyeModeTypeKey = "goodbye-mode-type";
+        internal static string RandomGoodbyeModeThemeKey = "random-goodbye-mode-theme";
+        internal static string GlobalThemeKey = "global-theme";
+        internal static string EnableGameTimeKey = "enable-game-time";
 
         private void WinLoaded(object sender, RoutedEventArgs e)
         {
             this.SizeToContent = SizeToContent.WidthAndHeight;
             this.Left = SystemParameters.WorkArea.Width / 2 - this.Width / 2;
             this.Top = SystemParameters.WorkArea.Height / 2 - this.Height / 2;
+
+            //全局主题
+            this.GlobalTheme.SelectedIndex = int.Parse(GetSetting(GlobalThemeKey, "0"));
+            //小娱乐
+            this.EnableGameTime.IsChecked = "1".Equals(GetSetting(EnableGameTimeKey));
+            //禁止自动锁屏
+            this.EnableDisableLockScreen.IsChecked = "1".Equals(GetSetting(EnableDisableLockScreenKey, "1"));
+            this.ChangeEnableDisableLockScreen.Text = GetSetting(ChangeEnableDisableLockScreenKey, "LeftCtrl + LeftAlt + Space");
+            //必应壁纸
             this.EnableBiYingBackground.IsChecked = "1".Equals(GetSetting(EnableBiYingKey));
             this.ChangeBiYingBackground.Text = GetSetting(ChangeBiYingBackgroundKey, "LeftCtrl + LeftAlt + B + N");
+            //窗体绑定/切换
             this.WindowBindOrChange.Text = GetSetting(WindowBindOrChangeKey, "LeftCtrl");
+            //强制绑定
             this.ForceWindowBindOrChange.Text = GetSetting(ForceWindowBindOrChangeKey, "LeftCtrl + LeftAlt");
+            //解除绑定
             this.UnWindowBindOrChange.Text = GetSetting(UnWindowBindOrChangeKey, "LeftCtrl + LeftAlt + Back");
+            //紧急避险
             this.ErrorMode.Text = GetSetting(ErrorModeKey, "LeftCtrl + LeftShift + Space");
+            //下班提醒
             this.EnableGoodbyeMode.IsChecked = "1".Equals(GetSetting(EnableGoodbyeModeKey));
-            this.EnableMouseGoodbyeMode.IsChecked = "1".Equals(GetSetting(EnableMouseGoodbyeModeKey));
-            this.EnableDisableLockScreen.IsChecked = "1".Equals(GetSetting(EnableDisableLockScreenKey, "1"));
-            this.EnableViewHeartbeat.IsChecked = "1".Equals(GetSetting(EnableViewHeartbeatKey));
             this.EnableGoodbyeH.Text = GetSetting(EnableGoodbyeHKey, "17");
-            this.OpacityValue.Value = double.Parse(GetSetting(OpacityValueKey, "0.5"));
             this.EnableGoodbyeM.Text = GetSetting(EnableGoodbyeMKey, "30");
-            this.ChangeEnableDisableLockScreen.Text = GetSetting(ChangeEnableDisableLockScreenKey, "LeftCtrl + LeftAlt + Space");
+            this.GoodbyeModeType.Text = GetSetting(GoodbyeModeTypeKey, "正常");
+            this.RandomGoodbyeModeTheme.IsChecked = "1".Equals(GetSetting(RandomGoodbyeModeThemeKey));
+            //透明度
+            this.OpacityValue.Value = double.Parse(GetSetting(OpacityValueKey, "0.5"));
+            //呼吸效果
+            this.EnableViewHeartbeat.IsChecked = "1".Equals(GetSetting(EnableViewHeartbeatKey));
+
         }
 
         private void SaveChange(object sender, RoutedEventArgs e)
         {
-            SetSetting(EnableBiYingKey, this.EnableBiYingBackground.IsChecked.Value ? "1" : "0");
-            SetSetting(ChangeBiYingBackgroundKey, this.ChangeBiYingBackground.Text);
-            SetSetting(WindowBindOrChangeKey, this.WindowBindOrChange.Text);
-            SetSetting(ForceWindowBindOrChangeKey, this.ForceWindowBindOrChange.Text);
-            SetSetting(UnWindowBindOrChangeKey, this.UnWindowBindOrChange.Text);
-            SetSetting(ErrorModeKey, this.ErrorMode.Text);
-            SetSetting(OpacityValueKey, this.OpacityValue.Value + "");
-            SetSetting(EnableGoodbyeHKey, this.EnableGoodbyeH.Text);
-            SetSetting(EnableGoodbyeMKey, this.EnableGoodbyeM.Text);
-            SetSetting(EnableGoodbyeModeKey, this.EnableGoodbyeMode.IsChecked.Value ? "1" : "0");
-            SetSetting(EnableViewHeartbeatKey, this.EnableViewHeartbeat.IsChecked.Value ? "1" : "0");
-            SetSetting(EnableMouseGoodbyeModeKey, this.EnableMouseGoodbyeMode.IsChecked.Value ? "1" : "0");
+            //全局主题
+            SetSetting(GlobalThemeKey, "" + this.GlobalTheme.SelectedIndex);
+            //小娱乐
+            SetSetting(EnableGameTimeKey, this.EnableGameTime.IsChecked.Value ? "1" : "0");
+            //禁止自动锁屏
             SetSetting(EnableDisableLockScreenKey, this.EnableDisableLockScreen.IsChecked.Value ? "1" : "0");
             SetSetting(ChangeEnableDisableLockScreenKey, this.ChangeEnableDisableLockScreen.Text);
+            //必应壁纸
+            SetSetting(EnableBiYingKey, this.EnableBiYingBackground.IsChecked.Value ? "1" : "0");
+            SetSetting(ChangeBiYingBackgroundKey, this.ChangeBiYingBackground.Text);
+            //窗体绑定/切换
+            SetSetting(WindowBindOrChangeKey, this.WindowBindOrChange.Text);
+            //强制窗体绑定
+            SetSetting(ForceWindowBindOrChangeKey, this.ForceWindowBindOrChange.Text);
+            //解除绑定
+            SetSetting(UnWindowBindOrChangeKey, this.UnWindowBindOrChange.Text);
+            //紧急避险
+            SetSetting(ErrorModeKey, this.ErrorMode.Text);
+            //下班提醒
+            SetSetting(EnableGoodbyeModeKey, this.EnableGoodbyeMode.IsChecked.Value ? "1" : "0");
+            SetSetting(EnableGoodbyeHKey, this.EnableGoodbyeH.Text);
+            SetSetting(EnableGoodbyeMKey, this.EnableGoodbyeM.Text);
+            SetSetting(GoodbyeModeTypeKey, this.GoodbyeModeType.Text);
+            SetSetting(RandomGoodbyeModeThemeKey, this.RandomGoodbyeModeTheme.IsChecked.Value ? "1" : "0");
+            //透明度设置
+            SetSetting(OpacityValueKey, this.OpacityValue.Value + "");
+            //呼吸效果
+            SetSetting(EnableViewHeartbeatKey, this.EnableViewHeartbeat.IsChecked.Value ? "1" : "0");
+            CacheValue.Clear();
             MainWindow.Notify.ShowBalloonTip(300, "修改成功", "新的配置已被应用", ToolTipIcon.Info);
             this.Close();
         }
@@ -157,17 +206,28 @@ namespace DesktopTools.views
 
         private void OpacityValueChange(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            var s = Application.Current.Resources["OpacityValue"] as SolidColorBrush;
-            Application.Current.Resources["OpacityValue"] = new SolidColorBrush
-            {
-                Color = s.Color,
-                Opacity = this.OpacityValue.Value
-            };
+            (Application.Current.Resources["mainBackColor"] as Brush).Opacity = this.OpacityValue.Value;
         }
 
         private void OnCloseReset(object sender, EventArgs e)
         {
             App.RefreshOpacityValue();
+        }
+
+        private void ChangeTheme(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            ResourceDictionary resource = new ResourceDictionary();
+            resource.Source = new Uri("pack://application:,,,/resource/ColorTheme" + this.GlobalTheme.SelectedIndex + ".xaml");
+            Application.Current.Resources.MergedDictionaries[0] = resource;
+            var ov = (double)Application.Current.FindResource("minOpacityValue");
+            this.OpacityValue.Minimum = ov;
+            if (this.OpacityValue.Value < ov)
+            {
+                this.OpacityValue.Value = ov;
+                OpacityValueChange(null, null);
+            }
+
+
         }
     }
 }

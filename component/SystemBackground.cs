@@ -44,18 +44,35 @@ namespace DesktopTools.component
                 using (Bitmap img = new Bitmap(image))
                 {
                     FileInfo f = new FileInfo(getImgPath());
+                    var fn = f.FullName;
                     App.Current.Dispatcher.Invoke(() =>
                     {
-                        img.Save(f.FullName);
-
-                        using (RegistryKey myRegKey = Registry.CurrentUser.CreateSubKey("Control Panel//Desktop"))
+                        try
                         {
-                            myRegKey.SetValue("TileWallpaper", "0");
-                            myRegKey.SetValue("WallpaperStyle", "2");
-                            myRegKey.SetValue("Wallpaper", f.FullName);
+                            img.Save(f.FullName);
                         }
-                        Win32.SystemParametersInfo(0x0014, 0, f.FullName, 0x2 | 0x1);
+                        catch
+                        {
+                            try
+                            {
+                                var fn = f.FullName + ".tmp.bmp";
+                                img.Save(fn);
+                                Win32.SystemParametersInfo(0x0014, 0, fn, 0x2 | 0x1);
+                                File.Move(fn, f.FullName);
+                            }
+                            catch
+                            {
+
+                            }
+                        }
                     });
+                    using (RegistryKey myRegKey = Registry.CurrentUser.CreateSubKey("Control Panel//Desktop"))
+                    {
+                        myRegKey.SetValue("TileWallpaper", "0");
+                        myRegKey.SetValue("WallpaperStyle", "2");
+                        myRegKey.SetValue("Wallpaper", f.FullName);
+                    }
+                    Win32.SystemParametersInfo(0x0014, 0, f.FullName, 0x2 | 0x1);
                 }
             });
         }
@@ -68,7 +85,7 @@ namespace DesktopTools.component
             }
             StringBuilder sb = new StringBuilder();
             Win32.SystemParametersInfo(0x0073, 65535, sb, 0);
-            if (Path.Equals(sb.ToString(), getImgPath()))
+            if (Path.Equals(sb.ToString(), getImgPath()) || Path.Equals(sb.ToString(), getImgPath() + ".tmp.bmp"))
             {
                 return;
             }

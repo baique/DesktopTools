@@ -16,7 +16,8 @@
     Loaded="Window_Loaded"
     MouseDown="Window_MouseDown"
     MouseEnter="HeartbeatStop"
-    MouseLeave="HeartbeatRestart"
+    MouseLeave="HeartbeatStart"
+    MouseMove="WithMouse"
     MouseRightButtonDown="ToggleMenuVisible"
     ResizeMode="NoResize"
     ShowInTaskbar="False"
@@ -26,110 +27,148 @@
     WindowStyle="None"
     mc:Ignorable="d">
     <Window.Resources>
-        <Storyboard x:Key="Storyboard1">
-            <DoubleAnimationUsingKeyFrames
-                Completed="HeartbeatStoryboard"
-                Storyboard.TargetName="border"
-                Storyboard.TargetProperty="(UIElement.Opacity)">
+        <Storyboard x:Key="Storyboard1" Timeline.RepeatBehavior="Forever">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border" Storyboard.TargetProperty="(UIElement.Opacity)">
                 <EasingDoubleKeyFrame KeyTime="00:00:02" Value="0.4" />
                 <EasingDoubleKeyFrame KeyTime="00:00:04" Value="1" />
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames
-                Completed="HeartbeatStoryboard"
-                Storyboard.TargetName="MenuView"
-                Storyboard.TargetProperty="(UIElement.Opacity)">
-                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="1" />
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="MenuView" Storyboard.TargetProperty="(UIElement.Opacity)">
                 <EasingDoubleKeyFrame KeyTime="00:00:02" Value="0.4" />
                 <EasingDoubleKeyFrame KeyTime="00:00:05" Value="1" />
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
         <Storyboard x:Key="SettingButtonInView">
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border1" Storyboard.TargetProperty="(Canvas.Left)">
-                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="-32" />
-                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="0" />
-                <EasingDoubleKeyFrame KeyTime="00:00:00.5000000" Value="32" />
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border" Storyboard.TargetProperty="(FrameworkElement.Height)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="90" />
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border2" Storyboard.TargetProperty="(Canvas.Right)">
-                <EasingDoubleKeyFrame KeyTime="00:00:00" Value="-32" />
-                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="0" />
-                <EasingDoubleKeyFrame KeyTime="00:00:00.5000000" Value="32" />
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00.20000" Value="-3" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.25000" Value="0" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.45000" Value="3" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.6000" Value="0" />
             </DoubleAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="border1" Storyboard.TargetProperty="(UIElement.Visibility)">
-                <DiscreteObjectKeyFrame KeyTime="00:00:00" Value="{x:Static Visibility.Collapsed}" />
-                <DiscreteObjectKeyFrame KeyTime="00:00:00.2000000" Value="{x:Static Visibility.Visible}" />
-                <DiscreteObjectKeyFrame KeyTime="00:00:00.5000000" Value="{x:Static Visibility.Visible}" />
-            </ObjectAnimationUsingKeyFrames>
-            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="border2" Storyboard.TargetProperty="(UIElement.Visibility)">
-                <DiscreteObjectKeyFrame KeyTime="00:00:00" Value="{x:Static Visibility.Collapsed}" />
-                <DiscreteObjectKeyFrame KeyTime="00:00:00.2000000" Value="{x:Static Visibility.Visible}" />
-                <DiscreteObjectKeyFrame KeyTime="00:00:00.5000000" Value="{x:Static Visibility.Visible}" />
-            </ObjectAnimationUsingKeyFrames>
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="MenuView" Storyboard.TargetProperty="(UIElement.Visibility)">
                 <DiscreteObjectKeyFrame KeyTime="00:00:00" Value="{x:Static Visibility.Visible}" />
             </ObjectAnimationUsingKeyFrames>
-        </Storyboard>
-        <Storyboard x:Key="SettingButtonOutView">
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border1" Storyboard.TargetProperty="(Canvas.Left)">
-                <EasingDoubleKeyFrame KeyTime="00:00:00.5000000" Value="-32" />
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border1" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00.0000000" Value="-32" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="0" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.4500000" Value="-5" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.600000" Value="0" />
             </DoubleAnimationUsingKeyFrames>
-            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border2" Storyboard.TargetProperty="(Canvas.Right)">
-                <EasingDoubleKeyFrame KeyTime="00:00:00.5000000" Value="-32" />
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border2" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00.0000000" Value="-32" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.4500000" Value="0" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.6500000" Value="-5" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.8000000" Value="0" />
             </DoubleAnimationUsingKeyFrames>
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="border1" Storyboard.TargetProperty="(UIElement.Visibility)">
-                <DiscreteObjectKeyFrame KeyTime="00:00:00.45" Value="{x:Static Visibility.Collapsed}" />
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.2000000" Value="{x:Static Visibility.Visible}" />
             </ObjectAnimationUsingKeyFrames>
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="border2" Storyboard.TargetProperty="(UIElement.Visibility)">
-                <DiscreteObjectKeyFrame KeyTime="00:00:00.45" Value="{x:Static Visibility.Collapsed}" />
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.2000000" Value="{x:Static Visibility.Visible}" />
+            </ObjectAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="SettingButtonOutView" Completed="ChangeOutStatus">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00.20000" Value="-3" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.25000" Value="0" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.45000" Value="3" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.6000" Value="0" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border1" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00.2000000" Value="-32" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border2" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00.4000000" Value="-32" />
+            </DoubleAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="border1" Storyboard.TargetProperty="(UIElement.Visibility)">
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.20" Value="{x:Static Visibility.Collapsed}" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="border2" Storyboard.TargetProperty="(UIElement.Visibility)">
+                <DiscreteObjectKeyFrame KeyTime="00:00:00.30" Value="{x:Static Visibility.Collapsed}" />
             </ObjectAnimationUsingKeyFrames>
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="MenuView" Storyboard.TargetProperty="(UIElement.Visibility)">
                 <DiscreteObjectKeyFrame KeyTime="00:00:00.5" Value="{x:Static Visibility.Collapsed}" />
             </ObjectAnimationUsingKeyFrames>
+
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border" Storyboard.TargetProperty="(FrameworkElement.Height)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00.5" Value="60" />
+            </DoubleAnimationUsingKeyFrames>
+
         </Storyboard>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource mainTimeFontColor}" />
+        </Style>
     </Window.Resources>
-    <Grid
-        x:Name="AlwaysShowLayout"
-        MouseDown="ToggleKeyMapPanel"
-        RenderTransformOrigin="0.5,0.5">
-        <Grid.RenderTransform>
+    <Window.RenderTransform>
+        <TransformGroup>
+            <ScaleTransform />
+            <SkewTransform />
+            <RotateTransform CenterX="71" CenterY="36" />
+            <TranslateTransform />
+        </TransformGroup>
+    </Window.RenderTransform>
+    <Canvas
+        x:Name="border"
+        Width="130px"
+        Height="60px"
+        Margin="6">
+        <Canvas.RenderTransform>
             <TransformGroup>
                 <ScaleTransform />
                 <SkewTransform />
-                <RotateTransform />
+                <RotateTransform CenterX="65" CenterY="30" />
                 <TranslateTransform />
             </TransformGroup>
-        </Grid.RenderTransform>
-        <Grid.Style>
-            <Style TargetType="Grid">
-                <Setter Property="Background" Value="Transparent" />
-            </Style>
-
-        </Grid.Style>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" MaxHeight="32px" />
-        </Grid.RowDefinitions>
-        <Border
-            x:Name="border"
-            Grid.Row="0"
-            Grid.Column="1"
-            CornerRadius="5"
+        </Canvas.RenderTransform>
+        <Rectangle
+            Canvas.Left="0"
+            Canvas.Top="0"
+            Width="130px"
+            Height="60px"
+            Panel.ZIndex="1"
             Cursor="Arrow"
-            Opacity="1">
-            <Border.Style>
-                <Style TargetType="Border">
-                    <Setter Property="Cursor" Value="Arrow" />
-                    <Setter Property="Background" Value="{DynamicResource OpacityValue}" />
+            Fill="{DynamicResource mainBackColor}"
+            RadiusX="5"
+            RadiusY="5" />
+        <Grid
+            x:Name="AlwaysShowLayout"
+            Width="Auto"
+            Height="Auto"
+            Panel.ZIndex="2"
+            MouseDown="ToggleKeyMapPanel"
+            RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform />
+                    <SkewTransform />
+                    <RotateTransform />
+                    <TranslateTransform />
+                </TransformGroup>
+            </Grid.RenderTransform>
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Background" Value="Transparent" />
                 </Style>
-            </Border.Style>
+            </Grid.Style>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" MaxHeight="32px" />
+            </Grid.RowDefinitions>
+
             <StackPanel
                 x:Name="stackPanel"
+                Grid.Row="0"
+                Grid.Column="1"
                 Width="130"
                 Height="60"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center">
+                VerticalAlignment="Center"
+                Opacity="1">
                 <TextBlock
                     Name="TimeNumber"
                     Height="Auto"
@@ -138,36 +177,53 @@
                     VerticalAlignment="Center"
                     FontSize="30"
                     FontWeight="Bold"
-                    Foreground="{DynamicResource FontColor}"
                     Text="00:00:00"
                     TextAlignment="Center" />
                 <TextBlock
                     x:Name="DateNumber"
                     FontSize="16"
                     FontWeight="Bold"
-                    Foreground="{DynamicResource FontColor}"
                     Text="01-01 周一"
-                    TextAlignment="Center" />
+                    TextAlignment="Center"
+                    Visibility="Visible" />
+                <TextBlock
+                    x:Name="Tip"
+                    FontSize="16"
+                    FontWeight="Bold"
+                    Text="01-01 周一"
+                    TextAlignment="Center"
+                    Visibility="Collapsed" />
             </StackPanel>
-        </Border>
+        </Grid>
         <Canvas
             x:Name="MenuView"
             Grid.Row="1"
+            Canvas.Top="60"
             Width="130px"
             Height="32px"
             HorizontalAlignment="Center"
+            Panel.ZIndex="0"
             Visibility="Collapsed">
             <Border
                 x:Name="border1"
-                Canvas.Left="-32"
+                Canvas.Left="32"
                 Width="Auto"
                 Margin="1"
                 Padding="2"
                 VerticalAlignment="Center"
-                Background="{DynamicResource OpacityValue}"
+                Background="{DynamicResource mainBackColor}"
                 CornerRadius="5"
                 MouseLeftButtonDown="OpenSettingView"
-                Visibility="Visible">
+                RenderTransformOrigin="0.5,0.5"
+                Visibility="Collapsed">
+                <Border.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform />
+                        <SkewTransform />
+                        <RotateTransform />
+                        <TranslateTransform />
+                    </TransformGroup>
+                </Border.RenderTransform>
                 <Image
                     x:Name="image"
                     Width="24px"
@@ -177,20 +233,29 @@
             </Border>
             <Border
                 x:Name="border2"
-                Canvas.Right="-32"
+                Canvas.Right="32"
                 Width="Auto"
                 Margin="1"
                 Padding="2"
                 VerticalAlignment="Center"
-                Background="{DynamicResource OpacityValue}"
+                Background="{DynamicResource mainBackColor}"
                 CornerRadius="5"
                 MouseLeftButtonDown="ExitApp"
-                Visibility="Visible">
+                Visibility="Collapsed">
+                <Border.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform />
+                        <SkewTransform />
+                        <RotateTransform />
+                        <TranslateTransform />
+                    </TransformGroup>
+                </Border.RenderTransform>
                 <Image
                     Width="24px"
                     Height="24px"
                     Source="pack://application:,,,/image/exit.png" />
             </Border>
         </Canvas>
-    </Grid>
+    </Canvas>
+
 </Window>

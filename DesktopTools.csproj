@@ -46,6 +46,26 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Page Update="resource\ColorTheme0.xaml">
+		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		  <SubType>Designer</SubType>
+		</Page>
+		<Page Update="resource\ColorTheme5.xaml">
+		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		  <SubType>Designer</SubType>
+		</Page>
+		<Page Update="resource\ColorTheme4.xaml">
+		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		  <SubType>Designer</SubType>
+		</Page>
+		<Page Update="resource\ColorTheme3.xaml">
+		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		  <SubType>Designer</SubType>
+		</Page>
+		<Page Update="resource\ColorTheme2.xaml">
+		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		  <SubType>Designer</SubType>
+		</Page>
 		<Page Update="views\BindView.xaml">
 			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
 			<SubType>Designer</SubType>
@@ -53,6 +73,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include=".github\release_node\V1.0.0.6.bate.md" />
 	  <None Include=".github\release_node\V1.0.0.5.md" />
 	  <None Include=".github\release_node\V1.0.0.4.md" />
 	  <None Include=".github\release_node\V1.0.0.3.md" />

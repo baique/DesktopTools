@@ -15,12 +15,10 @@ namespace DesktopTools
     {
         public static void RefreshOpacityValue()
         {
-            var s = Application.Current.Resources["OpacityValue"] as SolidColorBrush;
-            Application.Current.Resources["OpacityValue"] = new SolidColorBrush
-            {
-                Color = s.Color,
-                Opacity = double.Parse(Setting.GetSetting(Setting.OpacityValueKey, "0.4"))
-            };
+            Application.Current.Resources["OpacityValue"] = double.Parse(Setting.GetSetting(Setting.OpacityValueKey, "0.4"));
+            ResourceDictionary resource = new ResourceDictionary();
+            resource.Source = new Uri("pack://application:,,,/resource/ColorTheme" + Setting.GetSetting(Setting.GlobalThemeKey, "0") + ".xaml");
+            Application.Current.Resources.MergedDictionaries[0] = resource;
         }
 
         protected override void OnStartup(StartupEventArgs e)

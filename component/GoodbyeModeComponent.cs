@@ -22,11 +22,26 @@ namespace DesktopTools.component
             }
             var h = int.Parse(Setting.GetSetting(Setting.EnableGoodbyeHKey));
             var m = int.Parse(Setting.GetSetting(Setting.EnableGoodbyeMKey));
-
-            if (DateTime.Now.Hour > h || (DateTime.Now.Hour == h && DateTime.Now.Minute >= m))
+            var type = Setting.GetSetting(Setting.GoodbyeModeTypeKey, "正常");
+            if (type == "正常")
             {
-                return true;
+#if DEBUG 
+                if (DateTime.Now.Hour > h || (DateTime.Now.Hour == h && DateTime.Now.Minute >= m))
+#else
+                if (DateTime.Now.Hour == h && DateTime.Now.Minute == m)
+#endif
+                {
+                    return true;
+                }
             }
+            else
+            {
+                if (DateTime.Now.Hour > h || (DateTime.Now.Hour == h && DateTime.Now.Minute >= m))
+                {
+                    return true;
+                }
+            }
+
             return false;
         }
         private static bool Stop = false;
@@ -51,7 +66,24 @@ namespace DesktopTools.component
 
         public static void Show()
         {
-            if ("1".Equals(Setting.GetSetting(Setting.EnableMouseGoodbyeModeKey)))
+            var type = Setting.GetSetting(Setting.GoodbyeModeTypeKey, "正常");
+            if (type == "遛弯")
+            {
+                if (Stop)
+                {
+                    return;
+                }
+                Stop = true; ;
+                GoodbyeMode gm = new GoodbyeMode();
+                gm.Show();
+                gm.Closed += (a, e) =>
+                {
+                    activeWindows.Remove(gm);
+                    Stop = false;
+                };
+                activeWindows.Add(gm);
+            }
+            else if (type == "炸街")
             {
                 for (int i = 0; i < 3; i++)
                 {
@@ -72,7 +104,7 @@ namespace DesktopTools.component
                     return;
                 }
                 Stop = true; ;
-                GoodbyeMode gm = new GoodbyeMode();
+                GoodbyeMode2 gm = new GoodbyeMode2();
                 gm.Show();
                 gm.Closed += (a, e) =>
                 {
@@ -80,8 +112,8 @@ namespace DesktopTools.component
                     Stop = false;
                 };
                 activeWindows.Add(gm);
-            }
 
+            }
         }
     }
 }

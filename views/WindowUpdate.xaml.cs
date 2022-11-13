@@ -49,13 +49,13 @@ namespace DesktopTools
                 nb = 100;
                 await Task.Run(() =>
                 {
-                    Dispatcher.Invoke(() =>
+                    Dispatcher.InvokeAsync(() =>
                     {
                         this.pn.Visibility = Visibility.Collapsed;
                         this.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
                     });
                     Thread.Sleep(3000);
-                    Dispatcher.Invoke(() => this.Close());
+                    Dispatcher.InvokeAsync(() => this.Close());
                 });
             }
             this.bfb.Content = nb + "%";

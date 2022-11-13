@@ -23,6 +23,30 @@
     </Window.Resources>
     <StackPanel Margin="15">
         <StackPanel Orientation="Horizontal">
+            <Label Style="{StaticResource FormLabel}">
+                主题：
+            </Label>
+            <ComboBox
+                x:Name="GlobalTheme"
+                Width="150px"
+                Height="20"
+                Margin="0,0,0,0"
+                SelectionChanged="ChangeTheme">
+                <ComboBoxItem Content="默认" />
+                <ComboBoxItem Content="主题1" />
+                <ComboBoxItem Content="主题2" />
+                <ComboBoxItem Content="主题3" />
+                <ComboBoxItem Content="主题4" />
+                <ComboBoxItem Content="主题5" />
+            </ComboBox>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <Label Style="{StaticResource FormLabel}">
+                娱乐时间：
+            </Label>
+            <CheckBox x:Name="EnableGameTime" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
             <StackPanel Orientation="Horizontal">
                 <Label Style="{StaticResource FormLabel}">
                     禁止自动锁屏：
@@ -123,6 +147,31 @@
         <StackPanel Orientation="Horizontal">
             <StackPanel Orientation="Horizontal">
                 <Label Style="{StaticResource FormLabel}">
+                    下班提醒模式：
+                </Label>
+                <ComboBox
+                    x:Name="GoodbyeModeType"
+                    Width="60px"
+                    Height="20"
+                    Margin="0,0,0,0">
+                    <ComboBoxItem Content="正常" />
+                    <ComboBoxItem Content="遛弯" />
+                    <ComboBoxItem Content="炸街" />
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Style="{StaticResource FormLabel}">
+                    随机主题：
+                </Label>
+                <CheckBox
+                    x:Name="RandomGoodbyeModeTheme"
+                    Width="Auto"
+                    VerticalAlignment="Center" />
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal">
+                <Label Style="{StaticResource FormLabel}">
                     下班提醒：
                 </Label>
                 <CheckBox
@@ -171,16 +220,6 @@
                     <ComboBoxItem Content="60" />
                 </ComboBox>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Style="{StaticResource FormLabel}">
-                    （慎用）暴力提醒：
-                </Label>
-                <CheckBox
-                    x:Name="EnableMouseGoodbyeMode"
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    VerticalAlignment="Center" />
-            </StackPanel>
         </StackPanel>
 
 
@@ -194,6 +233,7 @@
                 VerticalAlignment="Center"
                 Maximum="1"
                 Minimum="0.2"
+                TickFrequency="10"
                 ValueChanged="OpacityValueChange"
                 Value="0.3" />
         </StackPanel>

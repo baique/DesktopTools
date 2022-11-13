@@ -1,0 +1,48 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=netstandard">
+    <Color x:Key="tColorRaw">#392F41</Color>
+    <Color x:Key="fColorRaw">#1BD1A5</Color>
+
+    <SolidColorBrush x:Key="tColor" Color="{DynamicResource tColorRaw}" />
+    <SolidColorBrush x:Key="fColor" Color="{DynamicResource fColorRaw}" />
+    <Color x:Key="fontTColorRaw">#333845</Color>
+    <Color x:Key="fontFColorRaw">#26d1aa</Color>
+    <SolidColorBrush x:Key="fontTColor" Color="{DynamicResource fontTColorRaw}" />
+    <SolidColorBrush x:Key="fontFColor" Color="{DynamicResource fontFColorRaw}" />
+
+    <Color x:Key="vColorRaw">White</Color>
+    <LinearGradientBrush x:Key="mainTimeFontColor" Opacity="1">
+
+        <GradientStop Offset="0" Color="{StaticResource vColorRaw}" />
+        <GradientStop Offset="0.19" Color="{StaticResource vColorRaw}" />
+        <GradientStop Offset="0.2" Color="{DynamicResource fColorRaw}" />
+        <GradientStop Offset="0.21" Color="{StaticResource vColorRaw}" />
+        <GradientStop Offset="0.49" Color="{StaticResource vColorRaw}" />
+        <GradientStop Offset="0.5" Color="{DynamicResource fColorRaw}" />
+        <GradientStop Offset="0.51" Color="{StaticResource vColorRaw}" />
+        <GradientStop Offset="0.79" Color="{StaticResource vColorRaw}" />
+        <GradientStop Offset="0.8" Color="{DynamicResource fColorRaw}" />
+        <GradientStop Offset="0.81" Color="{StaticResource vColorRaw}" />
+        <GradientStop Offset="0.9" Color="{StaticResource vColorRaw}" />
+        <GradientStop Offset="1" Color="{StaticResource vColorRaw}" />
+
+    </LinearGradientBrush>
+    <sys:Double x:Key="minOpacityValue">0.6</sys:Double>
+    <LinearGradientBrush x:Key="mainBackColor" Opacity="{DynamicResource OpacityValue}">
+        <GradientStop Offset="0" Color="{DynamicResource fColorRaw}" />
+        <GradientStop Offset="0.5" Color="{DynamicResource tColorRaw}" />
+        <GradientStop Offset="1" Color="{DynamicResource fColorRaw}" />
+    </LinearGradientBrush>
+    <Style TargetType="Ellipse">
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect
+                    BlurRadius="24"
+                    ShadowDepth="-4"
+                    Color="#000" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

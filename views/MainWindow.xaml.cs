@@ -3,6 +3,8 @@ using DesktopTools.util;
 using DesktopTools.views;
 using System;
 using System.Drawing;
+using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -11,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using static DesktopTools.util.Win32;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 using Application = System.Windows.Application;
 using DateTime = System.DateTime;
 using MessageBox = System.Windows.Forms.MessageBox;
@@ -35,7 +38,7 @@ namespace DesktopTools
         {
             AppUtil.DisableAltF4(this);
             AppUtil.AlwaysToTop(this);
-            HeartbeatStoryboard(null, null);
+            HeartbeatStart(null, null);
             ToggleWindow.addIgnorePtr(this);
             HideAltTab(new WindowInteropHelper(this).Handle);
             MiniWindow();
@@ -134,6 +137,9 @@ namespace DesktopTools
         {
             DispatcherTimer timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(20);
+#if DEBUG
+            timer.Interval = TimeSpan.FromSeconds(1);
+#endif
             timer.Tick += (a, e) =>
             {
                 if (GoodbyeModeComponent.IsInGoodbyeTime())
@@ -166,7 +172,7 @@ namespace DesktopTools
         {
 
             autoChangeBackgroundTimer = new DispatcherTimer();
-            autoChangeBackgroundTimer.Interval = new TimeSpan(0, 5, 0);
+            autoChangeBackgroundTimer.Interval = new TimeSpan(0, 2, 0);
 #if DEBUG
             autoChangeBackgroundTimer.Interval = new TimeSpan(0, 0, 10);
 #endif
@@ -276,60 +282,119 @@ namespace DesktopTools
         #endregion
 
         #region 呼吸效果
-        private void HeartbeatStoryboard(object sender, EventArgs e)
+        private DispatcherTimer timeoutHide = new DispatcherTimer
         {
-            if ("1".Equals(Setting.GetSetting(Setting.EnableViewHeartbeatKey, ""))) (this.FindResource("Storyboard1") as Storyboard).Begin();
-        }
-
+            Interval = TimeSpan.FromSeconds(1.5),
+        };
         private void HeartbeatStop(object sender, System.Windows.Input.MouseEventArgs e)
         {
             ((Storyboard)this.FindResource("Storyboard1")).Stop();
+            Storyboard sb = new Storyboard();
             this.border.Opacity = 1;
+            if (timeoutHide != null)
+            {
+                timeoutHide.Stop();
+            }
         }
 
-        private void HeartbeatRestart(object sender, System.Windows.Input.MouseEventArgs e)
+        private void HeartbeatStart(object sender, System.Windows.Input.MouseEventArgs e)
         {
             if ("1".Equals(Setting.GetSetting(Setting.EnableViewHeartbeatKey, ""))) ((Storyboard)this.FindResource("Storyboard1")).Begin();
+            var s = new Storyboard();
+
+            {
+                DoubleAnimationUsingKeyFrames doubleAnimation = new DoubleAnimationUsingKeyFrames();
+                {
+                    EasingDoubleKeyFrame ek = new EasingDoubleKeyFrame();
+                    ek.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0.2));
+                    ek.Value = 0;
+                    doubleAnimation.KeyFrames.Add(ek);
+                }
+                Storyboard.SetTargetProperty(doubleAnimation, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)"));
+                Storyboard.SetTarget(doubleAnimation, this.SelfWindow);
+                s.Children.Add(doubleAnimation);
+            }
+            s.Completed += (a, e) =>
+            {
+                this.Tip.Visibility = Visibility.Collapsed;
+                this.DateNumber.Visibility = Visibility.Visible;
+            };
+            s.Begin();
+
+            if (this.MenuView.Visibility == Visibility.Visible && !outStatus)
+            {
+                timeoutHide.Tick += (a, e) =>
+                {
+                    ((Storyboard)this.FindResource("SettingButtonInView")).Stop();
+                    ((Storyboard)this.FindResource("SettingButtonOutView")).Begin();
+                    timeoutHide.Stop();
+                };
+                timeoutHide.Start();
+            }
+
         }
         #endregion
-
+        private bool outStatus = false;
         private void ToggleMenuVisible(object sender, MouseButtonEventArgs e)
         {
             if (this.MenuView.Visibility == Visibility.Collapsed)
             {
                 ((Storyboard)this.FindResource("SettingButtonOutView")).Stop();
                 ((Storyboard)this.FindResource("SettingButtonInView")).Begin();
+                if (prevStoryboard != null)
+                {
+                    prevStoryboard.Stop();
+                }
             }
             else
             {
                 ((Storyboard)this.FindResource("SettingButtonInView")).Stop();
                 ((Storyboard)this.FindResource("SettingButtonOutView")).Begin();
+                outStatus = true;
+                if (prevStoryboard != null)
+                {
+                    prevStoryboard.Stop();
+                }
             }
+
         }
 
+        private void ChangeOutStatus(object sender, EventArgs e)
+        {
+            outStatus = false;
+        }
+
+        private Setting opendSettingView = null;
         private void OpenSettingView(object sender, MouseButtonEventArgs e)
         {
+            ToggleMenuVisible(sender, e);
+            if (opendSettingView != null)
+            {
+                if (opendSettingView.WindowState == WindowState.Minimized)
+                {
+                    opendSettingView.WindowState = WindowState.Normal;
+                }
+                opendSettingView.Focus();
+                return;
+            }
             Dispatcher.InvokeAsync(() =>
             {
-                ToggleMenuVisible(sender, e);
                 GlobalKeyboardEvent.GlobalKeybordEventStatus = false;
-                try
+                opendSettingView = new Setting();
+                opendSettingView.Show();
+                opendSettingView.Closed += (a, e) =>
                 {
-                    Setting setting = new Setting();
-                    setting.ShowDialog();
+                    opendSettingView = null;
+                    GlobalKeyboardEvent.GlobalKeybordEventStatus = true;
                     if (!"1".Equals(Setting.GetSetting(Setting.EnableViewHeartbeatKey, "")))
                     {
                         HeartbeatStop(null, null);
                     }
                     else
                     {
-                        HeartbeatRestart(null, null);
+                        HeartbeatStart(null, null);
                     }
-                }
-                finally
-                {
-                    GlobalKeyboardEvent.GlobalKeybordEventStatus = true;
-                }
+                };
             });
         }
 
@@ -337,5 +402,106 @@ namespace DesktopTools
         {
             App.Current.Shutdown();
         }
+
+        private Storyboard prevStoryboard;
+        private void WithMouse(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (this.MenuView.Visibility == Visibility.Visible)
+            {
+                return;
+            }
+            if (!"1".Equals(Setting.GetSetting(Setting.EnableGameTimeKey)))
+            {
+                return;
+            }
+            if (prevStoryboard != null)
+            {
+                prevStoryboard.Stop();
+            }
+            var point = e.GetPosition(this.SelfWindow);
+            double hc = this.SelfWindow.Height / 2, wc = this.SelfWindow.Width / 2;
+            double a = 0, x = wc, y = hc;
+            int leftOrRight = 0;
+            if (point.Y < hc && point.X > wc)
+            {
+                leftOrRight = -1;
+                y = hc - point.Y;
+                x = point.X - wc;
+            }
+            else if (point.Y < hc && point.X < wc)
+            {
+                leftOrRight = 1;
+                y = hc - point.Y;
+                x = wc - point.X;
+            }
+            else if (point.Y > hc && point.X > wc)
+            {
+                leftOrRight = 1;
+                y = point.Y - hc;
+                x = point.X - wc;
+            }
+            else if (point.Y > hc && point.X < wc)
+            {
+                leftOrRight = -1;
+                y = point.Y - hc;
+                x = wc - point.X;
+            }
+
+            a = (Math.Atan2(y, x) * 180 / Math.PI) % 18;
+
+            this.DateNumber.Visibility = Visibility.Collapsed;
+
+            this.Tip.FontSize = 16;
+            if (a <= 0.0000001)
+            {
+                this.Tip.Text = "(" + a.ToString("0.00000000") + ")神乎其技";
+                this.Tip.FontSize = 12;
+            }
+            else if (a <= 0.000001)
+            {
+                this.Tip.Text = "(" + a.ToString("0.0000000") + ")完美平衡";
+                this.Tip.FontSize = 12.5;
+            }
+            else if (a <= 0.2)
+            {
+                this.Tip.Text = "(" + a.ToString("0.00") + ")算你达成";
+            }
+            else if (a <= 1)
+            {
+                this.Tip.Text = "(" + a.ToString("0.0") + ")接近平衡";
+            }
+            else if (a <= 2)
+            {
+                this.Tip.Text = "(" + a.ToString("0") + ")就差一点";
+            }
+            else if (a <= 4)
+            {
+                this.Tip.Text = "(" + a.ToString("0") + ")就差亿点";
+            }
+            else
+            {
+                this.Tip.Text = "(" + a.ToString("0") + ")歪的厉害";
+            }
+            this.Tip.Visibility = Visibility.Visible;
+            a = a * leftOrRight;
+
+            Storyboard sb = new Storyboard();
+            DoubleAnimationUsingKeyFrames doubleAnimation = new DoubleAnimationUsingKeyFrames();
+            {
+                EasingDoubleKeyFrame ek = new EasingDoubleKeyFrame();
+                ek.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0.2));
+                ek.Value = a;
+                doubleAnimation.KeyFrames.Add(ek);
+            }
+            Storyboard.SetTargetProperty(doubleAnimation, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)"));
+            Storyboard.SetTarget(doubleAnimation, this.SelfWindow);
+
+
+            sb.Children.Add(doubleAnimation);
+            sb.Begin();
+            prevStoryboard = sb;
+
+        }
+
     }
 }
