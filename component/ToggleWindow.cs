@@ -70,7 +70,6 @@ namespace DesktopTools.component
             }
             return IntPtr.Zero;
         }
-
         private static void procMsg(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
         {
             if (!(idObject == 0 && idChild == 0))
@@ -177,7 +176,17 @@ namespace DesktopTools.component
                 SetWindowPos(needToTopWindow.Ptr, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
                 if (!SetForegroundWindow(needToTopWindow.Ptr))
                 {
-                    if (DontContinueBindOther(keyData))
+                    try
+                    {
+                        if (needToTopWindow.P != null && needToTopWindow.P.HasExited)
+                        {
+                            if (DontContinueBindOther(keyData))
+                            {
+                                return;
+                            }
+                        }
+                    }
+                    catch
                     {
                         return;
                     }
@@ -344,7 +353,7 @@ namespace DesktopTools.component
                         Setting.SetSetting("last-binding-key-window", currentBinding);
                         Setting.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
                         windowBindingIndex.Remove(w);
-                        UnhookWinEvent(w);
+                        try { UnhookWinEvent(w); } catch { }
                     }
                 }
             }
