@@ -165,6 +165,7 @@
                     Height="20"
                     Margin="0,0,0,0">
                     <ComboBoxItem Content="正常" />
+                    <ComboBoxItem Content="追随" />
                     <ComboBoxItem Content="遛弯" />
                     <ComboBoxItem Content="炸街" />
                 </ComboBox>

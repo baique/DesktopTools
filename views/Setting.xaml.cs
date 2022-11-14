@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using Application = System.Windows.Application;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using TextBox = System.Windows.Controls.TextBox;
@@ -223,7 +222,7 @@ namespace DesktopTools.views
             ResourceDictionary resource = new ResourceDictionary();
             resource.Source = new Uri("pack://application:,,,/resource/ColorTheme" + this.GlobalTheme.SelectedIndex + ".xaml");
             Application.Current.Resources.MergedDictionaries[0] = resource;
-
+            OpacityValueChange(null, null);
             this.OpacityValue.Minimum = 0.05;
             //try
             //{

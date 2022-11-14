@@ -40,6 +40,17 @@
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border" Storyboard.TargetProperty="(FrameworkElement.Height)">
                 <EasingDoubleKeyFrame KeyTime="00:00:00" Value="90" />
             </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames
+                x:Name="doubleAnimationUsingKeyFrames"
+                Storyboard.TargetName="border"
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00.20000" Value="0.8" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.6000" Value="1" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00.20000" Value="0.9" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.6000" Value="1" />
+            </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)">
                 <EasingDoubleKeyFrame KeyTime="00:00:00.20000" Value="-3" />
                 <EasingDoubleKeyFrame KeyTime="00:00:00.25000" Value="0" />
@@ -67,6 +78,11 @@
             <ObjectAnimationUsingKeyFrames Storyboard.TargetName="border2" Storyboard.TargetProperty="(UIElement.Visibility)">
                 <DiscreteObjectKeyFrame KeyTime="00:00:00.2000000" Value="{x:Static Visibility.Visible}" />
             </ObjectAnimationUsingKeyFrames>
+            <PointAnimationUsingKeyFrames Storyboard.TargetName="border2" Storyboard.TargetProperty="(UIElement.RenderTransformOrigin)">
+                <EasingPointKeyFrame KeyTime="00:00:00" Value="0,0" />
+                <EasingPointKeyFrame KeyTime="00:00:00.2000000" Value="0.5,0.5" />
+                <EasingPointKeyFrame KeyTime="00:00:00.4500000" Value="0,0" />
+            </PointAnimationUsingKeyFrames>
         </Storyboard>
         <Storyboard x:Key="SettingButtonOutView" Completed="ChangeOutStatus">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)">
@@ -99,6 +115,20 @@
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource mainTimeFontColor}" />
         </Style>
+        <Storyboard x:Key="Jump">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00.3000000" Value="-5" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.6000000" Value="0" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00.30000" Value="0.5" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.6000" Value="1" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="border" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[2].(RotateTransform.Angle)">
+                <EasingDoubleKeyFrame KeyTime="00:00:00.20000" Value="-5" />
+                <EasingDoubleKeyFrame KeyTime="00:00:00.6000" Value="0" />
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
     </Window.Resources>
     <Window.RenderTransform>
         <TransformGroup>
@@ -114,11 +144,11 @@
         Height="60px"
         Margin="40"
         MouseMove="WithMouse"
-        Visibility="Collapsed">
+        Visibility="Visible">
         <Canvas.RenderTransform>
             <TransformGroup>
-                <ScaleTransform />
-                <SkewTransform />
+                <ScaleTransform CenterX="71" CenterY="36" />
+                <SkewTransform CenterX="71" CenterY="36" />
                 <RotateTransform CenterX="65" CenterY="30" />
                 <TranslateTransform />
             </TransformGroup>
@@ -248,7 +278,7 @@
                         <ScaleTransform />
                         <SkewTransform />
                         <RotateTransform />
-                        <TranslateTransform />
+                        <TranslateTransform Y="-17.777784888888888" />
                     </TransformGroup>
                 </Border.RenderTransform>
                 <Image

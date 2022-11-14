@@ -10,7 +10,7 @@
 		<ApplicationIcon>icon.ico</ApplicationIcon>
 		<SignAssembly>False</SignAssembly>
 		<Title>桌面工具</Title>
-		<Version>1.0.0.2</Version>
+		<Version>1.0.0.6</Version>
 		<Authors>baique</Authors>
 		<Description>桌面工具</Description>
 		<Copyright>Copyright @ baique</Copyright>

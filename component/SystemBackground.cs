@@ -38,42 +38,46 @@ namespace DesktopTools.component
             Setting.SetSetting("last-change-background-time", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             await Task.Run(() =>
             {
-                var imgData = AppUtil.DownloadFileToByteArray("https://bingw.jasonzeng.dev/?index=random");
-                var image = AppUtil.ByteArrayToImage(imgData);
-                //using (Bitmap img = IsInGoodbyeTime()? createText(image) : new Bitmap(image))
-                using (Bitmap img = new Bitmap(image))
+                try
                 {
-                    FileInfo f = new FileInfo(getImgPath());
-                    var fn = f.FullName;
-                    App.Current.Dispatcher.Invoke(() =>
+                    var imgData = AppUtil.DownloadFileToByteArray("http://bingw.jasonzeng.dev/?index=random");
+                    var image = AppUtil.ByteArrayToImage(imgData);
+                    //using (Bitmap img = IsInGoodbyeTime()? createText(image) : new Bitmap(image))
+                    using (Bitmap img = new Bitmap(image))
                     {
-                        try
-                        {
-                            img.Save(f.FullName);
-                        }
-                        catch
+                        FileInfo f = new FileInfo(getImgPath());
+                        var fn = f.FullName;
+                        App.Current.Dispatcher.Invoke(() =>
                         {
                             try
                             {
-                                var fn = f.FullName + ".tmp.bmp";
-                                img.Save(fn);
-                                Win32.SystemParametersInfo(0x0014, 0, fn, 0x2 | 0x1);
-                                File.Move(fn, f.FullName);
+                                img.Save(f.FullName);
                             }
                             catch
                             {
+                                try
+                                {
+                                    var fn = f.FullName + ".tmp.bmp";
+                                    img.Save(fn);
+                                    Win32.SystemParametersInfo(0x0014, 0, fn, 0x2 | 0x1);
+                                    File.Move(fn, f.FullName);
+                                }
+                                catch
+                                {
 
+                                }
                             }
+                        });
+                        using (RegistryKey myRegKey = Registry.CurrentUser.CreateSubKey("Control Panel//Desktop"))
+                        {
+                            myRegKey.SetValue("TileWallpaper", "0");
+                            myRegKey.SetValue("WallpaperStyle", "2");
+                            myRegKey.SetValue("Wallpaper", f.FullName);
                         }
-                    });
-                    using (RegistryKey myRegKey = Registry.CurrentUser.CreateSubKey("Control Panel//Desktop"))
-                    {
-                        myRegKey.SetValue("TileWallpaper", "0");
-                        myRegKey.SetValue("WallpaperStyle", "2");
-                        myRegKey.SetValue("Wallpaper", f.FullName);
+                        Win32.SystemParametersInfo(0x0014, 0, f.FullName, 0x2 | 0x1);
                     }
-                    Win32.SystemParametersInfo(0x0014, 0, f.FullName, 0x2 | 0x1);
                 }
+                catch { }
             });
         }
 
