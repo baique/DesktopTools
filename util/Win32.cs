@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using static DesktopTools.KeyboardHook;
 
 namespace DesktopTools.util
@@ -164,7 +165,60 @@ namespace DesktopTools.util
         {
             EVENT_OBJECT_DESTROY = 0x8001,
             EVENT_OBJECT_NAMECHANGE = 0x800C,
+            EVENT_SYSTEM_FOREGROUND = 0x0003,
         }
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int left;
+            public int top;
+            public int right;
+            public int bottom;
+        }
+        [StructLayout(LayoutKind.Sequential)]
+        public struct APPBARDATA
+        {
+            public int cbSize;
+            public IntPtr hWnd;
+            public int uCallbackMessage;
+            public int uEdge;
+            public RECT rc;
+            public IntPtr lParam;
+        }
+        public enum ABMsg : int
+        {
+            ABM_NEW = 0,
+            ABM_REMOVE,
+            ABM_QUERYPOS,
+            ABM_SETPOS,
+            ABM_GETSTATE,
+            ABM_GETTASKBARPOS,
+            ABM_ACTIVATE,
+            ABM_GETAUTOHIDEBAR,
+            ABM_SETAUTOHIDEBAR,
+            ABM_WINDOWPOSCHANGED,
+            ABM_SETSTATE
+        }
+        public enum ABNotify : int
+        {
+            ABN_STATECHANGE = 0,
+            ABN_POSCHANGED,
+            ABN_FULLSCREENAPP,
+            ABN_WINDOWARRANGE
+        }
+        public enum ABEdge : int
+        {
+            ABE_LEFT = 0,
+            ABE_TOP,
+            ABE_RIGHT,
+            ABE_BOTTOM
+        }
+        [DllImport("SHELL32", CallingConvention = CallingConvention.StdCall)]
+        public static extern uint SHAppBarMessage(int dwMessage, ref APPBARDATA pData);
+        [DllImport("User32.dll", CharSet = CharSet.Auto)]
+        public static extern int RegisterWindowMessage(string msg);
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool GetWindowRect(IntPtr hwnd, out Rect lpRect);
         [DllImport("user32.dll")]
         public static extern IntPtr SetWinEventHook(WinEvents eventMin, WinEvents eventMax, IntPtr hmodWinEventProc, WinEventDelegate lpfnWinEventProc, uint idProcess, uint idThread, WinEventFlags dwFlags);
         public delegate void WinEventDelegate(IntPtr hWinEventHook, uint eventType,

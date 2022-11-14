@@ -31,11 +31,11 @@ namespace DesktopTools
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            var ptr = new WindowInteropHelper(this).Handle;
+            ToggleWindow.addIgnorePtr(this);
             AppUtil.DisableAltF4(this);
             AppUtil.AlwaysToTop(this);
-            var ptr = new WindowInteropHelper(this).Handle;
             HideAltTab(ptr);
-            ToggleWindow.addIgnorePtr(this);
         }
         public new void Show()
         {

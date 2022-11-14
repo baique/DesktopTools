@@ -3,17 +3,13 @@ using DesktopTools.util;
 using DesktopTools.views;
 using System;
 using System.Drawing;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using static DesktopTools.util.Win32;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 using Application = System.Windows.Application;
 using DateTime = System.DateTime;
 using MessageBox = System.Windows.Forms.MessageBox;
@@ -36,18 +32,19 @@ namespace DesktopTools
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            AppUtil.DisableAltF4(this);
-            AppUtil.AlwaysToTop(this);
-            HeartbeatStart(null, null);
-            ToggleWindow.addIgnorePtr(this);
-            ToggleWindow.RestoreKeyWindow();
-            HideAltTab(new WindowInteropHelper(this).Handle);
+            ToggleWindow.Register();
             MiniWindow();
+            HeartbeatStart(null, null);
+            ToggleWindow.RestoreKeyWindow();
             RegisterTimeJump();
             RegisterAutoChangeBackground();
             RegisterGoodbyeMode();
             RegisterDisableAutoLockScreen();
             RegisterKeyboardEvent();
+            AppUtil.DisableAltF4(this);
+            AppUtil.AlwaysToTop(this);
+            ToggleWindow.addIgnorePtr(this);
+            HideAltTab(new WindowInteropHelper(this).Handle);
         }
 
         #region 注册键盘事件
@@ -64,17 +61,10 @@ namespace DesktopTools
                 {
                     GlobalKeyboardEvent.GlobalKeybordEventStatus = false;
                     GoodbyeModeComponent.GlobalEnable = false;
-                    var wd = ToggleWindow.IconPanel();
-                    var t1 = wd.Top;
-                    var t2 = this.Top;
-                    wd.Top = -1000;
-                    this.Top = -1000;
                     WindowUpdate loading = new WindowUpdate();
                     loading.ShowDialog();
                     GoodbyeModeComponent.GlobalEnable = true;
                     GlobalKeyboardEvent.GlobalKeybordEventStatus = true;
-                    wd.Top = t1;
-                    this.Top = t2;
                     return true;
                 }
             );
@@ -240,6 +230,7 @@ namespace DesktopTools
         {
             try
             {
+                ToggleWindow.Close();
                 GlobalKeyboardEvent.close();
                 Notify.Visible = false;
                 Notify.Dispose();
@@ -350,7 +341,7 @@ namespace DesktopTools
 
         private void ExitApp(object sender, MouseButtonEventArgs e)
         {
-            App.Current.Shutdown();
+            this.Close();
         }
 
         private Storyboard prevStoryboard;

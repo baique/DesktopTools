@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Navigation;
 
 namespace DesktopTools
 {
@@ -42,7 +43,9 @@ namespace DesktopTools
             }
             SetSelfStarting(true, "desk_date");
             RefreshOpacityValue();
+            
         }
+
 
         protected override void OnExit(ExitEventArgs e)
         {

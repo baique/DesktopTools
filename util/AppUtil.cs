@@ -1,6 +1,8 @@
-﻿using System;
+﻿using DesktopTools.component;
+using System;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -96,7 +98,6 @@ namespace DesktopTools.util
                 var s = Application.GetResourceStream(new Uri("pack://application:,,,/font/Aa破竹体.TTF"));
                 try
                 {
-
                     byte[] buf = new byte[1024 * 1024];
                     using (MemoryStream ms = new MemoryStream())
                     {
@@ -131,11 +132,29 @@ namespace DesktopTools.util
         public static void AlwaysToTop(Window view)
         {
             var ptr = new WindowInteropHelper(view).Handle;
+            double viewRawTop = -20000;
             Task.Run(async () =>
             {
                 for (; ; )
                 {
                     await Task.Delay(10);
+                    if (ToggleWindow.HasFullScreen && viewRawTop == -20000)
+                    {
+                        App.Current.Dispatcher.Invoke(() =>
+                        {
+                            viewRawTop = view.Top;
+                            view.Top = -20000;
+                        });
+                        continue;
+                    }
+                    else if (!ToggleWindow.HasFullScreen && viewRawTop != -20000)
+                    {
+                        App.Current.Dispatcher.Invoke(() =>
+                        {
+                            view.Top = viewRawTop;
+                            viewRawTop = -20000;
+                        });
+                    }
                     Win32.SetWindowPos(ptr, -1, 0, 0, 0, 0, 3);
                 }
             });

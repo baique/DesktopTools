@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Forms;
@@ -25,6 +26,50 @@ namespace DesktopTools.component
         private static List<IntPtr> IgnorePtr = new List<IntPtr>();
         private static BindingView bv = new BindingView();
         private static WinEventDelegate hookProc = new WinEventDelegate(ToggleWindow.procMsg);
+        private static APPBARDATA abd;
+        private static int uCallBackMsg;
+        public static void Register()
+        {
+            abd = new APPBARDATA();
+            abd.cbSize = Marshal.SizeOf(abd);
+            abd.hWnd = new WindowInteropHelper(App.Current.MainWindow).Handle;
+            uCallBackMsg = RegisterWindowMessage("APPBARMSG_CSDN_HELPER");
+            abd.uCallbackMessage = uCallBackMsg;
+            SHAppBarMessage((int)ABMsg.ABM_NEW, ref abd);
+            HwndSource source = HwndSource.FromHwnd(abd.hWnd);
+            source.AddHook(new HwndSourceHook(ForegoundChangeProcMsg));
+        }
+
+        public static void Close()
+        {
+            SHAppBarMessage((int)ABMsg.ABM_REMOVE, ref abd);
+        }
+
+        public static bool HasFullScreen { get; private set; } = false;
+        public static IntPtr ForegoundChangeProcMsg(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (msg == uCallBackMsg)
+            {
+                switch (wParam.ToInt32())
+                {
+                    case (int)ABNotify.ABN_FULLSCREENAPP:
+                        {
+                            if ((int)lParam == 1)
+                            {
+                                HasFullScreen = true;
+                            }
+                            else
+                            {
+                                HasFullScreen = false;
+                            }
+                            break;
+                        }
+                    default:
+                        break;
+                }
+            }
+            return IntPtr.Zero;
+        }
 
         private static void procMsg(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
         {
@@ -58,9 +103,6 @@ namespace DesktopTools.component
                     bv.Refresh();
                 }
             }
-        }
-        public static void Close()
-        {
         }
         public static void addIgnorePtr(Window windowInstance)
         {
@@ -163,8 +205,17 @@ namespace DesktopTools.component
 
         public static void RestoreKeyWindow()
         {
+            var lastSysUpdateTime = Setting.GetSetting("last-sys-update-time", "0");
+
             var currentBinding = Setting.GetSetting("last-binding-key-window");
+
             Setting.SetSetting("last-binding-key-window", "");
+            Setting.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
+            if (long.Parse(lastSysUpdateTime) > Environment.TickCount64)
+            {
+                //中间可能经历过重启操作
+                return;
+            }
             var bindItems = currentBinding.Split(";");
             foreach (var b in bindItems)
             {
@@ -188,7 +239,7 @@ namespace DesktopTools.component
             {
                 int pid = 0;
                 GetWindowThreadProcessId(wd, out pid);
-                if(pid == 0)
+                if (pid == 0)
                 {
                     throw new Exception("进程模块获取异常");
                 }
@@ -261,6 +312,7 @@ namespace DesktopTools.component
                     windowBindingIndex[wi.Ptr].Add(keyData);
                     var currentBinding = Setting.GetSetting("last-binding-key-window");
                     Setting.SetSetting("last-binding-key-window", String.Join(";", currentBinding, keyData.ToString() + ":" + wi.Ptr.ToInt64()));
+                    Setting.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
                 }
 
                 bv.Refresh();
@@ -290,6 +342,7 @@ namespace DesktopTools.component
                             currentBinding = currentBinding.Replace(d.ToString() + ":" + w.ToInt64(), "");
                         }
                         Setting.SetSetting("last-binding-key-window", currentBinding);
+                        Setting.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
                         windowBindingIndex.Remove(w);
                         UnhookWinEvent(w);
                     }
@@ -314,6 +367,7 @@ namespace DesktopTools.component
                     }
                     var currentBinding = Setting.GetSetting("last-binding-key-window");
                     Setting.SetSetting("last-binding-key-window", currentBinding.Replace(key.ToString() + ":" + e, ""));
+                    Setting.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
                 }
             }
 
