@@ -50,8 +50,8 @@ namespace DesktopTools.views
 
             {
                 DoubleAnimation d1 = new DoubleAnimation(
-                    -120 + this.Width / -2,
-                    340,
+                    -110,
+                    this.Width / 2 - 110,
                     new Duration(TimeSpan.FromSeconds(at))
                 );
                 Storyboard.SetTarget(d1, this.c1);
@@ -59,7 +59,17 @@ namespace DesktopTools.views
 
                 storyboard.Children.Add(d1);
             }
+            {
+                DoubleAnimation d1 = new DoubleAnimation(
+                    this.Width - 110,
+                    this.Width / 2 - 110,
+                    new Duration(TimeSpan.FromSeconds(at))
+                );
+                Storyboard.SetTarget(d1, this.c2);
+                Storyboard.SetTargetProperty(d1, new PropertyPath("RenderTransform.X"));
 
+                storyboard.Children.Add(d1);
+            }
             {
                 DoubleAnimation d1 = new DoubleAnimation(
                     this.Width / -2,
@@ -72,17 +82,6 @@ namespace DesktopTools.views
                 storyboard.Children.Add(d1);
             }
 
-            {
-                DoubleAnimation d1 = new DoubleAnimation(
-                    this.Width - 120,
-                    -300,
-                    new Duration(TimeSpan.FromSeconds(at))
-                );
-                Storyboard.SetTarget(d1, this.c2);
-                Storyboard.SetTargetProperty(d1, new PropertyPath("RenderTransform.X"));
-
-                storyboard.Children.Add(d1);
-            }
 
             {
                 DoubleAnimation d1 = new DoubleAnimation(
@@ -114,11 +113,22 @@ namespace DesktopTools.views
 
             {
                 DoubleAnimation d1 = new DoubleAnimation(
-                    340,
-                    -120 + this.Width / -2,
+                    this.Width / 2 - 110,
+                    -110,
                     new Duration(TimeSpan.FromSeconds(at))
                 );
                 Storyboard.SetTarget(d1, this.c1);
+                Storyboard.SetTargetProperty(d1, new PropertyPath("RenderTransform.X"));
+
+                storyboard.Children.Add(d1);
+            }
+            {
+                DoubleAnimation d1 = new DoubleAnimation(
+                    this.Width / 2 - 110,
+                    this.Width - 110,
+                    new Duration(TimeSpan.FromSeconds(at))
+                );
+                Storyboard.SetTarget(d1, this.c2);
                 Storyboard.SetTargetProperty(d1, new PropertyPath("RenderTransform.X"));
 
                 storyboard.Children.Add(d1);
@@ -132,19 +142,6 @@ namespace DesktopTools.views
                 );
                 Storyboard.SetTarget(d1, this.p1);
                 Storyboard.SetTargetProperty(d1, new PropertyPath("RenderTransform.X"));
-
-                storyboard.Children.Add(d1);
-            }
-
-            {
-                DoubleAnimation d1 = new DoubleAnimation(
-                    -300,
-                    this.Width - 120,
-                    new Duration(TimeSpan.FromSeconds(at))
-                );
-                Storyboard.SetTarget(d1, this.c2);
-                Storyboard.SetTargetProperty(d1, new PropertyPath("RenderTransform.X"));
-
                 storyboard.Children.Add(d1);
             }
 
@@ -156,7 +153,6 @@ namespace DesktopTools.views
                 );
                 Storyboard.SetTarget(d1, this.p2);
                 Storyboard.SetTargetProperty(d1, new PropertyPath("RenderTransform.X"));
-
                 storyboard.Children.Add(d1);
             }
 

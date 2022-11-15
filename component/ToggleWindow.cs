@@ -272,7 +272,7 @@ namespace DesktopTools.component
                     }
                 }
 
-                if (string.IsNullOrWhiteSpace(wi.Title))
+                if (string.IsNullOrWhiteSpace(wi.Title) || wi.Title == "Program Manager" || wi.Title == "explorer")
                 {
                     return;
                 }

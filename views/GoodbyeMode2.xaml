@@ -33,7 +33,7 @@
         Visibility="Visible">
         <Canvas
             x:Name="c1"
-            Canvas.Left="847"
+            Canvas.Left="0"
             Canvas.Top="250"
             Panel.ZIndex="1">
             <Ellipse
@@ -86,8 +86,8 @@
             ClipToBounds="True" />
         <Canvas
             x:Name="c2"
+            Canvas.Left="0"
             Canvas.Top="540"
-            Canvas.Right="1080"
             Panel.ZIndex="1">
             <Ellipse
                 Width="220px"

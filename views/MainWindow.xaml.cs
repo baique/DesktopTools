@@ -124,7 +124,7 @@ namespace DesktopTools
         private void RegisterGoodbyeMode()
         {
             DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(20);
+            timer.Interval = TimeSpan.FromSeconds(45);
             timer.Tick += (a, e) =>
             {
                 if (GoodbyeModeComponent.IsInGoodbyeTime()) GoodbyeModeComponent.Show(this);
