@@ -53,8 +53,10 @@ namespace DesktopTools
         #region 注册键盘事件
         private void RegisterKeyboardEvent()
         {
+            //需要注意此处有一定的顺序要求
             //禁用自动锁屏
             GlobalKeyboardEvent.Register(new DisableAutoLockScreen());
+            //GlobalKeyboardEvent.Register(new DesktopManager());
             //壁纸切换
             GlobalKeyboardEvent.Register(new SystemBackground());
             //紧急避险
