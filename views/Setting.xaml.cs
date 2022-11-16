@@ -21,7 +21,7 @@ namespace DesktopTools.views
             InitializeComponent();
         }
 
-        private static Dictionary<string, string> CacheValue = new Dictionary<string, string>();
+        private static Dictionary<string, string?> CacheValue = new Dictionary<string, string?>();
 
         private void MoveWindow(object sender, MouseButtonEventArgs e)
         {
@@ -59,7 +59,7 @@ namespace DesktopTools.views
             if (CacheValue.ContainsKey(key))
             {
                 var v = CacheValue[key];
-                if (string.IsNullOrEmpty(v))
+                if (null == v)
                 {
                     return def;
                 }
@@ -68,7 +68,7 @@ namespace DesktopTools.views
             Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\desktop_tools");
             try
             {
-                var val = "";
+                string? val = null;
                 var v = rk2.GetValue(key);
                 if (v != null)
                 {
@@ -81,6 +81,39 @@ namespace DesktopTools.views
                 }
                 CacheValue[key] = val;
                 return val;
+            }
+            catch
+            {
+                CacheValue[key] = def;
+                return def;
+            }
+            finally
+            {
+                rk2.Close();
+            }
+        }
+
+        internal static string? GetSettingOrDefValueIfNotExists(string key, string def = "")
+        {
+            if (CacheValue.ContainsKey(key))
+            {
+                return CacheValue[key];
+            }
+            Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\desktop_tools");
+            try
+            {
+                var v = rk2.GetValueNames().Contains(key) ? rk2.GetValue(key) : null;
+                if (v == null)
+                {
+                    CacheValue[key] = def;
+                    return def;
+                }
+                else
+                {
+                    string? val = v.ToString();
+                    CacheValue[key] = val;
+                    return val;
+                }
             }
             catch
             {
@@ -125,18 +158,18 @@ namespace DesktopTools.views
             this.EnableGameTime.IsChecked = "1".Equals(GetSetting(EnableGameTimeKey));
             //禁止自动锁屏
             this.EnableDisableLockScreen.IsChecked = "1".Equals(GetSetting(EnableDisableLockScreenKey, "1"));
-            this.ChangeEnableDisableLockScreen.Text = GetSetting(ChangeEnableDisableLockScreenKey, "LeftCtrl + LeftAlt + Space");
+            this.ChangeEnableDisableLockScreen.Text = GetSettingOrDefValueIfNotExists(ChangeEnableDisableLockScreenKey, "LeftCtrl + LeftAlt + Space");
             //必应壁纸
             this.EnableBiYingBackground.IsChecked = "1".Equals(GetSetting(EnableBiYingKey));
-            this.ChangeBiYingBackground.Text = GetSetting(ChangeBiYingBackgroundKey, "LeftCtrl + LeftAlt + B + N");
+            this.ChangeBiYingBackground.Text = GetSettingOrDefValueIfNotExists(ChangeBiYingBackgroundKey, "LeftCtrl + LeftAlt + B + N");
             //窗体绑定/切换
-            this.WindowBindOrChange.Text = GetSetting(WindowBindOrChangeKey, "LeftCtrl");
+            this.WindowBindOrChange.Text = GetSettingOrDefValueIfNotExists(WindowBindOrChangeKey, "LeftCtrl");
             //强制绑定
-            this.ForceWindowBindOrChange.Text = GetSetting(ForceWindowBindOrChangeKey, "LeftCtrl + LeftAlt");
+            this.ForceWindowBindOrChange.Text = GetSettingOrDefValueIfNotExists(ForceWindowBindOrChangeKey, "LeftCtrl + LeftAlt");
             //解除绑定
-            this.UnWindowBindOrChange.Text = GetSetting(UnWindowBindOrChangeKey, "LeftCtrl + LeftAlt + Back");
+            this.UnWindowBindOrChange.Text = GetSettingOrDefValueIfNotExists(UnWindowBindOrChangeKey, "LeftCtrl + LeftAlt + Back");
             //紧急避险
-            this.ErrorMode.Text = GetSetting(ErrorModeKey, "LeftCtrl + LeftShift + Space");
+            this.ErrorMode.Text = GetSettingOrDefValueIfNotExists(ErrorModeKey, "LeftCtrl + LeftShift + Space");
             //下班提醒
             this.EnableGoodbyeMode.IsChecked = "1".Equals(GetSetting(EnableGoodbyeModeKey));
             this.EnableGoodbyeH.Text = GetSetting(EnableGoodbyeHKey, "17");
@@ -204,6 +237,7 @@ namespace DesktopTools.views
 
                 }
             }
+            e.Handled = false;
             ((TextBox)sender).Text = String.Join(" + ", keys.Select(f => f.ToString()).DistinctBy(f => f).ToArray());
         }
 
@@ -250,6 +284,11 @@ namespace DesktopTools.views
             //catch { }
 
 
+        }
+
+        private void UnbindKey(object sender, MouseButtonEventArgs e)
+        {
+            ((TextBox)sender).Text = "";
         }
     }
 }

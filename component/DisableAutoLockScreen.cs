@@ -32,9 +32,9 @@ namespace DesktopTools.component
             return true;
         }
 
-        public string Key()
+        public string? Key()
         {
-            return Setting.GetSetting(Setting.ChangeEnableDisableLockScreenKey, "LeftCtrl + LeftAlt + Space");
+            return Setting.GetSettingOrDefValueIfNotExists(Setting.ChangeEnableDisableLockScreenKey, "LeftCtrl + LeftAlt + Space");
         }
     }
 }

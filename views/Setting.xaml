@@ -73,6 +73,8 @@
                     VerticalAlignment="Center"
                     IsReadOnly="True"
                     KeyDown="KeyBind"
+                    MouseDoubleClick="UnbindKey"
+                    Selector.IsSelected="False"
                     Text="CTRL + SHIFT + E + L" />
             </StackPanel>
         </StackPanel>
@@ -97,6 +99,7 @@
                     VerticalAlignment="Center"
                     IsReadOnly="True"
                     KeyDown="KeyBind"
+                    MouseDoubleClick="UnbindKey"
                     Text="CTRL + ALT + B + N" />
             </StackPanel>
         </StackPanel>
@@ -110,6 +113,7 @@
                 VerticalAlignment="Center"
                 IsReadOnly="True"
                 KeyDown="KeyBind"
+                MouseDoubleClick="UnbindKey"
                 Text="CTRL" />
         </StackPanel>
         <StackPanel Orientation="Horizontal">
@@ -124,6 +128,7 @@
                 VerticalAlignment="Center"
                 IsReadOnly="True"
                 KeyDown="KeyBind"
+                MouseDoubleClick="UnbindKey"
                 Text="CTRL + ALT" />
         </StackPanel>
         <StackPanel Orientation="Horizontal">
@@ -138,6 +143,7 @@
                 VerticalAlignment="Center"
                 IsReadOnly="True"
                 KeyDown="KeyBind"
+                MouseDoubleClick="UnbindKey"
                 Text="CTRL + ALT + D0" />
         </StackPanel>
         <StackPanel Orientation="Horizontal">
@@ -152,6 +158,7 @@
                 VerticalAlignment="Center"
                 IsReadOnly="True"
                 KeyDown="KeyBind"
+                MouseDoubleClick="UnbindKey"
                 Text="CTRL + ALT + Space" />
         </StackPanel>
         <StackPanel Orientation="Horizontal">

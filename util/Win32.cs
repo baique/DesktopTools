@@ -220,7 +220,7 @@ namespace DesktopTools.util
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool GetWindowRect(IntPtr hwnd, out Rect lpRect);
         [DllImport("user32.dll")]
-        public static extern IntPtr SetWinEventHook(WinEvents eventMin, WinEvents eventMax, IntPtr hmodWinEventProc, WinEventDelegate lpfnWinEventProc, uint idProcess, uint idThread, WinEventFlags dwFlags);
+        public static extern IntPtr SetWinEventHook(WinEvents eventMin, WinEvents eventMax, IntPtr hmodWinEventProc, WinEventDelegate lpfnWinEventProc, int idProcess, uint idThread, WinEventFlags dwFlags);
         public delegate void WinEventDelegate(IntPtr hWinEventHook, uint eventType,
     IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime);
         [DllImport("user32.dll")]

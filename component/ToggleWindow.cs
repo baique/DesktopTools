@@ -1,18 +1,21 @@
 ﻿using DesktopTools.model;
 using DesktopTools.views;
 using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Management;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Interop;
+using System.Windows.Threading;
 using static DesktopTools.component.GlobalKeyboardEvent;
-using static DesktopTools.KeyboardHook;
 using static DesktopTools.util.Win32;
-using HookProc = DesktopTools.util.Win32.HookProc;
 using MessageBox = System.Windows.Forms.MessageBox;
 using MessageBoxOptions = System.Windows.Forms.MessageBoxOptions;
 
@@ -28,6 +31,9 @@ namespace DesktopTools.component
         private static WinEventDelegate hookProc = new WinEventDelegate(ToggleWindow.procMsg);
         private static APPBARDATA abd;
         private static int uCallBackMsg;
+        private static ConcurrentQueue<ProcEvent> EventQueue = new ConcurrentQueue<ProcEvent>();
+
+        private static CancellationTokenSource cts = new CancellationTokenSource();
         public static void Register()
         {
             abd = new APPBARDATA();
@@ -38,14 +44,55 @@ namespace DesktopTools.component
             SHAppBarMessage((int)ABMsg.ABM_NEW, ref abd);
             HwndSource source = HwndSource.FromHwnd(abd.hWnd);
             source.AddHook(new HwndSourceHook(ForegoundChangeProcMsg));
+
+            Task.Run(async () =>
+            {
+                while (!cts.IsCancellationRequested)
+                {
+                    ProcEvent? d;
+                    if (!EventQueue.TryDequeue(out d))
+                    {
+                        await Task.Delay(10);
+                        continue;
+                    };
+                    var eventType = d.T;
+                    var hwnd = d.H;
+                    if (eventType == 0x8001)
+                    {
+                        if (windowBindingIndex.ContainsKey(hwnd))
+                        {
+                            RemoveKeyWindow(windowBindingIndex[hwnd].ToArray());
+                        }
+                    }
+                    else if (eventType == 0x800C)
+                    {
+                        if (windowBindingIndex.ContainsKey(hwnd))
+                        {
+                            lock (doubleWriteLock)
+                            {
+                                var newText = GetText(hwnd);
+                                var item = windowBinding[windowBindingIndex[hwnd][0]];
+                                if (newText.Equals(item.Title))
+                                {
+                                    return;
+                                }
+                                item.Title = newText;
+                            }
+                            bv.Refresh();
+                        }
+                    }
+                }
+            });
         }
 
         public static void Close()
         {
+            cts.Cancel();
             SHAppBarMessage((int)ABMsg.ABM_REMOVE, ref abd);
         }
 
         public static bool HasFullScreen { get; private set; } = false;
+
         public static IntPtr ForegoundChangeProcMsg(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             if (msg == uCallBackMsg)
@@ -70,39 +117,22 @@ namespace DesktopTools.component
             }
             return IntPtr.Zero;
         }
+
+
+        class ProcEvent { public uint T { get; set; } public IntPtr H { get; set; } }
         private static void procMsg(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
         {
             if (!(idObject == 0 && idChild == 0))
             {
                 return;
             }
-            if (eventType == 0x8001)
+            EventQueue.Enqueue(new ProcEvent
             {
-                //窗体关闭
-                if (windowBindingIndex.ContainsKey(hwnd))
-                {
-                    RemoveKeyWindow(windowBindingIndex[hwnd].ToArray());
-                }
-            }
-            else if (eventType == 0x800C)
-            {
-                //标题变更
-                if (windowBindingIndex.ContainsKey(hwnd))
-                {
-                    lock (doubleWriteLock)
-                    {
-                        var newText = GetText(hwnd);
-                        var item = windowBinding[windowBindingIndex[hwnd][0]];
-                        if (newText.Equals(item.Title))
-                        {
-                            return;
-                        }
-                        item.Title = newText;
-                    }
-                    bv.Refresh();
-                }
-            }
+                T = eventType,
+                H = hwnd,
+            });
         }
+
         public static void addIgnorePtr(Window windowInstance)
         {
             var ptr = new WindowInteropHelper(windowInstance).Handle;
@@ -112,6 +142,7 @@ namespace DesktopTools.component
             }
             IgnorePtr.Add(ptr);
         }
+
         public static bool HasItem()
         {
             return windowBinding.Count > 0;
@@ -247,7 +278,7 @@ namespace DesktopTools.component
             try
             {
                 int pid = 0;
-                GetWindowThreadProcessId(wd, out pid);
+                var tid = GetWindowThreadProcessId(wd, out pid);
                 if (pid == 0)
                 {
                     throw new Exception("进程模块获取异常");
@@ -286,7 +317,7 @@ namespace DesktopTools.component
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button1,
                         MessageBoxOptions.ServiceNotification
-                        ) != System.Windows.Forms.DialogResult.Yes)
+                        ) != DialogResult.Yes)
                     {
                         return;
                     }
@@ -296,7 +327,7 @@ namespace DesktopTools.component
                     IntPtr hook = SetWinEventHook(
                         WinEvents.EVENT_OBJECT_DESTROY, WinEvents.EVENT_OBJECT_NAMECHANGE,
                         wd,
-                        hookProc, 0, 0,
+                        hookProc, pid, tid,
                         WinEventFlags.WINEVENT_OUTOFCONTEXT | WinEventFlags.WINEVENT_SKIPOWNPROCESS
                     );
                     if (hook == IntPtr.Zero)
@@ -326,11 +357,11 @@ namespace DesktopTools.component
 
                 bv.Refresh();
             }
-            catch (Exception e)
+            catch
             {
                 if (!ignoreError)
                 {
-                    throw e;
+                    throw;
                 }
             }
         }
@@ -393,9 +424,9 @@ namespace DesktopTools.component
             return sb.ToString();
         }
 
-        public string Key()
+        public string? Key()
         {
-            return Setting.GetSetting(Setting.ForceWindowBindOrChangeKey, "LeftCtrl + LeftAlt");
+            return Setting.GetSettingOrDefValueIfNotExists(Setting.ForceWindowBindOrChangeKey, "LeftCtrl + LeftAlt");
         }
 
 

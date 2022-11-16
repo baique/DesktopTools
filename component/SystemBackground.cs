@@ -107,9 +107,9 @@ namespace DesktopTools.component
             return "1".Equals(Setting.GetSetting(Setting.EnableBiYingKey));
         }
 
-        public string Key()
+        public string? Key()
         {
-            return Setting.GetSetting(Setting.ChangeBiYingBackgroundKey, "LeftCtrl + LeftAlt + B + N");
+            return Setting.GetSettingOrDefValueIfNotExists(Setting.ChangeBiYingBackgroundKey, "LeftCtrl + LeftAlt + B + N");
         }
 
     }

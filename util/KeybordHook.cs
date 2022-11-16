@@ -149,7 +149,12 @@ namespace DesktopTools
                 {
                     Keys keyData = (Keys)MyKeyboardHookStruct.vkCode;
                     KeyEventArgs e = new KeyEventArgs(keyData);
-                    KeyUpEvent(this, e);
+                    bool stopEvent = false;
+                    KeyUpEvent(() => { stopEvent = true; }, e);
+                    if (stopEvent)
+                    {
+                        return 1;
+                    }
                 }
             }
             //如果返回1，则结束消息，这个消息到此为止，不再传递。

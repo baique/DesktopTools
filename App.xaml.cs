@@ -43,9 +43,17 @@ namespace DesktopTools
             }
             SetSelfStarting(true, "desk_date");
             RefreshOpacityValue();
-            
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException; ;
         }
 
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            var exp = e.ExceptionObject as Exception;
+            if (exp != null)
+                MessageBox.Show("预期外的错误:" + exp.Message);
+            else
+                MessageBox.Show("预期外的错误");
+        }
 
         protected override void OnExit(ExitEventArgs e)
         {
@@ -54,7 +62,8 @@ namespace DesktopTools
 
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            MessageBox.Show("出现未知的错误:" + e.Exception.Message);
+            e.Handled = true;
+            MessageBox.Show("预期外的错误:" + e.Exception.Message);
         }
 
         /// <summary>

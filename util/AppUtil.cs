@@ -5,10 +5,12 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.Arm;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using VirtualDesktopSwitch;
 
 namespace DesktopTools.util
 {
@@ -129,6 +131,7 @@ namespace DesktopTools.util
             return new Font(pfc.Families[0], size);
         }
 
+        public static VirtualDesktopManager VDM = new VirtualDesktopManager();
         public static void AlwaysToTop(Window view)
         {
             var ptr = new WindowInteropHelper(view).Handle;
@@ -154,6 +157,10 @@ namespace DesktopTools.util
                             view.Top = viewRawTop;
                             viewRawTop = -20000;
                         });
+                    }
+                    if (!VDM.IsWindowOnCurrentVirtualDesktop(ptr))
+                    {
+                        VDM.MoveWindowToDesktop(ptr, VDM.GetWindowDesktopId(ptr));
                     }
                     Win32.SetWindowPos(ptr, -1, 0, 0, 0, 0, 3);
                 }
