@@ -47,83 +47,86 @@ namespace DesktopTools
         }
         public void Refresh()
         {
-            this.bar.Children.Clear();
-            int addSize = 0;
-            var allWindow = ToggleWindow.GetAllWindow();
-            var flowMode = Setting.GetSetting(Setting.FlowModeKey, "0");
-            foreach (var item in allWindow.OrderBy((item) => item.Key))
+            Dispatcher.InvokeAsync(() =>
             {
-                StackPanel sp = new StackPanel
+                this.bar.Children.Clear();
+                int addSize = 0;
+                var allWindow = ToggleWindow.GetAllWindow();
+                var flowMode = Setting.GetSetting(Setting.FlowModeKey, "0");
+                foreach (var item in allWindow.OrderBy((item) => item.Key))
                 {
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Orientation = Orientation.Vertical,
-                    Margin = "0" == flowMode ? new Thickness(5, 0, 5, 0) : new Thickness(0, 5, 0, 5)
-                };
-                string? fn = "";
-                try
-                {
-                    if (item.Value.P.MainModule != null)
+                    StackPanel sp = new StackPanel
                     {
-                        fn = item.Value.P.MainModule.FileName;
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Orientation = Orientation.Vertical,
+                        Margin = "0" == flowMode ? new Thickness(5, 0, 5, 0) : new Thickness(0, 5, 0, 5)
+                    };
+                    string? fn = "";
+                    try
+                    {
+                        if (item.Value.P.MainModule != null)
+                        {
+                            fn = item.Value.P.MainModule.FileName;
+                        }
+                        if (fn == null)
+                        {
+                            throw new Exception();
+                        }
                     }
+                    catch
+                    {
+                        fn = getModuleFilePath(item.Value.Pid);
+                    }
+
                     if (fn == null)
                     {
-                        throw new Exception();
+                        throw new Exception("进程模块获取异常");
                     }
-                }
-                catch
-                {
-                    fn = getModuleFilePath(item.Value.Pid);
-                }
+                    var icon = System.Drawing.Icon.ExtractAssociatedIcon(fn);
 
-                if (fn == null)
-                {
-                    throw new Exception("进程模块获取异常");
-                }
-                var icon = System.Drawing.Icon.ExtractAssociatedIcon(fn);
-
-                Image image = new Image
-                {
-                    Height = 18,
-                    Width = 18,
-                    Source = ToImageSource(icon)
-                };
+                    Image image = new Image
+                    {
+                        Height = 18,
+                        Width = 18,
+                        Source = ToImageSource(icon)
+                    };
 
 
-                var k = item.Key.ToString();
-                if (k.StartsWith("NumPad"))
-                {
-                    k = k.Substring(6);
+                    var k = item.Key.ToString();
+                    if (k.StartsWith("NumPad"))
+                    {
+                        k = k.Substring(6);
+                    }
+                    TextBlock tb = new TextBlock
+                    {
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        FontSize = 8,
+                        Margin = new Thickness(2),
+                        Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                        TextAlignment = TextAlignment.Center,
+                        Text = k,
+                    };
+                    sp.MouseLeftButtonDown += (a, e) =>
+                    {
+                        ToggleWindow.ToggleWindowToTop(item.Key, item.Value);
+                    };
+                    sp.MouseRightButtonDown += (a, e) =>
+                    {
+                        ToggleWindow.RemoveKeyWindow(item.Key);
+                    };
+                    sp.ToolTip = item.Value.Title;
+                    sp.Children.Add(image);
+                    sp.Children.Add(tb);
+                    this.bar.Children.Add(sp);
+                    addSize++;
                 }
-                TextBlock tb = new TextBlock
-                {
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    FontSize = 8,
-                    Margin = new Thickness(2),
-                    Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
-                    TextAlignment = TextAlignment.Center,
-                    Text = k,
-                };
-                sp.MouseLeftButtonDown += (a, e) =>
-                {
-                    ToggleWindow.ToggleWindowToTop(item.Key, item.Value);
-                };
-                sp.MouseRightButtonDown += (a, e) =>
-                {
-                    ToggleWindow.RemoveKeyWindow(item.Key);
-                };
-                sp.ToolTip = item.Value.Title;
-                sp.Children.Add(image);
-                sp.Children.Add(tb);
-                this.bar.Children.Add(sp);
-                addSize++;
-            }
-            if (addSize > 0)
-                this.Show();
-            else
-                this.Hide();
+                if (addSize > 0)
+                    this.Show();
+                else
+                    this.Hide();
+            });
         }
 
         private string getModuleFilePath(int processId)
