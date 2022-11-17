@@ -1,6 +1,24 @@
-﻿![](https://img.shields.io/badge/language-WPF-red.svg)
+﻿# DesktopTools
+
+![](https://img.shields.io/badge/language-WPF-red.svg)
 ![](https://img.shields.io/badge/license-MIT-green.svg)
 ![](https://img.shields.io/badge/version-V1.0.0.7.bate-blue.svg)
+
+# 说明
+
+## 1、窗口切换
+
+在平常需要开启多个窗口，并在多个窗口之间需要来回切换的场景中，频繁的<kbd>ALT</kbd>+<kbd>TAB</kbd>带来的体验并不良好，且经常有切换过头要再按下<kbd>SHIFT</kbd>向前选择的情况发生。
+
+为解决上述问题，简单开发了这款软件。
+
+其功能的核心就是，使用快捷键绑定和在不同的窗口之间进行快速、准确的切换。默认情况下，用户可以按下<kbd>CTRL</kbd>(*支持通过设置变更键位*)加任意数字键完成操作。
+
+数字键部分使用了右侧小键盘区域和顶部区域，两个区域各自独立，即通过右侧小键盘<kbd>CTRL</kbd>+<kbd>1</kbd>绑定的窗口是不能被顶部<kbd>CTRL</kbd>+<kbd>1</kbd>唤出的。
+
+## 2、锁屏禁用
+
+受企业版策略影响一般都会有自动锁屏机制，且用户无法自主修改，为应对某些场景下不让系统自动锁屏，提供了禁止自动锁屏功能。
 
 # 环境依赖
 
