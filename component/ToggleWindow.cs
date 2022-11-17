@@ -33,6 +33,7 @@ namespace DesktopTools.component
         private static ConcurrentQueue<ProcEvent> EventQueue = new ConcurrentQueue<ProcEvent>();
 
         private static CancellationTokenSource cts = new CancellationTokenSource();
+        private static IntPtr destroyEventHook, nameChangedEventHook;
         public static void Register()
         {
             abd = new APPBARDATA();
@@ -44,24 +45,24 @@ namespace DesktopTools.component
             HwndSource source = HwndSource.FromHwnd(abd.hWnd);
             source.AddHook(new HwndSourceHook(ForegoundChangeProcMsg));
 
-            IntPtr h1 = SetWinEventHook(
+            destroyEventHook = SetWinEventHook(
                         WinEvents.EVENT_OBJECT_DESTROY, WinEvents.EVENT_OBJECT_DESTROY,
                         abd.hWnd,
                         onProc, 0, 0,
                         WinEventFlags.WINEVENT_OUTOFCONTEXT | WinEventFlags.WINEVENT_SKIPOWNPROCESS
                     );
-            if (h1 == IntPtr.Zero) throw new Exception("对指定窗体的事件监听注册失败");
+            if (destroyEventHook == IntPtr.Zero) throw new Exception("事件监听注册失败！");
 
-            var h2 = SetWinEventHook(
+            nameChangedEventHook = SetWinEventHook(
                 WinEvents.EVENT_OBJECT_NAMECHANGE, WinEvents.EVENT_OBJECT_NAMECHANGE,
                 abd.hWnd,
                 onProc, 0, 0,
                 WinEventFlags.WINEVENT_OUTOFCONTEXT | WinEventFlags.WINEVENT_SKIPOWNPROCESS
             );
-            if (h2 == IntPtr.Zero)
+            if (nameChangedEventHook == IntPtr.Zero)
             {
-                UnhookWinEvent(h1);
-                throw new Exception("对指定窗体的事件监听注册失败");
+                UnhookWinEvent(destroyEventHook);
+                throw new Exception("事件监听注册失败！");
             }
             Task.Run(async () =>
             {
@@ -104,6 +105,8 @@ namespace DesktopTools.component
         }
         public static void Close()
         {
+            try { UnhookWinEvent(destroyEventHook); } catch { }
+            try { UnhookWinEvent(nameChangedEventHook); } catch { }
             cts.Cancel();
             SHAppBarMessage((int)ABMsg.ABM_REMOVE, ref abd);
         }

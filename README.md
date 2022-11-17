@@ -2,7 +2,7 @@
 
 ![](https://img.shields.io/badge/language-WPF-red.svg)
 ![](https://img.shields.io/badge/license-MIT-green.svg)
-![](https://img.shields.io/badge/version-V1.0.0.7.bate-blue.svg)
+![](https://img.shields.io/badge/version-V1.0.0.7.bate1-blue.svg)
 
 # 说明
 

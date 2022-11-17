@@ -35,6 +35,8 @@
             x:Name="border"
             Grid.Row="0"
             Grid.Column="1"
+            MaxWidth="600px"
+            MaxHeight="600px"
             Padding="8,0"
             CornerRadius="0,0,8,8"
             Cursor="Arrow">
@@ -53,11 +55,13 @@
                     <Setter Property="Background" Value="{DynamicResource mainBackColor}" />
                 </Style>
             </Border.Style>
-            <StackPanel
-                x:Name="bar"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Orientation="Horizontal" />
+            <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
+                <StackPanel
+                    x:Name="bar"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal" />
+            </ScrollViewer>
 
         </Border>
     </Grid>
