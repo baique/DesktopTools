@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=netstandard"
     x:Name="SelfWindow"
     Title=""
     Width="Auto"
@@ -129,6 +130,22 @@
                 <EasingDoubleKeyFrame KeyTime="00:00:00.6000" Value="0" />
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
+        <Style x:Key="TimeStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="30" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource mainTimeFontColor}" />
+            <Setter Property="Margin" Value="0,0,0,5" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style x:Key="DateStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource mainTimeFontColor}" />
+            <Setter Property="Margin" Value="0,0,0,5" />
+        </Style>
+        <sys:Double x:Key="WinWidth">130</sys:Double>
+        <sys:Double x:Key="WinHeight">60</sys:Double>
     </Window.Resources>
     <Window.RenderTransform>
         <TransformGroup>
@@ -140,8 +157,8 @@
     </Window.RenderTransform>
     <Canvas
         x:Name="border"
-        Width="130px"
-        Height="60px"
+        Width="{StaticResource WinWidth}"
+        Height="{StaticResource WinHeight}"
         Margin="40"
         MouseMove="WithMouse"
         Visibility="Visible">
@@ -156,8 +173,9 @@
         <Rectangle
             Canvas.Left="0"
             Canvas.Top="0"
-            Width="130px"
-            Height="60px"
+            Width="{StaticResource WinWidth}"
+            Height="{StaticResource WinHeight}"
+            MaxHeight="130px"
             Panel.ZIndex="1"
             Cursor="Arrow"
             Fill="{DynamicResource mainBackColor}"
@@ -165,8 +183,6 @@
             RadiusY="5" />
         <Grid
             x:Name="AlwaysShowLayout"
-            Width="Auto"
-            Height="Auto"
             Panel.ZIndex="2"
             MouseDown="ToggleKeyMapPanel"
             RenderTransformOrigin="0.5,0.5">
@@ -184,36 +200,32 @@
                 </Style>
             </Grid.Style>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" MaxHeight="32px" />
+                <RowDefinition />
             </Grid.RowDefinitions>
 
             <StackPanel
                 x:Name="stackPanel"
                 Grid.Row="0"
                 Grid.Column="1"
-                Width="130"
-                Height="60"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Opacity="1">
+                Width="{StaticResource WinWidth}"
+                Height="{StaticResource WinHeight}"
+                Opacity="1"
+                Orientation="Vertical">
                 <TextBlock
                     Name="TimeNumber"
                     Height="Auto"
                     Margin="0,4,0,0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    FontSize="30"
-                    FontWeight="Bold"
+                    Style="{DynamicResource TimeStyle}"
                     Text="00:00:00"
                     TextAlignment="Center" />
                 <TextBlock
                     x:Name="DateNumber"
-                    FontSize="16"
-                    FontWeight="Bold"
+                    Style="{DynamicResource DateStyle}"
                     Text="01-01 周一"
                     TextAlignment="Center"
                     Visibility="Visible" />
@@ -221,6 +233,7 @@
                     x:Name="Tip"
                     FontSize="16"
                     FontWeight="Bold"
+                    Style="{DynamicResource DateStyle}"
                     Text="01-01 周一"
                     TextAlignment="Center"
                     Visibility="Collapsed" />
@@ -230,7 +243,7 @@
             x:Name="MenuView"
             Grid.Row="1"
             Canvas.Top="60"
-            Width="130px"
+            Width="{Binding ElementName=border, Path=ActualWidth}"
             Height="32px"
             HorizontalAlignment="Center"
             Panel.ZIndex="0"
@@ -288,5 +301,4 @@
             </Border>
         </Canvas>
     </Canvas>
-
 </Window>

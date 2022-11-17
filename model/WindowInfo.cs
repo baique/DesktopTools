@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using System.Windows.Media;
 
 namespace DesktopTools.model
 {
@@ -14,20 +11,16 @@ namespace DesktopTools.model
         public IntPtr Ptr { get; set; }
         public Process P { get; set; }
         public int Pid { get; set; }
-        public IntPtr Hook { get; set; }
+        public ImageSource Icon { get; set; }
+        public List<IntPtr> Hook { get; } = new List<IntPtr>();
 
-        public WindowInfo(IntPtr ptr) : this("", ptr, 0, null, IntPtr.Zero)
-        {
-
-        }
-
-        public WindowInfo(string title, IntPtr ptr, int pid, Process p, IntPtr hook)
+        public WindowInfo(string title, IntPtr ptr, int pid, Process p, ImageSource icon)
         {
             Title = title;
             Pid = pid;
             Ptr = ptr;
             P = p;
-            Hook = hook;
+            Icon = icon;
         }
 
         public override bool Equals(object? obj)

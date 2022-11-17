@@ -1,11 +1,10 @@
 ﻿using DesktopTools.model;
+using DesktopTools.util;
 using DesktopTools.views;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Management;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -13,9 +12,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Interop;
-using System.Windows.Threading;
 using static DesktopTools.component.GlobalKeyboardEvent;
 using static DesktopTools.util.Win32;
+using static System.Net.Mime.MediaTypeNames;
 using MessageBox = System.Windows.Forms.MessageBox;
 using MessageBoxOptions = System.Windows.Forms.MessageBoxOptions;
 
@@ -28,7 +27,7 @@ namespace DesktopTools.component
         private static Dictionary<IntPtr, List<Keys>> windowBindingIndex = new Dictionary<IntPtr, List<Keys>>();
         private static List<IntPtr> IgnorePtr = new List<IntPtr>();
         private static BindingView bv = new BindingView();
-        private static WinEventDelegate hookProc = new WinEventDelegate(ToggleWindow.procMsg);
+        private static WinEventDelegate onProc = new WinEventDelegate(OnProcMsg);
         private static APPBARDATA abd;
         private static int uCallBackMsg;
         private static ConcurrentQueue<ProcEvent> EventQueue = new ConcurrentQueue<ProcEvent>();
@@ -45,46 +44,64 @@ namespace DesktopTools.component
             HwndSource source = HwndSource.FromHwnd(abd.hWnd);
             source.AddHook(new HwndSourceHook(ForegoundChangeProcMsg));
 
+            IntPtr h1 = SetWinEventHook(
+                        WinEvents.EVENT_OBJECT_DESTROY, WinEvents.EVENT_OBJECT_DESTROY,
+                        abd.hWnd,
+                        onProc, 0, 0,
+                        WinEventFlags.WINEVENT_OUTOFCONTEXT | WinEventFlags.WINEVENT_SKIPOWNPROCESS
+                    );
+            if (h1 == IntPtr.Zero) throw new Exception("对指定窗体的事件监听注册失败");
+
+            var h2 = SetWinEventHook(
+                WinEvents.EVENT_OBJECT_NAMECHANGE, WinEvents.EVENT_OBJECT_NAMECHANGE,
+                abd.hWnd,
+                onProc, 0, 0,
+                WinEventFlags.WINEVENT_OUTOFCONTEXT | WinEventFlags.WINEVENT_SKIPOWNPROCESS
+            );
+            if (h2 == IntPtr.Zero)
+            {
+                UnhookWinEvent(h1);
+                throw new Exception("对指定窗体的事件监听注册失败");
+            }
             Task.Run(async () =>
             {
                 while (!cts.IsCancellationRequested)
                 {
-                    ProcEvent? d;
-                    if (!EventQueue.TryDequeue(out d))
+                    try
                     {
-                        await Task.Delay(10);
-                        continue;
-                    };
-                    var eventType = d.T;
-                    var hwnd = d.H;
-                    if (eventType == 0x8001)
-                    {
-                        if (windowBindingIndex.ContainsKey(hwnd))
+                        ProcEvent? d;
+                        if (!EventQueue.TryDequeue(out d))
                         {
-                            RemoveKeyWindow(windowBindingIndex[hwnd].ToArray());
+                            await Task.Delay(10);
+                            continue;
+                        };
+
+                        var eventType = d.T;
+                        var hwnd = d.H;
+                        if (eventType == 0x8001)
+                        {
+                            if (windowBindingIndex.ContainsKey(hwnd)) RemoveKeyWindow(windowBindingIndex[hwnd].ToArray());
                         }
-                    }
-                    else if (eventType == 0x800C)
-                    {
-                        if (windowBindingIndex.ContainsKey(hwnd))
+                        else if (eventType == 0x800C)
                         {
-                            lock (doubleWriteLock)
+                            if (windowBindingIndex.ContainsKey(hwnd))
                             {
-                                var newText = GetText(hwnd);
-                                var item = windowBinding[windowBindingIndex[hwnd][0]];
-                                if (newText.Equals(item.Title))
+                                lock (doubleWriteLock)
                                 {
-                                    return;
+                                    var newText = GetText(hwnd);
+                                    var item = windowBinding[windowBindingIndex[hwnd][0]];
+                                    if (newText.Equals(item.Title)) continue;
+                                    item.Title = newText;
                                 }
-                                item.Title = newText;
+                                bv.Refresh();
                             }
-                            bv.Refresh();
                         }
                     }
+                    catch { }
                 }
+
             });
         }
-
         public static void Close()
         {
             cts.Cancel();
@@ -95,37 +112,23 @@ namespace DesktopTools.component
 
         public static IntPtr ForegoundChangeProcMsg(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            if (msg == uCallBackMsg)
+            if (msg == uCallBackMsg && wParam.ToInt32() == (int)ABNotify.ABN_FULLSCREENAPP)
             {
-                switch (wParam.ToInt32())
-                {
-                    case (int)ABNotify.ABN_FULLSCREENAPP:
-                        {
-                            if ((int)lParam == 1)
-                            {
-                                HasFullScreen = true;
-                            }
-                            else
-                            {
-                                HasFullScreen = false;
-                            }
-                            break;
-                        }
-                    default:
-                        break;
-                }
+                if ((int)lParam == 1) HasFullScreen = true;
+                else HasFullScreen = false;
             }
             return IntPtr.Zero;
         }
 
 
         class ProcEvent { public uint T { get; set; } public IntPtr H { get; set; } }
-        private static void procMsg(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
+        private static void OnProcMsg(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
         {
-            if (!(idObject == 0 && idChild == 0))
-            {
-                return;
-            }
+            if (hwnd == IntPtr.Zero) return;
+            if (idObject != 0 || idChild != 0) return;
+#if DEBUG
+            Trace.WriteLine("event:" + hwnd + "-" + eventType);
+#endif
             EventQueue.Enqueue(new ProcEvent
             {
                 T = eventType,
@@ -136,10 +139,7 @@ namespace DesktopTools.component
         public static void addIgnorePtr(Window windowInstance)
         {
             var ptr = new WindowInteropHelper(windowInstance).Handle;
-            if (IgnorePtr.Contains(ptr))
-            {
-                return;
-            }
+            if (IgnorePtr.Contains(ptr)) return;
             IgnorePtr.Add(ptr);
         }
 
@@ -156,16 +156,9 @@ namespace DesktopTools.component
             {
                 ShowWindow(ptr, 9);
                 ActiveWindow(keyData, info);
-
             }
-            else if (wd != ptr)
-            {
-                ActiveWindow(keyData, info);
-            }
-            else
-            {
-                ShowWindow(ptr, 6);
-            }
+            else if (wd != ptr) ActiveWindow(keyData, info);
+            else ShowWindow(ptr, 6);
         }
 
         public static Dictionary<Keys, WindowInfo> GetAllWindow()
@@ -183,7 +176,7 @@ namespace DesktopTools.component
                     MessageBoxIcon.Question,
                     MessageBoxDefaultButton.Button1,
                     MessageBoxOptions.ServiceNotification
-                    ) != System.Windows.Forms.DialogResult.Yes)
+                    ) != DialogResult.Yes)
             {
                 return true;
             }
@@ -195,10 +188,7 @@ namespace DesktopTools.component
             var fs = GetForegroundWindow();
             var targetInputProcessId = GetWindowThreadProcessId(fs, IntPtr.Zero);
             var curThread = (uint)GetCurrentThreadId();
-            if (fs == needToTopWindow.Ptr)
-            {
-                return;
-            }
+            if (fs == needToTopWindow.Ptr) return;
 
             bool attach = AttachThreadInput(curThread, targetInputProcessId, true);
             try
@@ -209,27 +199,15 @@ namespace DesktopTools.component
                 {
                     try
                     {
-                        if (needToTopWindow.P != null && needToTopWindow.P.HasExited)
-                        {
-                            if (DontContinueBindOther(keyData))
-                            {
-                                return;
-                            }
-                        }
+                        if (needToTopWindow.P != null && needToTopWindow.P.HasExited) if (DontContinueBindOther(keyData)) return;
                     }
-                    catch
-                    {
-                        return;
-                    }
+                    catch { return; }
                     RegisterKeyWindow(keyData, GetForegroundWindow());
                 }
             }
             finally
             {
-                if (attach)
-                {
-                    AttachThreadInput(curThread, targetInputProcessId, false);
-                }
+                if (attach) AttachThreadInput(curThread, targetInputProcessId, false);
             }
         }
 
@@ -251,18 +229,11 @@ namespace DesktopTools.component
 
             Setting.SetSetting("last-binding-key-window", "");
             Setting.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
-            if (long.Parse(lastSysUpdateTime) > Environment.TickCount64)
-            {
-                //中间可能经历过重启操作
-                return;
-            }
+            if (long.Parse(lastSysUpdateTime) > Environment.TickCount64) return;
             var bindItems = currentBinding.Split(";");
             foreach (var b in bindItems)
             {
-                if (string.IsNullOrWhiteSpace(b))
-                {
-                    continue;
-                }
+                if (string.IsNullOrWhiteSpace(b)) continue;
                 var keyAndData = b.Split(":");
                 Keys k = (Keys)Enum.Parse(typeof(Keys), keyAndData[0]);
                 RegisterKeyWindow(k, new IntPtr(long.Parse(keyAndData[1])), true);
@@ -271,90 +242,42 @@ namespace DesktopTools.component
 
         public static void RegisterKeyWindow(Keys keyData, IntPtr wd, bool ignoreError = false)
         {
-            if (IgnorePtr.Contains(wd))
-            {
-                return;
-            }
+            if (IgnorePtr.Contains(wd)) return;
             try
             {
                 int pid = 0;
-                var tid = GetWindowThreadProcessId(wd, out pid);
-                if (pid == 0)
-                {
-                    throw new Exception("进程模块获取异常");
-                }
+                GetWindowThreadProcessId(wd, out pid);
+
+                if (pid == 0) throw new Exception("进程模块获取异常");
+
+                var title = GetText(wd);
                 Process proc = Process.GetProcessById(pid);
-                var wi = new WindowInfo
-                (
-                    GetText(wd),
-                    wd,
-                    pid,
-                    proc,
-                    IntPtr.Zero
-                );
-                if (String.IsNullOrWhiteSpace(wi.Title))
-                {
-                    if (proc != null)
-                    {
-                        if (proc.ProcessName != null)
-                        {
-                            wi.Title = proc.ProcessName;
-                        }
-                    }
-                }
+                if (proc == null) throw new Exception("进程模块获取异常");
 
-                if (string.IsNullOrWhiteSpace(wi.Title) || wi.Title == "Program Manager" || wi.Title == "explorer")
-                {
-                    return;
-                }
+                if (String.IsNullOrWhiteSpace(title)) if (proc.ProcessName != null) title = proc.ProcessName;
 
+                if (string.IsNullOrWhiteSpace(title) || title == "Program Manager" || title == "explorer") return;
+
+                var wi = new WindowInfo(title, wd, pid, proc, AppUtil.GetAppIcon(pid, proc));
                 if (!ignoreError && windowBinding.ContainsValue(wi))
-                {
                     if (MessageBox.Show(
                         "[" + wi.Title + "]已经绑定了一个快捷键，是否仍要绑定？",
                         "提示",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question,
-                        MessageBoxDefaultButton.Button1,
-                        MessageBoxOptions.ServiceNotification
-                        ) != DialogResult.Yes)
-                    {
-                        return;
-                    }
-                }
-                else
-                {
-                    IntPtr hook = SetWinEventHook(
-                        WinEvents.EVENT_OBJECT_DESTROY, WinEvents.EVENT_OBJECT_NAMECHANGE,
-                        wd,
-                        hookProc, pid, tid,
-                        WinEventFlags.WINEVENT_OUTOFCONTEXT | WinEventFlags.WINEVENT_SKIPOWNPROCESS
-                    );
-                    if (hook == IntPtr.Zero)
-                    {
-                        if (ignoreError)
-                        {
-                            return;
-                        }
-                        throw new Exception("对指定窗体的事件监听注册失败");
-                    }
-                    wi.Hook = hook;
-                }
-
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification)
+                        != DialogResult.Yes) return;
 
                 lock (doubleWriteLock)
                 {
+#if DEBUG
+                    Trace.WriteLine("注册成功" + wi.Ptr);
+#endif
                     windowBinding[keyData] = wi;
-                    if (!windowBindingIndex.ContainsKey(wi.Ptr))
-                    {
-                        windowBindingIndex[wi.Ptr] = new List<Keys>();
-                    }
+                    if (!windowBindingIndex.ContainsKey(wi.Ptr)) windowBindingIndex[wi.Ptr] = new List<Keys>();
                     windowBindingIndex[wi.Ptr].Add(keyData);
                     var currentBinding = Setting.GetSetting("last-binding-key-window");
                     Setting.SetSetting("last-binding-key-window", String.Join(";", currentBinding, keyData.ToString() + ":" + wi.Ptr.ToInt64()));
                     Setting.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
                 }
-
                 bv.Refresh();
             }
             catch
@@ -371,21 +294,15 @@ namespace DesktopTools.component
             var w = GetForegroundWindow();
             foreach (var item in new Dictionary<Keys, WindowInfo>(windowBinding))
             {
-                if (item.Value.Ptr == w)
+                if (item.Value.Ptr != w) continue;
+                lock (doubleWriteLock)
                 {
-                    lock (doubleWriteLock)
-                    {
-                        windowBinding.Remove(item.Key);
-                        var currentBinding = Setting.GetSetting("last-binding-key-window");
-                        foreach (Keys d in windowBindingIndex[w])
-                        {
-                            currentBinding = currentBinding.Replace(d.ToString() + ":" + w.ToInt64(), "");
-                        }
-                        Setting.SetSetting("last-binding-key-window", currentBinding);
-                        Setting.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
-                        windowBindingIndex.Remove(w);
-                        try { UnhookWinEvent(w); } catch { }
-                    }
+                    windowBinding.Remove(item.Key);
+                    var currentBinding = Setting.GetSetting("last-binding-key-window");
+                    foreach (Keys d in windowBindingIndex[w]) currentBinding = currentBinding.Replace(d.ToString() + ":" + w.ToInt64(), "");
+                    Setting.SetSetting("last-binding-key-window", currentBinding);
+                    Setting.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
+                    windowBindingIndex.Remove(w);
                 }
             }
             bv.Refresh();
@@ -395,19 +312,17 @@ namespace DesktopTools.component
         {
             foreach (var key in keys)
             {
-                var e = windowBinding[key].Ptr;
+                var item = windowBinding[key];
+                var e = item.Ptr;
                 lock (doubleWriteLock)
                 {
-                    UnhookWinEvent(e);
                     windowBinding.Remove(key);
                     windowBindingIndex[e].Remove(key);
-                    if (windowBindingIndex[e].Count == 0)
-                    {
-                        windowBindingIndex.Remove(e);
-                    }
+                    if (windowBindingIndex[e].Count == 0) windowBindingIndex.Remove(e);
                     var currentBinding = Setting.GetSetting("last-binding-key-window");
                     Setting.SetSetting("last-binding-key-window", currentBinding.Replace(key.ToString() + ":" + e, ""));
                     Setting.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
+                    foreach (var h in item.Hook) try { UnhookWinEvent(h); } catch { }
                 }
             }
 
@@ -417,7 +332,6 @@ namespace DesktopTools.component
 
         public static string GetText(IntPtr hWnd)
         {
-            // Allocate correct string length first
             int length = GetWindowTextLength(hWnd);
             StringBuilder sb = new StringBuilder(length + 1);
             GetWindowText(hWnd, sb, sb.Capacity);
@@ -444,31 +358,11 @@ namespace DesktopTools.component
         {
             if (windowBinding.Count > 0)
             {
-                try
-                {
-                    if (!bv.IsVisible)
-                    {
-                        bv.Show();
-                    }
-                }
-                catch
-                {
-                    bv = new BindingView();
-                    bv.Show();
-                }
+                try { if (!bv.IsVisible) bv.Show(); } catch { bv = new BindingView(); bv.Show(); }
             }
             else
             {
-                try
-                {
-                    if (bv.IsVisible)
-                    {
-                        bv.Hide();
-                    }
-                }
-                catch
-                {
-                }
+                try { if (bv.IsVisible) bv.Hide(); } catch { }
             }
         }
 

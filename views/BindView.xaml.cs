@@ -25,9 +25,11 @@ namespace DesktopTools
     public partial class BindingView : Window
     {
         private string currentFlowMode = "";
+        private Debounce debounce;
         public BindingView()
         {
             InitializeComponent();
+            debounce = new Debounce(300, RawRefresh);
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -45,7 +47,7 @@ namespace DesktopTools
             this.SizeToContent = SizeToContent.WidthAndHeight;
             InitPos();
         }
-        public void Refresh()
+        private void RawRefresh()
         {
             Dispatcher.InvokeAsync(() =>
             {
@@ -62,34 +64,12 @@ namespace DesktopTools
                         Orientation = Orientation.Vertical,
                         Margin = "0" == flowMode ? new Thickness(5, 0, 5, 0) : new Thickness(0, 5, 0, 5)
                     };
-                    string? fn = "";
-                    try
-                    {
-                        if (item.Value.P.MainModule != null)
-                        {
-                            fn = item.Value.P.MainModule.FileName;
-                        }
-                        if (fn == null)
-                        {
-                            throw new Exception();
-                        }
-                    }
-                    catch
-                    {
-                        fn = getModuleFilePath(item.Value.Pid);
-                    }
-
-                    if (fn == null)
-                    {
-                        throw new Exception("进程模块获取异常");
-                    }
-                    var icon = System.Drawing.Icon.ExtractAssociatedIcon(fn);
 
                     Image image = new Image
                     {
                         Height = 18,
                         Width = 18,
-                        Source = ToImageSource(icon)
+                        Source = item.Value.Icon
                     };
 
 
@@ -128,32 +108,9 @@ namespace DesktopTools
                     this.Hide();
             });
         }
-
-        private string getModuleFilePath(int processId)
+        public void Refresh()
         {
-            string wmiQueryString = "SELECT ProcessId, ExecutablePath FROM Win32_Process WHERE ProcessId = " + processId;
-            using (var searcher = new ManagementObjectSearcher(wmiQueryString))
-            {
-                using (var results = searcher.Get())
-                {
-                    ManagementObject mo = results.Cast<ManagementObject>().FirstOrDefault();
-                    if (mo != null)
-                    {
-                        return (string)mo["ExecutablePath"];
-                    }
-                }
-            }
-            return null;
-        }
-
-        public static ImageSource ToImageSource(Icon icon)
-        {
-            ImageSource imageSource = Imaging.CreateBitmapSourceFromHIcon(
-                icon.Handle,
-                Int32Rect.Empty,
-                BitmapSizeOptions.FromEmptyOptions());
-
-            return imageSource;
+            debounce.invoke();
         }
 
         private void MoveWindow(object sender, MouseButtonEventArgs e)
@@ -238,8 +195,7 @@ namespace DesktopTools
             }
             this.border.Visibility = Visibility.Visible;
         }
-
-        private void SizeChangedEvent(object sender, SizeChangedEventArgs e)
+        private new void SizeChangedEvent(object sender, SizeChangedEventArgs e)
         {
             var flowMode = Setting.GetSetting(Setting.FlowModeKey, "0");
             if ("0".Equals(flowMode))

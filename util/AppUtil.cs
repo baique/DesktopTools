@@ -1,16 +1,20 @@
 ﻿using DesktopTools.component;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Net;
+using System.Linq;
+using System.Management;
 using System.Net.Http;
 using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.Arm;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using VirtualDesktopSwitch;
+using Color = System.Drawing.Color;
 
 namespace DesktopTools.util
 {
@@ -36,6 +40,61 @@ namespace DesktopTools.util
             };
         }
 
+        public static ImageSource GetAppIcon(int pid, Process process)
+        {
+            string? fn = "";
+            try
+            {
+                if (process.MainModule != null)
+                {
+                    fn = process.MainModule.FileName;
+                }
+                if (fn == null)
+                {
+                    throw new Exception();
+                }
+            }
+            catch
+            {
+                fn = getModuleFilePath(pid);
+            }
+
+            if (fn == null)
+            {
+                throw new Exception("进程模块加载异常");
+            }
+            var icon = Icon.ExtractAssociatedIcon(fn);
+            if (icon == null)
+            {
+                throw new Exception("进程图标加载异常");
+            }
+            return ToImageSource(icon);
+        }
+        private static string getModuleFilePath(int processId)
+        {
+            string wmiQueryString = "SELECT ProcessId, ExecutablePath FROM Win32_Process WHERE ProcessId = " + processId;
+            using (var searcher = new ManagementObjectSearcher(wmiQueryString))
+            {
+                using (var results = searcher.Get())
+                {
+                    ManagementObject mo = results.Cast<ManagementObject>().FirstOrDefault();
+                    if (mo != null)
+                    {
+                        return (string)mo["ExecutablePath"];
+                    }
+                }
+            }
+            return null;
+        }
+        public static ImageSource ToImageSource(Icon icon)
+        {
+            ImageSource imageSource = Imaging.CreateBitmapSourceFromHIcon(
+                icon.Handle,
+                Int32Rect.Empty,
+                BitmapSizeOptions.FromEmptyOptions());
+
+            return imageSource;
+        }
         /// <summary>
         /// 下载文件到字节数组
         /// </summary>
@@ -132,10 +191,13 @@ namespace DesktopTools.util
         }
 
         public static VirtualDesktopManager VDM = new VirtualDesktopManager();
+
         public static void AlwaysToTop(Window view)
         {
             var ptr = new WindowInteropHelper(view).Handle;
             double viewRawTop = -20000;
+            Win32.SetWindowPos(ptr, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0004 | 0x0020 | 0x0040);
+            //Hide on other window full screen
             Task.Run(async () =>
             {
                 for (; ; )
@@ -162,7 +224,6 @@ namespace DesktopTools.util
                     {
                         VDM.MoveWindowToDesktop(ptr, VDM.GetWindowDesktopId(ptr));
                     }
-                    Win32.SetWindowPos(ptr, -1, 0, 0, 0, 0, 3);
                 }
             });
         }
