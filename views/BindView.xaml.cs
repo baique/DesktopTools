@@ -29,7 +29,7 @@ namespace DesktopTools
         public BindingView()
         {
             InitializeComponent();
-            debounce = new Debounce(200, RawRefresh);
+            debounce = new Debounce(150, RawRefresh);
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
