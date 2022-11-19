@@ -18,6 +18,8 @@ namespace DesktopTools.views
     {
         public Setting()
         {
+            this.Width = 0;
+            this.Height = 0;
             InitializeComponent();
         }
 
@@ -145,6 +147,7 @@ namespace DesktopTools.views
         internal static string GlobalThemeKey = "global-theme";
         internal static string EnableGameTimeKey = "enable-game-time";
         internal static string FlowModeKey = "flow-mode";
+        internal static string HiddenTimeWindowKey = "hidden-time-window";
 
         private void WinLoaded(object sender, RoutedEventArgs e)
         {
@@ -156,6 +159,8 @@ namespace DesktopTools.views
             this.GlobalTheme.SelectedIndex = int.Parse(GetSetting(GlobalThemeKey, "0"));
             //小娱乐
             this.EnableGameTime.IsChecked = "1".Equals(GetSetting(EnableGameTimeKey));
+            //隐藏时间浮窗
+            this.HiddenTimeWindow.IsChecked = "1".Equals(GetSetting(HiddenTimeWindowKey));
             //禁止自动锁屏
             this.EnableDisableLockScreen.IsChecked = "1".Equals(GetSetting(EnableDisableLockScreenKey, "1"));
             this.ChangeEnableDisableLockScreen.Text = GetSettingOrDefValueIfNotExists(ChangeEnableDisableLockScreenKey, "LeftCtrl + LeftAlt + Space");
@@ -182,7 +187,6 @@ namespace DesktopTools.views
             this.EnableViewHeartbeat.IsChecked = "1".Equals(GetSetting(EnableViewHeartbeatKey));
             //任务栏位置
             this.FlowMode.SelectedIndex = int.Parse(GetSetting(FlowModeKey, "0"));
-
         }
 
         private void SaveChange(object sender, RoutedEventArgs e)
@@ -191,6 +195,7 @@ namespace DesktopTools.views
             SetSetting(GlobalThemeKey, "" + this.GlobalTheme.SelectedIndex);
             //小娱乐
             SetSetting(EnableGameTimeKey, this.EnableGameTime.IsChecked.Value ? "1" : "0");
+            SetSetting(HiddenTimeWindowKey, this.HiddenTimeWindow.IsChecked.Value ? "1" : "0");
             //禁止自动锁屏
             SetSetting(EnableDisableLockScreenKey, this.EnableDisableLockScreen.IsChecked.Value ? "1" : "0");
             SetSetting(ChangeEnableDisableLockScreenKey, this.ChangeEnableDisableLockScreen.Text);

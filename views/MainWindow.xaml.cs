@@ -29,6 +29,8 @@ namespace DesktopTools
         private GlobalKeyboardEvent KeyboardEvent;
         public MainWindow()
         {
+            this.Width = 0;
+            this.Height = 0;
             InitializeComponent();
             InitNotifyIcon();
             KeyboardEvent = new GlobalKeyboardEvent();
@@ -36,7 +38,7 @@ namespace DesktopTools
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             ToggleWindow.Register();
-            MiniWindow();
+            ToggleMainWindow();
             HeartbeatStart(null, null);
             ToggleWindow.RestoreKeyWindow();
             RegisterTimeJump();
@@ -183,11 +185,41 @@ namespace DesktopTools
                 Visible = true
             };
             Notify.ContextMenuStrip = new ContextMenuStrip();
-            var item = new ToolStripLabel();
-            item.Text = "退出";
-            item.Click += (o, e) => App.Current.Shutdown();
-            Notify.ContextMenuStrip.Items.Add(item);
+            {
+                var item = new ToolStripLabel();
+                item.Text = "设置";
+                item.Click += (o, e) => OpenSettingView(null, null);
+                Notify.ContextMenuStrip.Items.Add(item);
+            }
+            {
+                var item = new ToolStripLabel();
+                item.Text = "退出";
+                item.Click += (o, e) => App.Current.Shutdown();
+                Notify.ContextMenuStrip.Items.Add(item);
+            }
 
+        }
+
+        private void ToggleMainWindow()
+        {
+            if ("1".Equals(Setting.GetSetting(Setting.HiddenTimeWindowKey)))
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    this.border.Visibility = Visibility.Collapsed;
+                    this.Width = 1;
+                    this.Height = 1;
+                    this.Top = -2;
+                    this.Left = -2;
+                });
+
+
+                return;
+            }
+            else
+            {
+                MiniWindow();
+            }
         }
         private void MiniWindow()
         {
@@ -294,6 +326,10 @@ namespace DesktopTools
         {
             if (this.MenuView.Visibility == Visibility.Collapsed)
             {
+                if (sender == null)
+                {
+                    return;
+                }
                 ((Storyboard)this.FindResource("SettingButtonOutView")).Stop();
                 ((Storyboard)this.FindResource("SettingButtonInView")).Begin();
                 if (prevStoryboard != null)
@@ -343,9 +379,9 @@ namespace DesktopTools
                 GlobalKeyboardEvent.GlobalKeybordEventStatus = true;
                 if (!"1".Equals(Setting.GetSetting(Setting.EnableViewHeartbeatKey, ""))) HeartbeatStop(null, null);
                 else HeartbeatStart(null, null);
+                ToggleMainWindow();
             };
         }
-
 
         private static string[] randomText = new string[]
         {

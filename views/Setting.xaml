@@ -51,10 +51,18 @@
             </ComboBox>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <Label Style="{StaticResource FormLabel}">
-                娱乐时间：
-            </Label>
-            <CheckBox x:Name="EnableGameTime" VerticalAlignment="Center" />
+            <StackPanel Orientation="Horizontal">
+                <Label Style="{StaticResource FormLabel}">
+                    隐藏时间浮窗：
+                </Label>
+                <CheckBox x:Name="HiddenTimeWindow" VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Style="{StaticResource FormLabel}">
+                    娱乐时间：
+                </Label>
+                <CheckBox x:Name="EnableGameTime" VerticalAlignment="Center" />
+            </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
             <StackPanel Orientation="Horizontal">

@@ -1,11 +1,9 @@
-﻿using DesktopTools.component;
+﻿using DesktopTools.util;
 using DesktopTools.views;
 using System;
 using System.Diagnostics;
-using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Navigation;
 
 namespace DesktopTools
 {
@@ -24,24 +22,15 @@ namespace DesktopTools
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            DispatcherUnhandledException += App_DispatcherUnhandledException;
-            var n = Process.GetCurrentProcess();
-            foreach (var p in Process.GetProcesses())
+            var proc = GetRunningInstance();
+            if (proc != null)
             {
-                try
-                {
-                    if (p.ProcessName == n.ProcessName && p.Id != n.Id)
-                    {
-                        Application.Current.Shutdown();
-                        return;
-                    }
-                }
-                catch
-                {
-
-                }
+                HandleRunningInstance(proc);
+                App.Current.Shutdown();
+                return;
             }
-            SetSelfStarting(true, "desk_date");
+            SetSelfStarting(false, "desk_date");
+            SetSelfStarting(true, "DesktopTools", @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
             RefreshOpacityValue();
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException; ;
         }
@@ -53,6 +42,7 @@ namespace DesktopTools
                 MessageBox.Show("预期外的错误:" + exp.Message);
             else
                 MessageBox.Show("预期外的错误");
+            App.Current.Shutdown(1);
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -64,6 +54,7 @@ namespace DesktopTools
         {
             e.Handled = true;
             MessageBox.Show("预期外的错误:" + e.Exception.Message);
+            App.Current.Shutdown(1);
         }
 
         /// <summary>
@@ -72,42 +63,28 @@ namespace DesktopTools
         /// <param name="started">设置开机启动，或取消开机启动</param>
         /// <param name="exeName">注册表中的名称</param>
         /// <returns>开启或停用是否成功</returns>
-        private void SetSelfStarting(bool started, string exeName)
+        private void SetSelfStarting(bool started, string exeName, string key = @"Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run")
         {
             //设置是否自动启动
             if (started)
             {
                 {
                     string path = System.Windows.Forms.Application.ExecutablePath;
-                    Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run");
+                    Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(key);
                     rk2.SetValue(exeName, @"""" + path + @"""");
                     rk2.Close();
-                }
-                {
-                    try
-                    {
-                        string path = System.Windows.Forms.Application.ExecutablePath;
-                        Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.LocalMachine.CreateSubKey(@"Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run");
-                        rk2.SetValue(exeName, @"""" + path + @"""");
-                        rk2.Close();
-                    }
-                    catch
-                    {
-
-                    }
                 }
             }
             else
             {
                 {
-                    Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run");
+                    Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(key);
                     rk2.DeleteValue(exeName, false);
                     rk2.Close();
                 }
                 try
                 {
-                    string path = System.Windows.Forms.Application.ExecutablePath;
-                    Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.LocalMachine.CreateSubKey(@"Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run");
+                    Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.LocalMachine.CreateSubKey(key);
                     rk2.DeleteValue(exeName, false);
                     rk2.Close();
                 }
@@ -116,6 +93,42 @@ namespace DesktopTools
 
                 }
             }
+        }
+
+
+        /// <summary>
+        /// 获取当前是否具有相同进程。
+        /// </summary>
+        /// <returns></returns>
+        public static Process GetRunningInstance()
+        {
+            Process current = Process.GetCurrentProcess();
+            Process[] processes = Process.GetProcessesByName(current.ProcessName);
+            //遍历正在有相同名字运行的例程   
+            foreach (Process process in processes)
+            {
+                //忽略现有的例程   
+                if (process.Id != current.Id)
+                    //确保例程从EXE文件运行 
+                    if (process.ProcessName == process.ProcessName)
+                        return process;
+            }
+            return null;
+        }
+
+        private const int WS_SHOWNORMAL = 1;
+        [DllImport("User32.dll")]
+        private static extern bool ShowWindowAsync(IntPtr hWnd, int cmdShow);
+        [DllImport("User32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+        /// <summary>
+        /// 激活原有的进程。
+        /// </summary>
+        /// <param name="instance"></param>
+        public static void HandleRunningInstance(Process instance)
+        {
+            ShowWindowAsync(instance.MainWindowHandle, WS_SHOWNORMAL);
+            SetForegroundWindow(instance.MainWindowHandle);
         }
     }
 }
