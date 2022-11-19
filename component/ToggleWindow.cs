@@ -263,11 +263,7 @@ namespace DesktopTools.component
 
                 var wi = new WindowInfo(title, wd, pid, proc, AppUtil.GetAppIcon(pid, proc));
                 if (!ignoreError && windowBinding.ContainsValue(wi))
-                    if (MessageBox.Show(
-                        "[" + wi.Title + "]已经绑定了一个快捷键，是否仍要绑定？",
-                        "提示",
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification)
-                        != DialogResult.Yes) return;
+                    MainWindow.Notify.ShowBalloonTip(100, "提示", "[" + wi.Title + "]的快捷键被重复绑定", ToolTipIcon.Warning);
 
                 lock (doubleWriteLock)
                 {
