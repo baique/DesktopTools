@@ -18,7 +18,7 @@
         Color="{DynamicResource fontFColorRaw}" />
     <SolidColorBrush
         x:Key="mainBackColor"
-        Opacity="1"
+        Opacity="{DynamicResource OpacityValue}"
         Color="{DynamicResource fColorRaw}" />
     <Style TargetType="Ellipse">
         <Setter Property="Effect">

@@ -3,8 +3,6 @@ using DesktopTools.util;
 using DesktopTools.views;
 using System;
 using System.Drawing;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -16,7 +14,6 @@ using Application = System.Windows.Application;
 using DateTime = System.DateTime;
 using MessageBox = System.Windows.Forms.MessageBox;
 using MessageBoxOptions = System.Windows.Forms.MessageBoxOptions;
-using Point = System.Drawing.Point;
 
 namespace DesktopTools
 {
@@ -58,7 +55,6 @@ namespace DesktopTools
             //需要注意此处有一定的顺序要求
             //禁用自动锁屏
             GlobalKeyboardEvent.Register(new DisableAutoLockScreen());
-            //GlobalKeyboardEvent.Register(new DesktopManager());
             //壁纸切换
             GlobalKeyboardEvent.Register(new SystemBackground());
             //紧急避险
@@ -129,10 +125,7 @@ namespace DesktopTools
         {
             DispatcherTimer timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(45);
-            timer.Tick += (a, e) =>
-            {
-                if (GoodbyeModeComponent.IsInGoodbyeTime()) GoodbyeModeComponent.Show(this);
-            };
+            timer.Tick += (a, e) => { if (GoodbyeModeComponent.IsInGoodbyeTime()) GoodbyeModeComponent.Show(); };
             timer.Start();
         }
         #endregion
@@ -251,10 +244,6 @@ namespace DesktopTools
         }
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (GoodbyeModeComponent.IsInFlowMode)
-            {
-                return;
-            }
             try
             {
                 this.DragMove();
@@ -296,7 +285,6 @@ namespace DesktopTools
         private void HeartbeatStop(object sender, System.Windows.Input.MouseEventArgs e)
         {
             ((Storyboard)this.FindResource("Storyboard1")).Stop();
-            Storyboard sb = new Storyboard();
             this.border.Opacity = 1;
             if (timeoutHide != null) timeoutHide.Stop();
         }
@@ -349,12 +337,10 @@ namespace DesktopTools
             }
 
         }
-
         private void ChangeOutStatus(object sender, EventArgs e)
         {
             outStatus = false;
         }
-
         private Setting opendSettingView = null;
         private void OpenSettingView(object sender, MouseButtonEventArgs e)
         {
@@ -382,44 +368,10 @@ namespace DesktopTools
                 ToggleMainWindow();
             };
         }
-
-        private static string[] randomText = new string[]
-        {
-            "下班了喂！",
-            "溜了溜了！",
-            "你还卷！",
-            "别卷了！",
-            "走了~卷王",
-        };
-
-        public void RandomGoodbye()
-        {
-            this.DateNumber.Visibility = Visibility.Collapsed;
-            this.Tip.Visibility = Visibility.Visible;
-            Dispatcher.Invoke(() =>
-            {
-                Random rnd = new Random();
-                var r = rnd.Next(0, randomText.Length);
-                this.Tip.Text = randomText[r];
-            });
-        }
-
         private void ExitApp(object sender, MouseButtonEventArgs e)
         {
-            if (GoodbyeModeComponent.IsInFlowMode)
-            {
-                this.DateNumber.Visibility = Visibility.Collapsed;
-                this.Tip.Visibility = Visibility.Visible;
-                Task.Run(() =>
-                {
-                    Dispatcher.Invoke(() => this.Tip.Text = "休想！");
-                    Thread.Sleep(2000);
-                });
-                return;
-            }
             this.Close();
         }
-
         private Storyboard prevStoryboard;
         private void WithMouse(object sender, System.Windows.Input.MouseEventArgs e)
         {
@@ -460,42 +412,40 @@ namespace DesktopTools
 
             a = (Math.Atan2(y, x) * 180 / Math.PI) % 18;
 
-            if (!GoodbyeModeComponent.IsInFlowMode)
+            this.Tip.FontSize = 16;
+            if (a <= 0.0000001)
             {
-                this.Tip.FontSize = 16;
-                if (a <= 0.0000001)
-                {
-                    this.Tip.Text = "(" + a.ToString("0.00000000") + ")神乎其技";
-                    this.Tip.FontSize = 12;
-                }
-                else if (a <= 0.000001)
-                {
-                    this.Tip.Text = "(" + a.ToString("0.0000000") + ")完美平衡";
-                    this.Tip.FontSize = 12.5;
-                }
-                else if (a <= 0.2)
-                {
-                    this.Tip.Text = "(" + a.ToString("0.00") + ")算你达成";
-                }
-                else if (a <= 1)
-                {
-                    this.Tip.Text = "(" + a.ToString("0.0") + ")接近平衡";
-                }
-                else if (a <= 2)
-                {
-                    this.Tip.Text = "(" + a.ToString("0") + ")就差一点";
-                }
-                else if (a <= 4)
-                {
-                    this.Tip.Text = "(" + a.ToString("0") + ")就差亿点";
-                }
-                else
-                {
-                    this.Tip.Text = "(" + a.ToString("0") + ")歪的厉害";
-                }
-                this.DateNumber.Visibility = Visibility.Collapsed;
-                this.Tip.Visibility = Visibility.Visible;
+                this.Tip.Text = "(" + a.ToString("0.00000000") + ")神乎其技";
+                this.Tip.FontSize = 12;
             }
+            else if (a <= 0.000001)
+            {
+                this.Tip.Text = "(" + a.ToString("0.0000000") + ")完美平衡";
+                this.Tip.FontSize = 12.5;
+            }
+            else if (a <= 0.2)
+            {
+                this.Tip.Text = "(" + a.ToString("0.00") + ")算你达成";
+            }
+            else if (a <= 1)
+            {
+                this.Tip.Text = "(" + a.ToString("0.0") + ")接近平衡";
+            }
+            else if (a <= 2)
+            {
+                this.Tip.Text = "(" + a.ToString("0") + ")就差一点";
+            }
+            else if (a <= 4)
+            {
+                this.Tip.Text = "(" + a.ToString("0") + ")就差亿点";
+            }
+            else
+            {
+                this.Tip.Text = "(" + a.ToString("0") + ")歪的厉害";
+            }
+            this.DateNumber.Visibility = Visibility.Collapsed;
+            this.Tip.Visibility = Visibility.Visible;
+
             a = a * leftOrRight;
 
             Storyboard sb = new Storyboard();
