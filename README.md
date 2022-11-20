@@ -1,12 +1,8 @@
 ﻿# DesktopTools
 
-<p align="center">
-
 ![](https://img.shields.io/badge/language-WPF-red.svg)
 ![](https://img.shields.io/badge/license-MIT-green.svg)
-![](https://img.shields.io/badge/version-V1.0.0.7-blue.svg)
-
-</p>
+![](https://img.shields.io/badge/version-V1.0.0.8-blue.svg)
 
 # 说明
 
