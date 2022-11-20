@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Media;
 
-namespace DesktopTools.model
+namespace DesktopTools.component.model
 {
     public class WindowInfo
     {

@@ -9,6 +9,7 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<ApplicationIcon>icon.ico</ApplicationIcon>
 		<SignAssembly>False</SignAssembly>
+		<StartupObject>DesktopTools.Program</StartupObject>
 		<Title>桌面工具</Title>
 		<Version>1.0.0.8</Version>
 		<Authors>baique</Authors>
@@ -22,14 +23,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Resource Include="font\clockicons.TTF" />
-		<Resource Include="font\Aa破竹体.TTF" />
+		<Resource Include="resource\font\clockicons.TTF" />
+		<Resource Include="resource\font\Aa破竹体.TTF" />
 		<Resource Include="icon.ico">
 		  <Pack>True</Pack>
 		  <PackagePath>\</PackagePath>
 		</Resource>
-		<Resource Include="image\exit.png" />
-		<Resource Include="image\setting.png" />
+		<Resource Include="resource\image\exit.png" />
+		<Resource Include="resource\image\setting.png" />
 	</ItemGroup>
 
 	<ItemGroup>

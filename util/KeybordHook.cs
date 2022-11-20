@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
+using System.Windows.Input;
+using System.Windows.Interop;
 using static DesktopTools.util.Win32;
 
 namespace DesktopTools
@@ -13,7 +14,6 @@ namespace DesktopTools
     class KeyboardHook
     {
         public event KeyEventHandler? KeyDownEvent;
-        public event KeyPressEventHandler? KeyPressEvent;
         public event KeyEventHandler? KeyUpEvent;
 
         static int hKeyboardHook = 0; //声明键盘钩子处理的初始值
@@ -105,7 +105,7 @@ namespace DesktopTools
         private int KeyboardHookProc(int nCode, Int32 wParam, IntPtr lParam)
         {
             // 侦听键盘事件
-            if ((nCode >= 0) && (KeyDownEvent != null || KeyUpEvent != null || KeyPressEvent != null))
+            if ((nCode >= 0) && (KeyDownEvent != null || KeyUpEvent != null))
             {
                 KeyboardHookStruct? MyKeyboardHookStruct = Marshal.PtrToStructure(lParam, typeof(KeyboardHookStruct)) as KeyboardHookStruct;
                 if (MyKeyboardHookStruct == null)
@@ -115,8 +115,8 @@ namespace DesktopTools
                 // raise KeyDown
                 if (KeyDownEvent != null && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN))
                 {
-                    Keys keyData = (Keys)MyKeyboardHookStruct.vkCode;
-                    KeyEventArgs e = new KeyEventArgs(keyData);
+                    KeyEventArgs e = new KeyEventArgs(Keyboard.PrimaryDevice, new HwndSource(0, 0, 0, 0, 0, "", IntPtr.Zero), 0,
+                        KeyInterop.KeyFromVirtualKey(MyKeyboardHookStruct.vkCode));
                     bool stopEvent = false;
                     KeyDownEvent(() => { stopEvent = true; }, e);
                     if (stopEvent)
@@ -125,30 +125,12 @@ namespace DesktopTools
                     }
                 }
 
-                //键盘按下
-                if (KeyPressEvent != null && wParam == WM_KEYDOWN)
-                {
-                    byte[] keyState = new byte[256];
-                    GetKeyboardState(keyState);
-
-                    byte[] inBuffer = new byte[2];
-                    if (ToAscii(MyKeyboardHookStruct.vkCode, MyKeyboardHookStruct.scanCode, keyState, inBuffer, MyKeyboardHookStruct.flags) == 1)
-                    {
-                        KeyPressEventArgs e = new KeyPressEventArgs((char)inBuffer[0]);
-                        bool stopEvent = false;
-                        KeyPressEvent(() => { stopEvent = true; }, e);
-                        if (stopEvent)
-                        {
-                            return 1;
-                        }
-                    }
-                }
-
                 // 键盘抬起
                 if (KeyUpEvent != null && (wParam == WM_KEYUP || wParam == WM_SYSKEYUP))
                 {
-                    Keys keyData = (Keys)MyKeyboardHookStruct.vkCode;
-                    KeyEventArgs e = new KeyEventArgs(keyData);
+                    Key keyData = (Key)MyKeyboardHookStruct.vkCode;
+
+                    KeyEventArgs e = new KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, keyData);
                     bool stopEvent = false;
                     KeyUpEvent(() => { stopEvent = true; }, e);
                     if (stopEvent)

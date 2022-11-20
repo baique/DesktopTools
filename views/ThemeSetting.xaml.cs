@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 namespace DesktopTools.views
 {
     /// <summary>
-    /// ThemeSetting.xaml 的交互逻辑
+    /// ThemeSettingUtil.xaml 的交互逻辑
     /// </summary>
     public partial class ThemeSetting : Window
     {

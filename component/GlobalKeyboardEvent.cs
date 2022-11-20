@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Input;
-using KeyEventArgs = System.Windows.Forms.KeyEventArgs;
 
 namespace DesktopTools.component
 {
@@ -25,18 +24,13 @@ namespace DesktopTools.component
         /// </summary>
         private static List<Event> events = new List<Event>();
 
-        public GlobalKeyboardEvent()
+        public static void InitKeyWatch()
         {
-            InitKeyWatch();
-        }
-
-        private void InitKeyWatch()
-        {
-            k_hook.KeyDownEvent += new System.Windows.Forms.KeyEventHandler(hook_KeyPress);//钩住键按下
+            k_hook.KeyDownEvent += new KeyEventHandler(hook_KeyPress);//钩住键按下
             k_hook.Start();//安装键盘钩子
         }
 
-        private void hook_KeyPress(object done, KeyEventArgs e)
+        private static void hook_KeyPress(object done, KeyEventArgs e)
         {
             if (!GlobalKeybordEventStatus)
             {
@@ -60,7 +54,7 @@ namespace DesktopTools.component
             }
         }
 
-        private bool CheckKeyDown(string v, KeyEventArgs eventArgs)
+        private static bool CheckKeyDown(string v, KeyEventArgs eventArgs)
         {
             try
             {
@@ -93,12 +87,8 @@ namespace DesktopTools.component
                                 continue;
                             }
                             return false;
-                        }//`
-                        if (key == Key.OemTilde && eventArgs.KeyCode == System.Windows.Forms.Keys.Oemtilde)
-                        {
-                            return true;
                         }
-                        if (eventArgs.KeyCode.ToString().Equals(key.ToString()) || Keyboard.IsKeyDown(key))
+                        if (eventArgs.Key == key || Keyboard.IsKeyDown(key))
                         {
                             continue;
                         }

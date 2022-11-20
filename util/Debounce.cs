@@ -3,6 +3,9 @@ using System.Timers;
 
 namespace DesktopTools.util
 {
+    /// <summary>
+    /// 对刷新频率进行一定的控制
+    /// </summary>
     public class Debounce
     {
         public Action work { get; set; }
@@ -23,10 +26,13 @@ namespace DesktopTools.util
                     timer.AutoReset = false;
                     timer.Elapsed += (a, e) =>
                     {
-                        timer.Stop();
-                        timer.Close();
-                        timer = null;
                         work();
+                        if (timer != null)
+                        {
+                            timer.Stop();
+                            timer.Close();
+                            timer = null;
+                        }
                     };
                 }
             }

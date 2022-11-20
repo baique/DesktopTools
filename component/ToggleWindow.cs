@@ -1,6 +1,5 @@
-﻿using DesktopTools.model;
+﻿using DesktopTools.component.model;
 using DesktopTools.util;
-using DesktopTools.views;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,20 +10,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Input;
 using System.Windows.Interop;
-using static DesktopTools.component.GlobalKeyboardEvent;
 using static DesktopTools.util.Win32;
-using static System.Net.Mime.MediaTypeNames;
 using MessageBox = System.Windows.Forms.MessageBox;
 using MessageBoxOptions = System.Windows.Forms.MessageBoxOptions;
 
 namespace DesktopTools.component
 {
-    public class ToggleWindow : Event
+    public class ToggleWindow
     {
         private static object doubleWriteLock = new object();
-        private static Dictionary<Keys, WindowInfo> windowBinding = new Dictionary<Keys, WindowInfo>();
-        private static Dictionary<IntPtr, List<Keys>> windowBindingIndex = new Dictionary<IntPtr, List<Keys>>();
+        private static Dictionary<Key, WindowInfo> windowBinding = new Dictionary<Key, WindowInfo>();
+        private static Dictionary<IntPtr, List<Key>> windowBindingIndex = new Dictionary<IntPtr, List<Key>>();
         private static List<IntPtr> IgnorePtr = new List<IntPtr>();
         private static BindingView bv = new BindingView();
         private static WinEventDelegate onProc = new WinEventDelegate(OnProcMsg);
@@ -111,14 +109,13 @@ namespace DesktopTools.component
             SHAppBarMessage((int)ABMsg.ABM_REMOVE, ref abd);
         }
 
-        public static bool HasFullScreen { get; private set; } = false;
 
         public static IntPtr ForegoundChangeProcMsg(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             if (msg == uCallBackMsg && wParam.ToInt32() == (int)ABNotify.ABN_FULLSCREENAPP)
             {
-                if ((int)lParam == 1) HasFullScreen = true;
-                else HasFullScreen = false;
+                if ((int)lParam == 1) SettingUtil.HasFullScreen = true;
+                else SettingUtil.HasFullScreen = false;
             }
             return IntPtr.Zero;
         }
@@ -151,7 +148,7 @@ namespace DesktopTools.component
             return windowBinding.Count > 0;
         }
 
-        public static void ToggleWindowToTop(Keys keyData, WindowInfo info)
+        public static void ToggleWindowToTop(Key keyData, WindowInfo info)
         {
             var ptr = info.Ptr;
             var wd = GetForegroundWindow();
@@ -164,12 +161,12 @@ namespace DesktopTools.component
             else ShowWindow(ptr, 6);
         }
 
-        public static Dictionary<Keys, WindowInfo> GetAllWindow()
+        public static Dictionary<Key, WindowInfo> GetAllWindow()
         {
             return windowBinding;
         }
 
-        private static bool DontContinueBindOther(Keys keyData)
+        private static bool DontContinueBindOther(Key keyData)
         {
             RemoveKeyWindow(keyData);
             if (MessageBox.Show(
@@ -186,7 +183,7 @@ namespace DesktopTools.component
             return false;
         }
 
-        private static void ActiveWindow(Keys keyData, WindowInfo needToTopWindow)
+        private static void ActiveWindow(Key keyData, WindowInfo needToTopWindow)
         {
             var fs = GetForegroundWindow();
             var targetInputProcessId = GetWindowThreadProcessId(fs, IntPtr.Zero);
@@ -214,36 +211,36 @@ namespace DesktopTools.component
             }
         }
 
-        public static void ToggleWindowToTop(Keys keyData)
+        public static void ToggleWindowToTop(Key keyData)
         {
             ToggleWindowToTop(keyData, windowBinding[keyData]);
         }
 
-        public static bool ContainsKey(Keys keyData)
+        public static bool ContainsKey(Key keyData)
         {
             return windowBinding.ContainsKey(keyData);
         }
 
         public static void RestoreKeyWindow()
         {
-            var lastSysUpdateTime = Setting.GetSetting("last-sys-update-time", "0");
+            var lastSysUpdateTime = SettingUtil.GetSetting("last-sys-update-time", "0");
 
-            var currentBinding = Setting.GetSetting("last-binding-key-window");
+            var currentBinding = SettingUtil.GetSetting("last-binding-key-window");
 
-            Setting.SetSetting("last-binding-key-window", "");
-            Setting.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
+            SettingUtil.SetSetting("last-binding-key-window", "");
+            SettingUtil.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
             if (long.Parse(lastSysUpdateTime) > Environment.TickCount64) return;
             var bindItems = currentBinding.Split(";");
             foreach (var b in bindItems)
             {
                 if (string.IsNullOrWhiteSpace(b)) continue;
                 var keyAndData = b.Split(":");
-                Keys k = (Keys)Enum.Parse(typeof(Keys), keyAndData[0]);
+                Key k = (Key)Enum.Parse(typeof(Key), keyAndData[0]);
                 RegisterKeyWindow(k, new IntPtr(long.Parse(keyAndData[1])), true);
             }
         }
 
-        public static void RegisterKeyWindow(Keys keyData, IntPtr wd, bool ignoreError = false)
+        public static void RegisterKeyWindow(Key keyData, IntPtr wd, bool ignoreError = false)
         {
             if (IgnorePtr.Contains(wd)) return;
             try
@@ -271,11 +268,11 @@ namespace DesktopTools.component
                     Trace.WriteLine("注册成功" + wi.Ptr);
 #endif
                     windowBinding[keyData] = wi;
-                    if (!windowBindingIndex.ContainsKey(wi.Ptr)) windowBindingIndex[wi.Ptr] = new List<Keys>();
+                    if (!windowBindingIndex.ContainsKey(wi.Ptr)) windowBindingIndex[wi.Ptr] = new List<Key>();
                     windowBindingIndex[wi.Ptr].Add(keyData);
-                    var currentBinding = Setting.GetSetting("last-binding-key-window");
-                    Setting.SetSetting("last-binding-key-window", String.Join(";", currentBinding, keyData.ToString() + ":" + wi.Ptr.ToInt64()));
-                    Setting.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
+                    var currentBinding = SettingUtil.GetSetting("last-binding-key-window");
+                    SettingUtil.SetSetting("last-binding-key-window", String.Join(";", currentBinding, keyData.ToString() + ":" + wi.Ptr.ToInt64()));
+                    SettingUtil.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
                 }
                 bv.Refresh();
             }
@@ -291,23 +288,23 @@ namespace DesktopTools.component
         public static void RemoveKeyWindow()
         {
             var w = GetForegroundWindow();
-            foreach (var item in new Dictionary<Keys, WindowInfo>(windowBinding))
+            foreach (var item in new Dictionary<Key, WindowInfo>(windowBinding))
             {
                 if (item.Value.Ptr != w) continue;
                 lock (doubleWriteLock)
                 {
                     windowBinding.Remove(item.Key);
-                    var currentBinding = Setting.GetSetting("last-binding-key-window");
-                    foreach (Keys d in windowBindingIndex[w]) currentBinding = currentBinding.Replace(d.ToString() + ":" + w.ToInt64(), "");
-                    Setting.SetSetting("last-binding-key-window", currentBinding);
-                    Setting.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
+                    var currentBinding = SettingUtil.GetSetting("last-binding-key-window");
+                    foreach (Key d in windowBindingIndex[w]) currentBinding = currentBinding.Replace(d.ToString() + ":" + w.ToInt64(), "");
+                    SettingUtil.SetSetting("last-binding-key-window", currentBinding);
+                    SettingUtil.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
                     windowBindingIndex.Remove(w);
                 }
             }
             bv.Refresh();
         }
 
-        public static void RemoveKeyWindow(params Keys[] keys)
+        public static void RemoveKeyWindow(params Key[] keys)
         {
             foreach (var key in keys)
             {
@@ -318,9 +315,9 @@ namespace DesktopTools.component
                     windowBinding.Remove(key);
                     windowBindingIndex[e].Remove(key);
                     if (windowBindingIndex[e].Count == 0) windowBindingIndex.Remove(e);
-                    var currentBinding = Setting.GetSetting("last-binding-key-window");
-                    Setting.SetSetting("last-binding-key-window", currentBinding.Replace(key.ToString() + ":" + e, ""));
-                    Setting.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
+                    var currentBinding = SettingUtil.GetSetting("last-binding-key-window");
+                    SettingUtil.SetSetting("last-binding-key-window", currentBinding.Replace(key.ToString() + ":" + e, ""));
+                    SettingUtil.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
                     foreach (var h in item.Hook) try { UnhookWinEvent(h); } catch { }
                 }
             }
@@ -337,21 +334,6 @@ namespace DesktopTools.component
             return sb.ToString();
         }
 
-        public string? Key()
-        {
-            return Setting.GetSettingOrDefValueIfNotExists(Setting.ForceWindowBindOrChangeKey, "LeftCtrl + LeftAlt");
-        }
-
-
-        public bool Handler(KeyEventArgs e)
-        {
-            if ((e.KeyValue >= (int)Keys.NumPad0 && e.KeyValue <= (int)Keys.NumPad9) || e.KeyValue >= (int)Keys.D0 && e.KeyValue <= (int)Keys.D9)
-            {
-                RegisterKeyWindow(e.KeyData, GetForegroundWindow());
-                return true;
-            }
-            return false;
-        }
 
         public static void ToggleIconPanel()
         {

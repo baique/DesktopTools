@@ -15,9 +15,9 @@ namespace DesktopTools
         public static void RefreshOpacityValue()
         {
             ResourceDictionary resource = new ResourceDictionary();
-            resource.Source = new Uri("pack://application:,,,/resource/ColorTheme" + Setting.GetSetting(Setting.GlobalThemeKey, "0") + ".xaml");
+            resource.Source = new Uri("pack://application:,,,/resource/ColorTheme" + SettingUtil.GetSetting(SettingUtil.GlobalThemeKey, "0") + ".xaml");
             Application.Current.Resources.MergedDictionaries[0] = resource;
-            Application.Current.Resources["OpacityValue"] = double.Parse(Setting.GetSetting(Setting.OpacityValueKey, "0.4"));
+            Application.Current.Resources["OpacityValue"] = double.Parse(SettingUtil.GetSetting(SettingUtil.OpacityValueKey, "0.4"));
         }
 
         protected override void OnStartup(StartupEventArgs e)

@@ -5,14 +5,14 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
+using static DesktopTools.util.SettingUtil;
 using Application = System.Windows.Application;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using TextBox = System.Windows.Controls.TextBox;
-
 namespace DesktopTools.views
 {
     /// <summary>
-    /// Setting.xaml 的交互逻辑
+    /// SettingUtil.xaml 的交互逻辑
     /// </summary>
     public partial class Setting : Window
     {
@@ -22,8 +22,6 @@ namespace DesktopTools.views
             this.Height = 0;
             InitializeComponent();
         }
-
-        private static Dictionary<string, string?> CacheValue = new Dictionary<string, string?>();
 
         private void MoveWindow(object sender, MouseButtonEventArgs e)
         {
@@ -36,118 +34,6 @@ namespace DesktopTools.views
 
             }
         }
-
-        internal static bool SetSetting(string key, string value)
-        {
-            CacheValue[key] = value;
-            Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\desktop_tools");
-            try
-            {
-                rk2.SetValue(key, value);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-            finally
-            {
-                rk2.Close();
-            }
-        }
-
-        internal static string GetSetting(string key, string def = "")
-        {
-            if (CacheValue.ContainsKey(key))
-            {
-                var v = CacheValue[key];
-                if (null == v)
-                {
-                    return def;
-                }
-                return v;
-            }
-            Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\desktop_tools");
-            try
-            {
-                string? val = null;
-                var v = rk2.GetValue(key);
-                if (v != null)
-                {
-                    val = v.ToString();
-                }
-                if (string.IsNullOrEmpty(val))
-                {
-                    CacheValue[key] = def;
-                    return def;
-                }
-                CacheValue[key] = val;
-                return val;
-            }
-            catch
-            {
-                CacheValue[key] = def;
-                return def;
-            }
-            finally
-            {
-                rk2.Close();
-            }
-        }
-
-        internal static string? GetSettingOrDefValueIfNotExists(string key, string def = "")
-        {
-            if (CacheValue.ContainsKey(key))
-            {
-                return CacheValue[key];
-            }
-            Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\desktop_tools");
-            try
-            {
-                var v = rk2.GetValueNames().Contains(key) ? rk2.GetValue(key) : null;
-                if (v == null)
-                {
-                    CacheValue[key] = def;
-                    return def;
-                }
-                else
-                {
-                    string? val = v.ToString();
-                    CacheValue[key] = val;
-                    return val;
-                }
-            }
-            catch
-            {
-                CacheValue[key] = def;
-                return def;
-            }
-            finally
-            {
-                rk2.Close();
-            }
-        }
-
-        internal static string EnableBiYingKey = "enable-biying";
-        internal static string ChangeBiYingBackgroundKey = "change-biying-background";
-        internal static string WindowBindOrChangeKey = "window-bind-change";
-        internal static string ForceWindowBindOrChangeKey = "force-window-bind-change";
-        internal static string UnWindowBindOrChangeKey = "un-window-bind-change";
-        internal static string ErrorModeKey = "error-mode";
-        internal static string EnableGoodbyeModeKey = "enable-goodbye";
-        internal static string EnableGoodbyeMKey = "enable-goodbye-m";
-        internal static string EnableGoodbyeHKey = "enable-goodbye-h";
-        internal static string EnableMouseGoodbyeModeKey = "enable-mouse-goodbye";
-        internal static string EnableDisableLockScreenKey = "enable-disable-lock-screen";
-        internal static string ChangeEnableDisableLockScreenKey = "global-change-enable-disable-lock-screen";
-        internal static string EnableViewHeartbeatKey = "enable-view-heartbeat";
-        internal static string OpacityValueKey = "opacity-value";
-        internal static string GoodbyeModeTypeKey = "goodbye-mode-type";
-        internal static string RandomGoodbyeModeThemeKey = "random-goodbye-mode-theme";
-        internal static string GlobalThemeKey = "global-theme";
-        internal static string EnableGameTimeKey = "enable-game-time";
-        internal static string FlowModeKey = "flow-mode";
-        internal static string HiddenTimeWindowKey = "hidden-time-window";
 
         private void WinLoaded(object sender, RoutedEventArgs e)
         {

@@ -1,16 +1,8 @@
-﻿using DesktopTools.views;
+﻿using DesktopTools.util;
+using DesktopTools.views;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Forms;
-using System.Windows.Interop;
-using System.Windows.Media.Animation;
-using System.Windows.Threading;
-using Application = System.Windows.Application;
 
 namespace DesktopTools.component
 {
@@ -23,13 +15,13 @@ namespace DesktopTools.component
             {
                 return false;
             }
-            if (!"1".Equals(Setting.GetSetting(Setting.EnableGoodbyeModeKey)))
+            if (!"1".Equals(SettingUtil.GetSetting(SettingUtil.EnableGoodbyeModeKey)))
             {
                 return false;
             }
-            var h = int.Parse(Setting.GetSetting(Setting.EnableGoodbyeHKey));
-            var m = int.Parse(Setting.GetSetting(Setting.EnableGoodbyeMKey));
-            var type = Setting.GetSetting(Setting.GoodbyeModeTypeKey, "正常");
+            var h = int.Parse(SettingUtil.GetSetting(SettingUtil.EnableGoodbyeHKey));
+            var m = int.Parse(SettingUtil.GetSetting(SettingUtil.EnableGoodbyeMKey));
+            var type = SettingUtil.GetSetting(SettingUtil.GoodbyeModeTypeKey, "正常");
             if (type == "正常")
             {
 #if DEBUG 
@@ -73,7 +65,7 @@ namespace DesktopTools.component
 
         public static void Show()
         {
-            var type = Setting.GetSetting(Setting.GoodbyeModeTypeKey, "正常");
+            var type = SettingUtil.GetSetting(SettingUtil.GoodbyeModeTypeKey, "正常");
             if (type == "遛弯")
             {
                 if (Stop)

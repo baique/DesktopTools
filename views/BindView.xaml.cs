@@ -33,15 +33,14 @@ namespace DesktopTools
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            var ptr = new WindowInteropHelper(this).Handle;
             ToggleWindow.addIgnorePtr(this);
             AppUtil.DisableAltF4(this);
             AppUtil.AlwaysToTop(this);
-            HideAltTab(ptr);
+            AppUtil.HideAltTab(this);
         }
         public new void Show()
         {
-            if (this.IsVisible && currentFlowMode == Setting.GetSetting(Setting.FlowModeKey)) return;
+            if (this.IsVisible && currentFlowMode == SettingUtil.GetSetting(SettingUtil.FlowModeKey)) return;
             this.border.Visibility = Visibility.Hidden;
             base.Show();
             this.SizeToContent = SizeToContent.WidthAndHeight;
@@ -54,7 +53,7 @@ namespace DesktopTools
                 this.bar.Children.Clear();
                 int addSize = 0;
                 var allWindow = ToggleWindow.GetAllWindow();
-                var flowMode = Setting.GetSetting(Setting.FlowModeKey, "0");
+                var flowMode = SettingUtil.GetSetting(SettingUtil.FlowModeKey, "0");
                 foreach (var item in allWindow.OrderBy((item) => item.Key))
                 {
                     StackPanel sp = new StackPanel
@@ -118,20 +117,20 @@ namespace DesktopTools
             try
             {
                 if (sender != null) this.DragMove();
-                var flowMode = Setting.GetSetting(Setting.FlowModeKey, "0");
+                var flowMode = SettingUtil.GetSetting(SettingUtil.FlowModeKey, "0");
                 if ("0".Equals(flowMode))
                 {
-                    Setting.SetSetting("bind-view-left", "" + this.Left);
+                    SettingUtil.SetSetting("bind-view-left", "" + this.Left);
                     this.Top = 0;
                 }
                 else if ("1".Equals(flowMode))
                 {
-                    Setting.SetSetting("bind-view-top", "" + this.Top);
+                    SettingUtil.SetSetting("bind-view-top", "" + this.Top);
                     this.Left = SystemParameters.WorkArea.Width - this.Width;
                 }
                 else if ("2".Equals(flowMode))
                 {
-                    Setting.SetSetting("bind-view-top", "" + this.Top);
+                    SettingUtil.SetSetting("bind-view-top", "" + this.Top);
                     this.Left = 0;
                 }
             }
@@ -142,12 +141,12 @@ namespace DesktopTools
         }
         private void InitPos()
         {
-            var flowMode = Setting.GetSetting(Setting.FlowModeKey, "0");
+            var flowMode = SettingUtil.GetSetting(SettingUtil.FlowModeKey, "0");
             if ("0".Equals(flowMode))
             {
 
                 this.Top = 0;
-                var left = Setting.GetSetting("bind-view-left");
+                var left = SettingUtil.GetSetting("bind-view-left");
                 if (string.IsNullOrWhiteSpace(left))
                 {
                     var width = SystemParameters.WorkArea.Width;
@@ -163,7 +162,7 @@ namespace DesktopTools
             else if ("1".Equals(flowMode))
             {
                 this.Left = SystemParameters.WorkArea.Width - this.Width;
-                var h = Setting.GetSetting("bind-view-top");
+                var h = SettingUtil.GetSetting("bind-view-top");
                 if (string.IsNullOrWhiteSpace(h))
                 {
                     var height = SystemParameters.WorkArea.Height;
@@ -180,7 +179,7 @@ namespace DesktopTools
             {
 
                 this.Left = 0;
-                var h = Setting.GetSetting("bind-view-top");
+                var h = SettingUtil.GetSetting("bind-view-top");
                 if (string.IsNullOrWhiteSpace(h))
                 {
                     var height = SystemParameters.WorkArea.Height;
@@ -197,7 +196,7 @@ namespace DesktopTools
         }
         private new void SizeChangedEvent(object sender, SizeChangedEventArgs e)
         {
-            var flowMode = Setting.GetSetting(Setting.FlowModeKey, "0");
+            var flowMode = SettingUtil.GetSetting(SettingUtil.FlowModeKey, "0");
             if ("0".Equals(flowMode))
             {
                 this.Top = 0;

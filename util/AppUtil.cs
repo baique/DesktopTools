@@ -1,5 +1,4 @@
-﻿using DesktopTools.component;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -203,18 +202,18 @@ namespace DesktopTools.util
                 for (; ; )
                 {
                     await Task.Delay(10);
-                    if (ToggleWindow.HasFullScreen && viewRawTop == -20000)
+                    if (SettingUtil.HasFullScreen && viewRawTop == -20000)
                     {
-                        App.Current.Dispatcher.Invoke(() =>
+                        Application.Current.Dispatcher.Invoke(() =>
                         {
                             viewRawTop = view.Top;
                             view.Top = -20000;
                         });
                         continue;
                     }
-                    else if (!ToggleWindow.HasFullScreen && viewRawTop != -20000)
+                    else if (!SettingUtil.HasFullScreen && viewRawTop != -20000)
                     {
-                        App.Current.Dispatcher.Invoke(() =>
+                        Application.Current.Dispatcher.Invoke(() =>
                         {
                             view.Top = viewRawTop;
                             viewRawTop = -20000;
@@ -226,6 +225,11 @@ namespace DesktopTools.util
                     }
                 }
             });
+        }
+
+        public static void HideAltTab(Window window)
+        {
+            Win32.HideAltTab(new WindowInteropHelper(window).Handle);
         }
     }
 }

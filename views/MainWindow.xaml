@@ -184,7 +184,6 @@
         <Grid
             x:Name="AlwaysShowLayout"
             Panel.ZIndex="2"
-            MouseDown="ToggleKeyMapPanel"
             RenderTransformOrigin="0.5,0.5">
             <Grid.RenderTransform>
                 <TransformGroup>
@@ -273,7 +272,7 @@
                     Width="24px"
                     Height="24px"
                     Margin="0,0,0,0"
-                    Source="pack://application:,,,/image/setting.png" />
+                    Source="pack://application:,,,/resource/image/setting.png" />
             </Border>
             <Border
                 x:Name="border2"
@@ -297,7 +296,7 @@
                 <Image
                     Width="24px"
                     Height="24px"
-                    Source="pack://application:,,,/image/exit.png" />
+                    Source="pack://application:,,,/resource/image/exit.png" />
             </Border>
         </Canvas>
     </Canvas>

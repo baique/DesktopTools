@@ -1,5 +1,4 @@
 ﻿using DesktopTools.util;
-using DesktopTools.views;
 using Microsoft.Win32;
 using System;
 using System.Drawing;
@@ -7,7 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.Windows.Input;
 
 namespace DesktopTools.component
 {
@@ -22,7 +21,7 @@ namespace DesktopTools.component
         {
             try
             {
-                return DateTime.ParseExact(Setting.GetSetting("last-change-background-time"), "yyyy-MM-dd HH:mm:ss", CultureInfo.CurrentCulture);
+                return DateTime.ParseExact(SettingUtil.GetSetting("last-change-background-time"), "yyyy-MM-dd HH:mm:ss", CultureInfo.CurrentCulture);
             }
             catch
             {
@@ -35,7 +34,7 @@ namespace DesktopTools.component
             {
                 return;
             }
-            Setting.SetSetting("last-change-background-time", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            SettingUtil.SetSetting("last-change-background-time", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             await Task.Run(() =>
             {
                 try
@@ -104,12 +103,12 @@ namespace DesktopTools.component
 
         private static bool IsEnableBiYing()
         {
-            return "1".Equals(Setting.GetSetting(Setting.EnableBiYingKey));
+            return "1".Equals(SettingUtil.GetSetting(SettingUtil.EnableBiYingKey));
         }
 
         public string? Key()
         {
-            return Setting.GetSettingOrDefValueIfNotExists(Setting.ChangeBiYingBackgroundKey, "LeftCtrl + LeftAlt + B + N");
+            return SettingUtil.GetSettingOrDefValueIfNotExists(SettingUtil.ChangeBiYingBackgroundKey, "LeftCtrl + LeftAlt + B + N");
         }
 
     }

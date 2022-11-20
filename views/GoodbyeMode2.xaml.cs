@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DesktopTools.util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,7 +29,7 @@ namespace DesktopTools.views
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            if ("1".Equals(Setting.GetSetting(Setting.RandomGoodbyeModeThemeKey)))
+            if ("1".Equals(SettingUtil.GetSetting(SettingUtil.RandomGoodbyeModeThemeKey)))
             {
                 ResourceDictionary resource = new ResourceDictionary();
                 resource.Source = new Uri("pack://application:,,,/resource/ColorTheme" + new Random().Next(6) + ".xaml");

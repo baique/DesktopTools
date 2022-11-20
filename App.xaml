@@ -9,8 +9,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/resource/ColorTheme10.xaml" />
                 <ResourceDictionary>
-                    <FontFamily x:Key="clockicons">pack://application:,,,/font/#clockicons</FontFamily>
-                    <FontFamily x:Key="Aa破竹体">pack://application:,,,/font/#Aa破竹体</FontFamily>
+                    <FontFamily x:Key="clockicons">pack://application:,,,/resource/font/#clockicons</FontFamily>
+                    <FontFamily x:Key="Aa破竹体">pack://application:,,,/resource/font/#Aa破竹体</FontFamily>
 
                     <Image x:Key="application_icon" Source="pack://application:,,,/icon.ico" />
                 </ResourceDictionary>

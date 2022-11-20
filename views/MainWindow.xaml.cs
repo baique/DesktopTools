@@ -2,11 +2,11 @@
 using DesktopTools.util;
 using DesktopTools.views;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using static DesktopTools.util.Win32;
@@ -22,31 +22,69 @@ namespace DesktopTools
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static NotifyIcon Notify { get; private set; }
-        private GlobalKeyboardEvent KeyboardEvent;
+        /// <summary>
+        /// 托盘菜单
+        /// </summary>
+        public static NotifyIcon Notify { get; } = Notify = new NotifyIcon
+        {
+            Text = @"桌面工具",
+            Icon = new Icon(Application.GetResourceStream(new Uri("pack://application:,,,/icon.ico")).Stream),
+            Visible = true
+        };
+        /// <summary>
+        /// 设置界面
+        /// </summary>
+        private Setting? opendSettingView = null;
+        /// <summary>
+        /// 菜单界面故事板
+        /// </summary>
+        private Storyboard prevStoryboard;
+        /// <summary>
+        /// 退出菜单动画状态
+        /// </summary>
+        private bool outStatus = false;
+        /// <summary>
+        /// 菜单自动隐藏
+        /// </summary>
+        private DispatcherTimer timeoutHide = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(1.5),
+        };
+
+
         public MainWindow()
         {
             this.Width = 0;
             this.Height = 0;
             InitializeComponent();
+            //初始化托盘区菜单
             InitNotifyIcon();
-            KeyboardEvent = new GlobalKeyboardEvent();
         }
+
+        /// <summary>
+        /// 初始化窗体
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            ToggleWindow.Register();
             ToggleMainWindow();
             HeartbeatStart(null, null);
-            ToggleWindow.RestoreKeyWindow();
             RegisterTimeJump();
+
+            GlobalKeyboardEvent.InitKeyWatch();
+            ToggleWindow.Register();
+            ToggleWindow.RestoreKeyWindow();
             RegisterAutoChangeBackground();
             RegisterGoodbyeMode();
             RegisterDisableAutoLockScreen();
             RegisterKeyboardEvent();
+
+            ToggleWindow.addIgnorePtr(this);
+
             AppUtil.DisableAltF4(this);
             AppUtil.AlwaysToTop(this);
-            ToggleWindow.addIgnorePtr(this);
-            HideAltTab(new WindowInteropHelper(this).Handle);
+            AppUtil.HideAltTab(this);
         }
 
         #region 注册键盘事件
@@ -59,7 +97,7 @@ namespace DesktopTools
             GlobalKeyboardEvent.Register(new SystemBackground());
             //紧急避险
             GlobalKeyboardEvent.Register(
-                () => Setting.GetSettingOrDefValueIfNotExists(Setting.ErrorModeKey, "LeftCtrl + LeftShift + Space"),
+                () => SettingUtil.GetSettingOrDefValueIfNotExists(SettingUtil.ErrorModeKey, "LeftCtrl + LeftShift + Space"),
                 e =>
                 {
                     GlobalKeyboardEvent.GlobalKeybordEventStatus = false;
@@ -73,7 +111,7 @@ namespace DesktopTools
             );
             //移除快捷键
             GlobalKeyboardEvent.Register(
-                () => Setting.GetSettingOrDefValueIfNotExists(Setting.UnWindowBindOrChangeKey, "LeftCtrl + LeftAlt + Back"),
+                () => SettingUtil.GetSettingOrDefValueIfNotExists(SettingUtil.UnWindowBindOrChangeKey, "LeftCtrl + LeftAlt + Back"),
                 e =>
                 {
                     if (MessageBox.Show("当前窗体将被移除全部快捷访问,是否继续？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification) == System.Windows.Forms.DialogResult.Yes) ToggleWindow.RemoveKeyWindow();
@@ -81,22 +119,22 @@ namespace DesktopTools
                 }
             );
             //强制注册快捷键到窗体
-            GlobalKeyboardEvent.Register(() => Setting.GetSettingOrDefValueIfNotExists(Setting.ForceWindowBindOrChangeKey, "LeftCtrl + LeftAlt"), e =>
+            GlobalKeyboardEvent.Register(() => SettingUtil.GetSettingOrDefValueIfNotExists(SettingUtil.ForceWindowBindOrChangeKey, "LeftCtrl + LeftAlt"), e =>
             {
-                if ((e.KeyValue >= (int)Keys.NumPad0 && e.KeyValue <= (int)Keys.NumPad9) || e.KeyValue >= (int)Keys.D0 && e.KeyValue <= (int)Keys.D9)
+                if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) || e.Key >= Key.D0 && e.Key <= Key.D9)
                 {
-                    ToggleWindow.RegisterKeyWindow(e.KeyData, GetForegroundWindow());
+                    ToggleWindow.RegisterKeyWindow(e.Key, GetForegroundWindow());
                     return true;
                 };
                 return false;
             });
             //注册或切换窗体状态
-            GlobalKeyboardEvent.Register(() => Setting.GetSettingOrDefValueIfNotExists(Setting.WindowBindOrChangeKey, "LeftCtrl"), e =>
+            GlobalKeyboardEvent.Register(() => SettingUtil.GetSettingOrDefValueIfNotExists(SettingUtil.WindowBindOrChangeKey, "LeftCtrl"), e =>
             {
-                if ((e.KeyValue >= (int)Keys.NumPad0 && e.KeyValue <= (int)Keys.NumPad9) || e.KeyValue >= (int)Keys.D0 && e.KeyValue <= (int)Keys.D9)
+                if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) || e.Key >= Key.D0 && e.Key <= Key.D9)
                 {
-                    if (ToggleWindow.ContainsKey(e.KeyData)) ToggleWindow.ToggleWindowToTop(e.KeyData);
-                    else ToggleWindow.RegisterKeyWindow(e.KeyData, GetForegroundWindow());
+                    if (ToggleWindow.ContainsKey(e.Key)) ToggleWindow.ToggleWindowToTop(e.Key);
+                    else ToggleWindow.RegisterKeyWindow(e.Key, GetForegroundWindow());
                     return true;
                 }
                 return false;
@@ -112,7 +150,7 @@ namespace DesktopTools
             timer.Interval = TimeSpan.FromSeconds(5);
             timer.Tick += (a, e) =>
             {
-                if (!"1".Equals(Setting.GetSetting(Setting.EnableDisableLockScreenKey, "1"))) return;
+                if (!"1".Equals(SettingUtil.GetSetting(SettingUtil.EnableDisableLockScreenKey, "1"))) return;
                 DisableAutoLockScreen.TriggerUserMouseEvent();
             };
             timer.Start();
@@ -120,7 +158,6 @@ namespace DesktopTools
         #endregion
 
         #region 挥手模式
-
         private void RegisterGoodbyeMode()
         {
             DispatcherTimer timer = new DispatcherTimer();
@@ -146,11 +183,10 @@ namespace DesktopTools
         #endregion
 
         #region 自动切换壁纸
-        private DispatcherTimer? autoChangeBackgroundTimer = null;
         private void RegisterAutoChangeBackground()
         {
 
-            autoChangeBackgroundTimer = new DispatcherTimer();
+            DispatcherTimer autoChangeBackgroundTimer = new DispatcherTimer();
             autoChangeBackgroundTimer.Interval = new TimeSpan(0, 2, 0);
 #if DEBUG
             autoChangeBackgroundTimer.Interval = new TimeSpan(0, 0, 10);
@@ -171,12 +207,6 @@ namespace DesktopTools
         #region 其他
         private void InitNotifyIcon()
         {
-            Notify = new NotifyIcon
-            {
-                Text = @"桌面工具",
-                Icon = new Icon(Application.GetResourceStream(new Uri("pack://application:,,,/icon.ico")).Stream),
-                Visible = true
-            };
             Notify.ContextMenuStrip = new ContextMenuStrip();
             {
                 var item = new ToolStripLabel();
@@ -190,12 +220,14 @@ namespace DesktopTools
                 item.Click += (o, e) => App.Current.Shutdown();
                 Notify.ContextMenuStrip.Items.Add(item);
             }
-
         }
 
+        /// <summary>
+        /// 根据用户设置决定将窗体挪到工作区之外，还是正常显示
+        /// </summary>
         private void ToggleMainWindow()
         {
-            if ("1".Equals(Setting.GetSetting(Setting.HiddenTimeWindowKey)))
+            if ("1".Equals(SettingUtil.GetSetting(SettingUtil.HiddenTimeWindowKey)))
             {
                 Dispatcher.Invoke(() =>
                 {
@@ -205,8 +237,6 @@ namespace DesktopTools
                     this.Top = -2;
                     this.Left = -2;
                 });
-
-
                 return;
             }
             else
@@ -214,16 +244,22 @@ namespace DesktopTools
                 MiniWindow();
             }
         }
+
+        /// <summary>
+        /// 正常显示窗体
+        /// 
+        /// 过程中将从注册表读取用户最后一次移动后的窗体位置
+        /// </summary>
         private void MiniWindow()
         {
             this.border.Visibility = Visibility.Visible;
             this.SizeToContent = SizeToContent.WidthAndHeight;
-            var left = Setting.GetSetting("main-view-left");
-            var top = Setting.GetSetting("main-view-top");
+            var left = SettingUtil.GetSetting("main-view-left");
+            var top = SettingUtil.GetSetting("main-view-top");
             if (string.IsNullOrWhiteSpace(left))
             {
                 double x = SystemParameters.WorkArea.Width;
-                this.Left = x - this.Width;
+                this.Left = x - this.border.Width;
             }
             else
             {
@@ -238,21 +274,35 @@ namespace DesktopTools
             if (string.IsNullOrWhiteSpace(top)) this.Top = -10;
             else
             {
+                //Trace.WriteLine("当前高度：" + top + "-" + this.border.Height);
                 this.Top = double.Parse(top);
-                if (this.Top - this.Height < 0) this.Top = -1;
+                if (this.Top + this.border.Height < 0) this.Top = -1;
             }
         }
+
+        /// <summary>
+        /// 触发窗体移动
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             try
             {
                 this.DragMove();
-                Setting.SetSetting("main-view-left", "" + this.Left);
-                Setting.SetSetting("main-view-top", "" + this.Top);
+                //移动完成更新现在位置
+                SettingUtil.SetSetting("main-view-left", "" + this.Left);
+                SettingUtil.SetSetting("main-view-top", "" + this.Top);
+                Trace.WriteLine("更新高度：" + this.Top);
             }
             catch { }
         }
 
+        /// <summary>
+        /// 窗体关闭
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_Closed(object sender, EventArgs e)
         {
             try
@@ -270,46 +320,11 @@ namespace DesktopTools
 
         }
 
-        private void ToggleKeyMapPanel(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ClickCount < 2) return;
-            ToggleWindow.ToggleIconPanel();
-        }
-        #endregion
-
-        #region 呼吸效果
-        private DispatcherTimer timeoutHide = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromSeconds(1.5),
-        };
-        private void HeartbeatStop(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            ((Storyboard)this.FindResource("Storyboard1")).Stop();
-            this.border.Opacity = 1;
-            if (timeoutHide != null) timeoutHide.Stop();
-        }
-
-        private void HeartbeatStart(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            if (opendSettingView != null) return;
-            if ("1".Equals(Setting.GetSetting(Setting.EnableViewHeartbeatKey, ""))) ((Storyboard)this.FindResource("Storyboard1")).Begin();
-            StopWithMouse();
-
-            if (this.MenuView.Visibility == Visibility.Visible && !outStatus)
-            {
-                timeoutHide.Tick += (a, e) =>
-                {
-                    ((Storyboard)this.FindResource("SettingButtonInView")).Stop();
-                    ((Storyboard)this.FindResource("SettingButtonOutView")).Begin();
-                    timeoutHide.Stop();
-                };
-                timeoutHide.Start();
-            }
-
-        }
-        #endregion
-
-        private bool outStatus = false;
+        /// <summary>
+        /// 切换菜单显示状态
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ToggleMenuVisible(object sender, MouseButtonEventArgs e)
         {
             if (this.MenuView.Visibility == Visibility.Collapsed)
@@ -337,11 +352,22 @@ namespace DesktopTools
             }
 
         }
+
+        /// <summary>
+        /// 退出动画结束后修改状态
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ChangeOutStatus(object sender, EventArgs e)
         {
             outStatus = false;
         }
-        private Setting opendSettingView = null;
+
+        /// <summary>
+        /// 打开设置界面
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OpenSettingView(object sender, MouseButtonEventArgs e)
         {
             ToggleMenuVisible(sender, e);
@@ -363,21 +389,62 @@ namespace DesktopTools
                 ToggleWindow.IconPanel().Refresh();
                 opendSettingView = null;
                 GlobalKeyboardEvent.GlobalKeybordEventStatus = true;
-                if (!"1".Equals(Setting.GetSetting(Setting.EnableViewHeartbeatKey, ""))) HeartbeatStop(null, null);
+                if (!"1".Equals(SettingUtil.GetSetting(SettingUtil.EnableViewHeartbeatKey, ""))) HeartbeatStop(null, null);
                 else HeartbeatStart(null, null);
                 ToggleMainWindow();
             };
         }
+
+        /// <summary>
+        /// 退出应用
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ExitApp(object sender, MouseButtonEventArgs e)
         {
             this.Close();
         }
-        private Storyboard prevStoryboard;
+        #endregion
+
+        #region 呼吸效果
+        private void HeartbeatStop(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            ((Storyboard)this.FindResource("Storyboard1")).Stop();
+            this.border.Opacity = 1;
+            if (timeoutHide != null) timeoutHide.Stop();
+        }
+
+        private void HeartbeatStart(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (opendSettingView != null) return;
+            if ("1".Equals(SettingUtil.GetSetting(SettingUtil.EnableViewHeartbeatKey, ""))) ((Storyboard)this.FindResource("Storyboard1")).Begin();
+            StopWithMouse();
+
+            if (this.MenuView.Visibility == Visibility.Visible && !outStatus)
+            {
+                timeoutHide.Tick += (a, e) =>
+                {
+                    ((Storyboard)this.FindResource("SettingButtonInView")).Stop();
+                    ((Storyboard)this.FindResource("SettingButtonOutView")).Begin();
+                    timeoutHide.Stop();
+                };
+                timeoutHide.Start();
+            }
+
+        }
+        #endregion
+
+        #region 娱乐模式
+        /// <summary>
+        /// 娱乐模式，跟随鼠标位置运动
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void WithMouse(object sender, System.Windows.Input.MouseEventArgs e)
         {
             if (this.MenuView.Visibility == Visibility.Visible) return;
             if (this.opendSettingView != null) return;
-            if (!"1".Equals(Setting.GetSetting(Setting.EnableGameTimeKey))) return;
+            if (!"1".Equals(SettingUtil.GetSetting(SettingUtil.EnableGameTimeKey))) return;
             if (prevStoryboard != null) prevStoryboard.Stop();
 
             FrameworkElement item = this.border;
@@ -487,5 +554,6 @@ namespace DesktopTools
             };
             s.Begin();
         }
+        #endregion
     }
 }

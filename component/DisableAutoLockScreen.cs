@@ -1,11 +1,6 @@
 ﻿using DesktopTools.util;
-using DesktopTools.views;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.Windows.Input;
 using static DesktopTools.component.GlobalKeyboardEvent;
 
 namespace DesktopTools.component
@@ -19,22 +14,22 @@ namespace DesktopTools.component
 
         public bool Handler(KeyEventArgs e)
         {
-            if ("1".Equals(Setting.GetSetting(Setting.EnableDisableLockScreenKey, "1")))
+            if ("1".Equals(SettingUtil.GetSetting(SettingUtil.EnableDisableLockScreenKey, "1")))
             {
-                Setting.SetSetting(Setting.EnableDisableLockScreenKey, "0");
-                MainWindow.Notify.ShowBalloonTip(300, "提示", "禁止自动锁屏已关闭", ToolTipIcon.Info);
+                SettingUtil.SetSetting(SettingUtil.EnableDisableLockScreenKey, "0");
+                MainWindow.Notify.ShowBalloonTip(300, "提示", "禁止自动锁屏已关闭", System.Windows.Forms.ToolTipIcon.Info);
             }
             else
             {
-                Setting.SetSetting(Setting.EnableDisableLockScreenKey, "1");
-                MainWindow.Notify.ShowBalloonTip(300, "提示", "禁止自动锁屏已开启", ToolTipIcon.Info);
+                SettingUtil.SetSetting(SettingUtil.EnableDisableLockScreenKey, "1");
+                MainWindow.Notify.ShowBalloonTip(300, "提示", "禁止自动锁屏已开启", System.Windows.Forms.ToolTipIcon.Info);
             }
             return true;
         }
 
         public string? Key()
         {
-            return Setting.GetSettingOrDefValueIfNotExists(Setting.ChangeEnableDisableLockScreenKey, "LeftCtrl + LeftAlt + Space");
+            return SettingUtil.GetSettingOrDefValueIfNotExists(SettingUtil.ChangeEnableDisableLockScreenKey, "LeftCtrl + LeftAlt + Space");
         }
     }
 }
