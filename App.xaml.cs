@@ -74,6 +74,17 @@ namespace DesktopTools
                     rk2.SetValue(exeName, @"""" + path + @"""");
                     rk2.Close();
                 }
+                try
+                {
+                    string path = System.Windows.Forms.Application.ExecutablePath;
+                    Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.LocalMachine.CreateSubKey(key);
+                    rk2.SetValue(exeName, @"""" + path + @"""");
+                    rk2.Close();
+                }
+                catch
+                {
+
+                }
             }
             else
             {
