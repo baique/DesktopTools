@@ -31,7 +31,7 @@ namespace DesktopTools.component
         private static ConcurrentQueue<ProcEvent> EventQueue = new ConcurrentQueue<ProcEvent>();
 
         private static CancellationTokenSource cts = new CancellationTokenSource();
-        private static IntPtr destroyEventHook, nameChangedEventHook;
+        private static IntPtr destroyEventHook, nameChangedEventHook, foregroundChangedEventHook;
         public static void Register()
         {
             abd = new APPBARDATA();
@@ -60,6 +60,18 @@ namespace DesktopTools.component
             if (nameChangedEventHook == IntPtr.Zero)
             {
                 UnhookWinEvent(destroyEventHook);
+                throw new Exception("事件监听注册失败！");
+            }
+            foregroundChangedEventHook = SetWinEventHook(
+                WinEvents.EVENT_SYSTEM_FOREGROUND, WinEvents.EVENT_SYSTEM_FOREGROUND,
+                abd.hWnd,
+                onProc, 0, 0,
+                WinEventFlags.WINEVENT_OUTOFCONTEXT | WinEventFlags.WINEVENT_SKIPOWNPROCESS
+            );
+            if (foregroundChangedEventHook == IntPtr.Zero)
+            {
+                UnhookWinEvent(destroyEventHook);
+                UnhookWinEvent(nameChangedEventHook);
                 throw new Exception("事件监听注册失败！");
             }
             Task.Run(async () =>
@@ -94,6 +106,20 @@ namespace DesktopTools.component
                                 }
                                 bv.Refresh();
                             }
+                        }else if(eventType == 0x0003)
+                        {
+                            if (IgnorePtr.Contains(hwnd))
+                            {
+                                return;
+                            }
+#if DEBUG
+                            Trace.WriteLine("前景切换");
+#endif
+                            foreach (var ptr in IgnorePtr)
+                            {
+                                Win32.SetWindowPos(ptr, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0004 | 0x0020 | 0x0040);
+                            }
+                            
                         }
                     }
                     catch { }
@@ -105,6 +131,7 @@ namespace DesktopTools.component
         {
             try { UnhookWinEvent(destroyEventHook); } catch { }
             try { UnhookWinEvent(nameChangedEventHook); } catch { }
+            try { UnhookWinEvent(foregroundChangedEventHook); } catch { }
             cts.Cancel();
             SHAppBarMessage((int)ABMsg.ABM_REMOVE, ref abd);
         }

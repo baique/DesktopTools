@@ -293,7 +293,9 @@ namespace DesktopTools
                 //移动完成更新现在位置
                 SettingUtil.SetSetting("main-view-left", "" + this.Left);
                 SettingUtil.SetSetting("main-view-top", "" + this.Top);
+#if DEBUG
                 Trace.WriteLine("更新高度：" + this.Top);
+#endif
             }
             catch { }
         }
