@@ -108,6 +108,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include=".github\release_node\V1.0.0.9.md" />
 	  <None Include=".github\release_node\V1.0.0.8.md" />
 	  <None Include=".github\release_node\V1.0.0.7.md" />
 	  <None Include=".github\release_node\V1.0.0.7.bate1.md" />
