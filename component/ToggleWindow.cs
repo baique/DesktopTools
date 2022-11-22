@@ -74,6 +74,17 @@ namespace DesktopTools.component
                 UnhookWinEvent(nameChangedEventHook);
                 throw new Exception("事件监听注册失败！");
             }
+            Debounce debounce = new Debounce(1000, () =>
+            {
+#if DEBUG
+                Trace.WriteLine("前景切换");
+#endif
+
+                foreach (var ptr in IgnorePtr)
+                {
+                    Win32.SetWindowPos(ptr, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0004 | 0x0020 | 0x0040);
+                }
+            });
             Task.Run(async () =>
             {
                 while (!cts.IsCancellationRequested)
@@ -106,20 +117,14 @@ namespace DesktopTools.component
                                 }
                                 bv.Refresh();
                             }
-                        }else if(eventType == 0x0003)
+                        }
+                        else if (eventType == 0x0003)
                         {
                             if (IgnorePtr.Contains(hwnd))
                             {
                                 return;
                             }
-#if DEBUG
-                            Trace.WriteLine("前景切换");
-#endif
-                            foreach (var ptr in IgnorePtr)
-                            {
-                                Win32.SetWindowPos(ptr, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0004 | 0x0020 | 0x0040);
-                            }
-                            
+                            debounce.invoke();
                         }
                     }
                     catch { }
