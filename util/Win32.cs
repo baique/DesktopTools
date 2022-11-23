@@ -128,6 +128,15 @@ namespace DesktopTools.util
             WH_MOUSE_LL = 14
         }
 
+        public enum DisplayAffinity : uint
+        {
+            None = 0x00,
+            Monitor = 0x01,
+            ExcludeFromCapture = 0x11
+        }
+
+        [DllImport("user32.dll")]
+        public static extern bool SetWindowDisplayAffinity(IntPtr hwnd, DisplayAffinity affinity);
         public static long WS_EX_TOOLWINDOW = 0x00000080L;
         public static int GWL_EXSTYLE = (-20);
         public static void HideAltTab(IntPtr ptr)

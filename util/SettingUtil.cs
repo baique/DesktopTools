@@ -118,6 +118,8 @@ namespace DesktopTools.util
         public static string EnableGameTimeKey = "enable-game-time";
         public static string FlowModeKey = "flow-mode";
         public static string HiddenTimeWindowKey = "hidden-time-window";
+        public static string DisablePrintScreenKey = "enable-disable-print-screen";
+        public static string ChangeDisablePrintScreenStateKey = "change-disable-print-screen";
 
         public static bool HasFullScreen { get; internal set; }
     }

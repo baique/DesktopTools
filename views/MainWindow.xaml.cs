@@ -44,6 +44,10 @@ namespace DesktopTools
         /// </summary>
         private bool outStatus = false;
         /// <summary>
+        /// 禁用录屏
+        /// </summary>
+        private DisablePrintScreenView? pvView;
+        /// <summary>
         /// 菜单自动隐藏
         /// </summary>
         private DispatcherTimer timeoutHide = new DispatcherTimer
@@ -79,20 +83,66 @@ namespace DesktopTools
             RegisterGoodbyeMode();
             RegisterDisableAutoLockScreen();
             RegisterKeyboardEvent();
+            //RegisterDisablePrintScreen();
 
             ToggleWindow.addIgnorePtr(this);
 
+            AppUtil.ExcludeFromCapture(this);
             AppUtil.DisableAltF4(this);
             AppUtil.AlwaysToTop(this);
             AppUtil.HideAltTab(this);
         }
 
+        #region 禁止录屏
+        private void RegisterDisablePrintScreen()
+        {
+            if ("1".Equals(SettingUtil.GetSetting(SettingUtil.DisablePrintScreenKey)))
+            {
+                if (pvView != null)
+                {
+                    return;
+                }
+                pvView = new DisablePrintScreenView();
+                pvView.Show();
+                pvView.Closed += (a, e) =>
+                {
+                    pvView = null;
+                };
+            }
+        }
+        private void ToggleDisablePrintScreen()
+        {
+            if (pvView == null)
+            {
+                pvView = new DisablePrintScreenView();
+                pvView.Show();
+                pvView.Closed += (a, e) =>
+                {
+                    pvView = null;
+                };
+            }
+            else
+            {
+
+                pvView.Close();
+            }
+        }
+        #endregion
         #region 注册键盘事件
         private void RegisterKeyboardEvent()
         {
             //需要注意此处有一定的顺序要求
             //禁用自动锁屏
             GlobalKeyboardEvent.Register(new DisableAutoLockScreen());
+            //录屏
+            //GlobalKeyboardEvent.Register(
+            //    () => SettingUtil.GetSettingOrDefValueIfNotExists(SettingUtil.ChangeDisablePrintScreenStateKey, "LeftAlt + M"),
+            //    (e) =>
+            //    {
+            //        ToggleDisablePrintScreen();
+            //        return true;
+            //    }
+            //);
             //壁纸切换
             GlobalKeyboardEvent.Register(new SystemBackground());
             //紧急避险
@@ -394,6 +444,7 @@ namespace DesktopTools
                 if (!"1".Equals(SettingUtil.GetSetting(SettingUtil.EnableViewHeartbeatKey, ""))) HeartbeatStop(null, null);
                 else HeartbeatStart(null, null);
                 ToggleMainWindow();
+                RegisterDisablePrintScreen();
             };
         }
 

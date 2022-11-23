@@ -64,6 +64,27 @@
                 <CheckBox x:Name="EnableGameTime" VerticalAlignment="Center" />
             </StackPanel>
         </StackPanel>
+        <StackPanel Orientation="Horizontal" Visibility="Collapsed">
+            <Label Style="{StaticResource FormLabel}">
+                自动禁止录屏：
+            </Label>
+            <CheckBox x:Name="DisablePrintScreen" VerticalAlignment="Center" />
+            <StackPanel Orientation="Horizontal">
+                <Label Style="{StaticResource FormLabel}">
+                    切换禁止录屏：
+                </Label>
+                <TextBox
+                    x:Name="DisablePrintScreenState"
+                    Width="150px"
+                    VerticalAlignment="Center"
+                    IsReadOnly="True"
+                    KeyDown="KeyBind"
+                    MouseDoubleClick="UnbindKey"
+                    Selector.IsSelected="False"
+                    Text="" />
+
+            </StackPanel>
+        </StackPanel>
         <StackPanel Orientation="Horizontal">
             <StackPanel Orientation="Horizontal">
                 <Label Style="{StaticResource FormLabel}">

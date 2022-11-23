@@ -34,6 +34,7 @@ namespace DesktopTools
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             ToggleWindow.addIgnorePtr(this);
+            AppUtil.ExcludeFromCapture(this);
             AppUtil.DisableAltF4(this);
             AppUtil.AlwaysToTop(this);
             AppUtil.HideAltTab(this);

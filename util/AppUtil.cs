@@ -13,7 +13,10 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using VirtualDesktopSwitch;
+using static DesktopTools.util.Win32;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Color = System.Drawing.Color;
+using Window = System.Windows.Window;
 
 namespace DesktopTools.util
 {
@@ -191,9 +194,9 @@ namespace DesktopTools.util
 
         public static VirtualDesktopManager VDM = new VirtualDesktopManager();
 
-        public static void AlwaysToTop(Window view)
+        public static void AlwaysToTop(Window view, bool forceTop = false)
         {
-            var ptr = new WindowInteropHelper(view).Handle;
+            var ptr = GetHwnd(view);
             double viewRawTop = -20000;
             Win32.SetWindowPos(ptr, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0004 | 0x0020 | 0x0040);
             //Hide on other window full screen
@@ -202,6 +205,11 @@ namespace DesktopTools.util
                 for (; ; )
                 {
                     await Task.Delay(10);
+                    if (forceTop)
+                    {
+                        Win32.SetWindowPos(ptr, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0004 | 0x0020 | 0x0040);
+                        continue;
+                    }
                     if (SettingUtil.HasFullScreen && viewRawTop == -20000)
                     {
                         Application.Current.Dispatcher.Invoke(() =>
@@ -229,7 +237,22 @@ namespace DesktopTools.util
 
         public static void HideAltTab(Window window)
         {
-            Win32.HideAltTab(new WindowInteropHelper(window).Handle);
+            Win32.HideAltTab(GetHwnd(window));
+        }
+
+        public static void MonitorFromCapture(Window window)
+        {
+            SetWindowDisplayAffinity(GetHwnd(window), DisplayAffinity.Monitor);
+        }
+
+        public static void ExcludeFromCapture(Window window)
+        {
+            SetWindowDisplayAffinity(GetHwnd(window), DisplayAffinity.ExcludeFromCapture);
+        }
+
+        internal static IntPtr GetHwnd(Window window)
+        {
+            return new WindowInteropHelper(window).Handle;
         }
     }
 }

@@ -47,6 +47,10 @@ namespace DesktopTools.views
             this.EnableGameTime.IsChecked = "1".Equals(GetSetting(EnableGameTimeKey));
             //隐藏时间浮窗
             this.HiddenTimeWindow.IsChecked = "1".Equals(GetSetting(HiddenTimeWindowKey));
+            //禁止录屏
+            this.DisablePrintScreen.IsChecked = "1".Equals(GetSetting(DisablePrintScreenKey));
+            this.DisablePrintScreenState.Text = GetSettingOrDefValueIfNotExists(ChangeDisablePrintScreenStateKey, "LeftAlt + M");
+
             //禁止自动锁屏
             this.EnableDisableLockScreen.IsChecked = "1".Equals(GetSetting(EnableDisableLockScreenKey, "1"));
             this.ChangeEnableDisableLockScreen.Text = GetSettingOrDefValueIfNotExists(ChangeEnableDisableLockScreenKey, "LeftCtrl + LeftAlt + Space");
@@ -82,6 +86,9 @@ namespace DesktopTools.views
             //小娱乐
             SetSetting(EnableGameTimeKey, this.EnableGameTime.IsChecked.Value ? "1" : "0");
             SetSetting(HiddenTimeWindowKey, this.HiddenTimeWindow.IsChecked.Value ? "1" : "0");
+
+            SetSetting(DisablePrintScreenKey, this.DisablePrintScreen.IsChecked.Value ? "1" : "0");
+            SetSetting(ChangeDisablePrintScreenStateKey, this.DisablePrintScreenState.Text);
             //禁止自动锁屏
             SetSetting(EnableDisableLockScreenKey, this.EnableDisableLockScreen.IsChecked.Value ? "1" : "0");
             SetSetting(ChangeEnableDisableLockScreenKey, this.ChangeEnableDisableLockScreen.Text);

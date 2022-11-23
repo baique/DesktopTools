@@ -8,13 +8,13 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using static DesktopTools.util.Win32;
 using MessageBox = System.Windows.Forms.MessageBox;
 using MessageBoxOptions = System.Windows.Forms.MessageBoxOptions;
+using Window = System.Windows.Window;
 
 namespace DesktopTools.component
 {
@@ -36,7 +36,7 @@ namespace DesktopTools.component
         {
             abd = new APPBARDATA();
             abd.cbSize = Marshal.SizeOf(abd);
-            abd.hWnd = new WindowInteropHelper(App.Current.MainWindow).Handle;
+            abd.hWnd = AppUtil.GetHwnd(App.Current.MainWindow);
             uCallBackMsg = RegisterWindowMessage("APPBARMSG_CSDN_HELPER");
             abd.uCallbackMessage = uCallBackMsg;
             SHAppBarMessage((int)ABMsg.ABM_NEW, ref abd);
@@ -146,7 +146,14 @@ namespace DesktopTools.component
         {
             if (msg == uCallBackMsg && wParam.ToInt32() == (int)ABNotify.ABN_FULLSCREENAPP)
             {
-                if ((int)lParam == 1) SettingUtil.HasFullScreen = true;
+                if ((int)lParam == 1)
+                {
+                    if (IgnorePtr.Contains(hwnd))
+                    {
+                        return IntPtr.Zero;
+                    }
+                    SettingUtil.HasFullScreen = true;
+                }
                 else SettingUtil.HasFullScreen = false;
             }
             return IntPtr.Zero;
@@ -170,7 +177,7 @@ namespace DesktopTools.component
 
         public static void addIgnorePtr(Window windowInstance)
         {
-            var ptr = new WindowInteropHelper(windowInstance).Handle;
+            var ptr = AppUtil.GetHwnd(windowInstance);
             if (IgnorePtr.Contains(ptr)) return;
             IgnorePtr.Add(ptr);
         }

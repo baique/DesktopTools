@@ -32,7 +32,8 @@ namespace DesktopTools.views
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            HideAltTab(new WindowInteropHelper(this).Handle);
+            AppUtil.ExcludeFromCapture(this);
+            AppUtil.HideAltTab(this);
             ((Storyboard)FindResource("Storyboard1")).Begin();
             ((Storyboard)FindResource("Storyboard2")).Begin();
         }
