@@ -63,14 +63,15 @@ namespace DesktopTools.component
                                     }
                                     catch { }
                                 }
+                                using (RegistryKey myRegKey = Registry.CurrentUser.CreateSubKey("Control Panel//Desktop"))
+                                {
+                                    myRegKey.SetValue("TileWallpaper", "0");
+                                    myRegKey.SetValue("WallpaperStyle", "2");
+                                    myRegKey.SetValue("Wallpaper", f.FullName);
+                                }
+                                Win32.SystemParametersInfo(0x0014, 0, f.FullName, 0x2 | 0x1);
                             });
-                            using (RegistryKey myRegKey = Registry.CurrentUser.CreateSubKey("Control Panel//Desktop"))
-                            {
-                                myRegKey.SetValue("TileWallpaper", "0");
-                                myRegKey.SetValue("WallpaperStyle", "2");
-                                myRegKey.SetValue("Wallpaper", f.FullName);
-                            }
-                            Win32.SystemParametersInfo(0x0014, 0, f.FullName, 0x2 | 0x1);
+                     
                         }
                     }
 
