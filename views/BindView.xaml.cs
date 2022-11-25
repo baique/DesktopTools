@@ -1,19 +1,12 @@
 ﻿using DesktopTools.component;
 using DesktopTools.util;
-using DesktopTools.views;
 using System;
-using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
-using System.Management;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using static DesktopTools.util.Win32;
 using Color = System.Windows.Media.Color;
 using Image = System.Windows.Controls.Image;
 
@@ -71,8 +64,6 @@ namespace DesktopTools
                         Width = 18,
                         Source = item.Value.Icon
                     };
-
-
                     var k = item.Key.ToString();
                     if (k.StartsWith("NumPad"))
                     {
@@ -86,7 +77,7 @@ namespace DesktopTools
                         Margin = new Thickness(2),
                         Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
                         TextAlignment = TextAlignment.Center,
-                        Text = k,
+                        Text = k
                     };
                     sp.MouseLeftButtonDown += (a, e) =>
                     {
@@ -96,7 +87,7 @@ namespace DesktopTools
                     {
                         ToggleWindow.RemoveKeyWindow(item.Key);
                     };
-                    sp.ToolTip = item.Value.Title;
+                    sp.MouseEnter += (a, e) => { sp.ToolTip = item.Value.Title; };
                     sp.Children.Add(image);
                     sp.Children.Add(tb);
                     this.bar.Children.Add(sp);

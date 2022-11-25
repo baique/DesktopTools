@@ -29,9 +29,9 @@ namespace DesktopTools.component
         private static APPBARDATA abd;
         private static int uCallBackMsg;
         private static ConcurrentQueue<ProcEvent> EventQueue = new ConcurrentQueue<ProcEvent>();
-
         private static CancellationTokenSource cts = new CancellationTokenSource();
         private static IntPtr destroyEventHook, nameChangedEventHook, foregroundChangedEventHook;
+        private static Debounce refreshTopmost = new Debounce(1500, () => { foreach (var ptr in IgnorePtr) SetWindowPos(ptr, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0004 | 0x0020 | 0x0040); });
         public static void Register()
         {
             abd = new APPBARDATA();
@@ -74,17 +74,6 @@ namespace DesktopTools.component
                 UnhookWinEvent(nameChangedEventHook);
                 throw new Exception("事件监听注册失败！");
             }
-            Debounce debounce = new Debounce(1000, () =>
-            {
-#if DEBUG
-                Trace.WriteLine("前景切换");
-#endif
-
-                foreach (var ptr in IgnorePtr)
-                {
-                    Win32.SetWindowPos(ptr, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0004 | 0x0020 | 0x0040);
-                }
-            });
             Task.Run(async () =>
             {
                 while (!cts.IsCancellationRequested)
@@ -106,25 +95,19 @@ namespace DesktopTools.component
                         }
                         else if (eventType == 0x800C)
                         {
-                            if (windowBindingIndex.ContainsKey(hwnd))
+                            if (!windowBindingIndex.ContainsKey(hwnd))
                             {
-                                lock (doubleWriteLock)
-                                {
-                                    var newText = GetText(hwnd);
-                                    var item = windowBinding[windowBindingIndex[hwnd][0]];
-                                    if (newText.Equals(item.Title)) continue;
-                                    item.Title = newText;
-                                }
-                                bv.Refresh();
+                                continue;
                             }
+                            lock (doubleWriteLock) windowBinding[windowBindingIndex[hwnd][0]].Title = GetText(hwnd);
                         }
                         else if (eventType == 0x0003)
                         {
                             if (IgnorePtr.Contains(hwnd))
                             {
-                                return;
+                                continue;
                             }
-                            debounce.invoke();
+                            refreshTopmost.invoke();
                         }
                     }
                     catch { }
@@ -357,7 +340,6 @@ namespace DesktopTools.component
                     var currentBinding = SettingUtil.GetSetting("last-binding-key-window");
                     SettingUtil.SetSetting("last-binding-key-window", currentBinding.Replace(key.ToString() + ":" + e, ""));
                     SettingUtil.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
-                    foreach (var h in item.Hook) try { UnhookWinEvent(h); } catch { }
                 }
             }
 

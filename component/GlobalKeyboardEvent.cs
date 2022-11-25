@@ -43,7 +43,7 @@ namespace DesktopTools.component
                 {
                     continue;
                 }
-                if (CheckKeyDown(item.Key(), e))
+                if (CheckKeyDown(key, e))
                 {
                     if (item.Handler(e))
                     {

@@ -38,7 +38,7 @@ namespace DesktopTools
         /// <summary>
         /// 菜单界面故事板
         /// </summary>
-        private Storyboard prevStoryboard;
+        private Storyboard? prevStoryboard;
         /// <summary>
         /// 退出菜单动画状态
         /// </summary>
@@ -86,7 +86,6 @@ namespace DesktopTools
             //RegisterDisablePrintScreen();
 
             ToggleWindow.addIgnorePtr(this);
-
             AppUtil.ExcludeFromCapture(this);
             AppUtil.DisableAltF4(this);
             AppUtil.AlwaysToTop(this);
@@ -128,6 +127,7 @@ namespace DesktopTools
             }
         }
         #endregion
+
         #region 注册键盘事件
         private void RegisterKeyboardEvent()
         {
@@ -189,7 +189,6 @@ namespace DesktopTools
                 }
                 return false;
             });
-
         }
         #endregion
 

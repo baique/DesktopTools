@@ -1,7 +1,7 @@
 ﻿using DesktopTools.util;
-using DesktopTools.views;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 
@@ -39,7 +39,13 @@ namespace DesktopTools
         {
             var exp = e.ExceptionObject as Exception;
             if (exp != null)
+            {
+#if DEBUG
+                File.AppendAllText("error.log", exp.Message + "\r\n" + exp.StackTrace);
+#endif
                 MessageBox.Show("预期外的错误:" + exp.Message);
+            }
+
             else
                 MessageBox.Show("预期外的错误");
             App.Current.Shutdown(1);
@@ -53,7 +59,11 @@ namespace DesktopTools
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             e.Handled = true;
-            MessageBox.Show("预期外的错误:" + e.Exception.Message);
+            var exp = e.Exception;
+#if DEBUG
+            File.AppendAllText("error.log", exp.Message + "\r\n" + exp.StackTrace);
+#endif
+            MessageBox.Show("预期外的错误:" + exp.Message);
             App.Current.Shutdown(1);
         }
 

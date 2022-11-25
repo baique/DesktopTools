@@ -14,7 +14,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using VirtualDesktopSwitch;
 using static DesktopTools.util.Win32;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Color = System.Drawing.Color;
 using Window = System.Windows.Window;
 
@@ -194,7 +193,7 @@ namespace DesktopTools.util
 
         public static VirtualDesktopManager VDM = new VirtualDesktopManager();
 
-        public static void AlwaysToTop(Window view, bool forceTop = false)
+        public static void AlwaysToTop(Window view)
         {
             var ptr = GetHwnd(view);
             double viewRawTop = -20000;
@@ -205,11 +204,6 @@ namespace DesktopTools.util
                 for (; ; )
                 {
                     await Task.Delay(10);
-                    if (forceTop)
-                    {
-                        Win32.SetWindowPos(ptr, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0004 | 0x0020 | 0x0040);
-                        continue;
-                    }
                     if (SettingUtil.HasFullScreen && viewRawTop == -20000)
                     {
                         Application.Current.Dispatcher.Invoke(() =>
