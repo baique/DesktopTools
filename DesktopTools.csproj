@@ -11,7 +11,7 @@
 		<SignAssembly>False</SignAssembly>
 		<StartupObject>DesktopTools.Program</StartupObject>
 		<Title>桌面工具</Title>
-		<Version>1.0.0.8</Version>
+		<Version>1.0.1.0</Version>
 		<Authors>baique</Authors>
 		<Description>桌面工具</Description>
 		<Copyright>Copyright @ baique</Copyright>
@@ -108,6 +108,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include=".github\release_node\V1.0.1.0.md" />
 	  <None Include=".github\release_node\V1.0.0.9.md" />
 	  <None Include=".github\release_node\V1.0.0.8.md" />
 	  <None Include=".github\release_node\V1.0.0.7.md" />
