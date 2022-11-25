@@ -46,7 +46,7 @@ namespace DesktopTools.component
                         {
                             FileInfo f = new FileInfo(getImgPath());
                             var fn = f.FullName;
-                            App.Current.Dispatcher.InvokeAsync(() =>
+                            App.Current.Dispatcher.Invoke(() =>
                             {
                                 try
                                 {
