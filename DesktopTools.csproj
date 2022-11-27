@@ -9,7 +9,6 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<ApplicationIcon>icon.ico</ApplicationIcon>
 		<SignAssembly>False</SignAssembly>
-		<StartupObject>DesktopTools.Program</StartupObject>
 		<Title>桌面工具</Title>
 		<Version>1.0.1.0</Version>
 		<Authors>baique</Authors>

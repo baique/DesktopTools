@@ -91,7 +91,35 @@ namespace DesktopTools.component
                         var hwnd = d.H;
                         if (eventType == 0x8001)
                         {
-                            if (windowBindingIndex.ContainsKey(hwnd)) RemoveKeyWindow(windowBindingIndex[hwnd].ToArray());
+                            if (windowBindingIndex.ContainsKey(hwnd))
+                            {
+                                try
+                                {
+                                    var item = windowBindingIndex[hwnd][0];
+                                    if (!windowBinding[item].P.HasExited)
+                                    {
+
+                                        lock (doubleWriteLock)
+                                        {
+                                            var newTargetPtr = windowBinding[item].P.MainWindowHandle;
+
+                                            if (newTargetPtr != IntPtr.Zero && !windowBindingIndex.ContainsKey(newTargetPtr))
+                                            {
+                                                var oldPtr = windowBinding[item].Ptr;
+                                                //进行一次追踪窗体操作
+                                                windowBinding[item].Ptr = newTargetPtr;
+                                                windowBinding[item].Title = windowBinding[item].P.MainWindowTitle;
+                                                foreach (var e in windowBindingIndex[hwnd]) RemoveWindowFromReg(e, oldPtr, newTargetPtr);
+                                                windowBindingIndex[newTargetPtr] = windowBindingIndex[hwnd];
+                                                windowBindingIndex.Remove(hwnd);
+                                                continue;
+                                            }
+                                        }
+                                    }
+                                }
+                                catch { }
+                                RemoveKeyWindow(windowBindingIndex[hwnd].ToArray());
+                            }
                         }
                         else if (eventType == 0x800C)
                         {
@@ -292,9 +320,8 @@ namespace DesktopTools.component
                     windowBinding[keyData] = wi;
                     if (!windowBindingIndex.ContainsKey(wi.Ptr)) windowBindingIndex[wi.Ptr] = new List<Key>();
                     windowBindingIndex[wi.Ptr].Add(keyData);
-                    var currentBinding = SettingUtil.GetSetting("last-binding-key-window");
-                    SettingUtil.SetSetting("last-binding-key-window", String.Join(";", currentBinding, keyData.ToString() + ":" + wi.Ptr.ToInt64()));
-                    SettingUtil.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
+                    AddWindowToReg(keyData, wi.Ptr);
+
                 }
                 bv.Refresh();
             }
@@ -321,6 +348,7 @@ namespace DesktopTools.component
                     SettingUtil.SetSetting("last-binding-key-window", currentBinding);
                     SettingUtil.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
                     windowBindingIndex.Remove(w);
+
                 }
             }
             bv.Refresh();
@@ -337,13 +365,32 @@ namespace DesktopTools.component
                     windowBinding.Remove(key);
                     windowBindingIndex[e].Remove(key);
                     if (windowBindingIndex[e].Count == 0) windowBindingIndex.Remove(e);
-                    var currentBinding = SettingUtil.GetSetting("last-binding-key-window");
-                    SettingUtil.SetSetting("last-binding-key-window", currentBinding.Replace(key.ToString() + ":" + e, ""));
-                    SettingUtil.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
+                    RemoveWindowFromReg(key, e);
                 }
             }
 
             bv.Refresh();
+        }
+
+        public static void AddWindowToReg(Key keyData, IntPtr ptr)
+        {
+            var currentBinding = SettingUtil.GetSetting("last-binding-key-window");
+            SettingUtil.SetSetting("last-binding-key-window", String.Join(";", currentBinding, keyData.ToString() + ":" + ptr.ToInt64()));
+            SettingUtil.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
+        }
+
+        public static void RemoveWindowFromReg(Key key, IntPtr ptr, IntPtr? newPtr = null)
+        {
+            var currentBinding = SettingUtil.GetSetting("last-binding-key-window");
+            if (newPtr != null)
+            {
+                SettingUtil.SetSetting("last-binding-key-window", currentBinding.Replace(key.ToString() + ":" + ptr.ToInt64(), key.ToString() + ":" + newPtr.Value.ToInt64()));
+            }
+            else
+            {
+                SettingUtil.SetSetting("last-binding-key-window", currentBinding.Replace(key.ToString() + ":" + ptr.ToInt64(), ""));
+            }
+            SettingUtil.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
         }
 
 

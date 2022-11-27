@@ -64,12 +64,14 @@ namespace DesktopTools.util
             {
                 throw new Exception("进程模块加载异常");
             }
-            var icon = Icon.ExtractAssociatedIcon(fn);
-            if (icon == null)
+            using (var icon = Icon.ExtractAssociatedIcon(fn))
             {
-                throw new Exception("进程图标加载异常");
+                if (icon == null)
+                {
+                    throw new Exception("进程图标加载异常");
+                }
+                return ToImageSource(icon);
             }
-            return ToImageSource(icon);
         }
         private static string getModuleFilePath(int processId)
         {
@@ -89,12 +91,10 @@ namespace DesktopTools.util
         }
         public static ImageSource ToImageSource(Icon icon)
         {
-            ImageSource imageSource = Imaging.CreateBitmapSourceFromHIcon(
+            return Imaging.CreateBitmapSourceFromHIcon(
                 icon.Handle,
                 Int32Rect.Empty,
                 BitmapSizeOptions.FromEmptyOptions());
-
-            return imageSource;
         }
         /// <summary>
         /// 下载文件到字节数组
