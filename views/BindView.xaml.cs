@@ -23,10 +23,11 @@ namespace DesktopTools
     {
         private string currentFlowMode = "";
         private Debounce debounce;
+        private string prevFlowMode = "";
         public BindingView()
         {
             InitializeComponent();
-            debounce = new Debounce(150, RawRefresh);
+            debounce = new Debounce(200, RawRefresh);
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -36,6 +37,7 @@ namespace DesktopTools
             AppUtil.AlwaysToTop(this);
             AppUtil.HideAltTab(this);
         }
+
         public new void Show()
         {
             if (this.IsVisible && currentFlowMode == SettingUtil.GetSetting(SettingUtil.FlowModeKey)) return;
@@ -44,6 +46,7 @@ namespace DesktopTools
             this.SizeToContent = SizeToContent.WidthAndHeight;
             InitPos();
         }
+
         private void RawRefresh()
         {
             Dispatcher.Invoke(() =>
@@ -54,6 +57,8 @@ namespace DesktopTools
                 {
                     prevItem = addWindowItem(item.Key, item.Value, prevItem);
                 }
+
+                prevFlowMode = SettingUtil.GetSetting(SettingUtil.FlowModeKey, "0");
                 ToggleViewVisible();
             });
         }
@@ -73,13 +78,22 @@ namespace DesktopTools
             {
                 k = k.Substring(6);
             }
+            var flowMode = SettingUtil.GetSetting(SettingUtil.FlowModeKey, "0");
             var name = "kbd_hook_" + k;
             var n = this.bar.FindName(name) as UIElement;
             if (n != null)
             {
-                return n;
+                if (prevFlowMode == flowMode)
+                {
+                    return n;
+                }
+                else
+                {
+                    UnregisterName(name);
+                    this.bar.Children.Remove(n);
+                }
             }
-            var flowMode = SettingUtil.GetSetting(SettingUtil.FlowModeKey, "0");
+
             StackPanel sp = new StackPanel
             {
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -96,6 +110,7 @@ namespace DesktopTools
             var image = new Image
             {
                 Width = 18,
+                Height = 18,
                 Source = value.Icon
             };
 
@@ -122,7 +137,7 @@ namespace DesktopTools
             sp.Children.Add(tb);
             if (prevItem != null)
             {
-                this.bar.Children.Insert(this.bar.Children.IndexOf(prevItem)+1, sp);
+                this.bar.Children.Insert(this.bar.Children.IndexOf(prevItem) + 1, sp);
             }
             else
             {
