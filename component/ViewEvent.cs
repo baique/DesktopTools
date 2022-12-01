@@ -47,29 +47,23 @@ namespace DesktopTools.component
 
                         var eventType = d.T;
                         var hwnd = d.H;
-                        try
+                        if (eventType == 0x8001)
                         {
-                            if (eventType == 0x8001)
-                            {
-                                ToggleWindow.TryFlowWindow(hwnd);
-                            }
-                            else if (eventType == 0x800C)
-                            {
-                                ToggleWindow.Rename(hwnd);
-                            }
-                            else if (eventType == 0x0003)
-                            {
-                                if (SettingUtil.SelfPtr.Contains(hwnd))
-                                {
-                                    continue;
-                                }
-                                refreshTopmost.invoke();
-                            }
+                            ToggleWindow.TryFlowWindow(hwnd);
                         }
-                        finally
+                        else if (eventType == 0x800C)
                         {
-                            Win32.DeleteDC(hwnd);
+                            ToggleWindow.Rename(hwnd);
                         }
+                        else if (eventType == 0x0003)
+                        {
+                            if (SettingUtil.SelfPtr.Contains(hwnd))
+                            {
+                                continue;
+                            }
+                            refreshTopmost.invoke();
+                        }
+
                     }
                     catch { }
                 }
