@@ -4,6 +4,13 @@
 ![](https://img.shields.io/badge/license-MIT-green.svg)
 ![](https://img.shields.io/badge/version-V1.0.1.1.bate-blue.svg)
 
+# 重要事项
+
+
+## V1.0.0.8 - V1.0.1.0版本存在严重问题
+
+键盘输入过程中存在未释放资源将导致界面崩溃，该文件在`V1.0.1.1.bate`版本后修复。
+
 # 说明
 
 ## 1、窗口切换
