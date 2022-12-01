@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 
-namespace DesktopTools.component
+namespace DesktopTools.component.impl
 {
     public class GoodbyeModeComponent
     {
@@ -25,7 +25,7 @@ namespace DesktopTools.component
             if (type == "正常")
             {
 #if DEBUG 
-                if (DateTime.Now.Hour > h || (DateTime.Now.Hour == h && DateTime.Now.Minute >= m))
+                if (DateTime.Now.Hour > h || DateTime.Now.Hour == h && DateTime.Now.Minute >= m)
 #else
                 if (DateTime.Now.Hour == h && DateTime.Now.Minute == m)
 #endif
@@ -35,7 +35,7 @@ namespace DesktopTools.component
             }
             else
             {
-                if (DateTime.Now.Hour > h || (DateTime.Now.Hour == h && DateTime.Now.Minute >= m))
+                if (DateTime.Now.Hour > h || DateTime.Now.Hour == h && DateTime.Now.Minute >= m)
                 {
                     return true;
                 }
@@ -72,28 +72,34 @@ namespace DesktopTools.component
                 {
                     return;
                 }
-                Stop = true; ;
-                GoodbyeMode gm = new GoodbyeMode();
-                gm.Show();
-                gm.Closed += (a, e) =>
+                Stop = true;
+                App.Current.Dispatcher.Invoke(() =>
                 {
-                    activeWindows.Remove(gm);
-                    Stop = false;
-                };
-                activeWindows.Add(gm);
+                    GoodbyeMode gm = new GoodbyeMode();
+                    gm.Show();
+                    gm.Closed += (a, e) =>
+                    {
+                        activeWindows.Remove(gm);
+                        Stop = false;
+                    };
+                    activeWindows.Add(gm);
+                });
             }
             else if (type == "炸街")
             {
                 for (int i = 0; i < 3; i++)
                 {
-                    var d = new GoodbyeMode(i);
-                    d.Closed += (a, e) =>
+                    App.Current.Dispatcher.Invoke(() =>
                     {
-                        activeWindows.Remove(d);
-                        ;
-                    };
-                    d.Show();
-                    activeWindows.Add(d);
+                        var d = new GoodbyeMode(i);
+                        d.Closed += (a, e) =>
+                        {
+                            activeWindows.Remove(d);
+                            ;
+                        };
+                        d.Show();
+                        activeWindows.Add(d);
+                    });
                 }
             }
             else
@@ -102,16 +108,18 @@ namespace DesktopTools.component
                 {
                     return;
                 }
-                Stop = true; ;
-                GoodbyeMode2 gm = new GoodbyeMode2();
-                gm.Show();
-                gm.Closed += (a, e) =>
+                Stop = true;
+                App.Current.Dispatcher.Invoke(() =>
                 {
-                    activeWindows.Remove(gm);
-                    Stop = false;
-                };
-                activeWindows.Add(gm);
-
+                    GoodbyeMode2 gm = new GoodbyeMode2();
+                    gm.Show();
+                    gm.Closed += (a, e) =>
+                    {
+                        activeWindows.Remove(gm);
+                        Stop = false;
+                    };
+                    activeWindows.Add(gm);
+                });
             }
         }
     }

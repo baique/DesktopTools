@@ -62,7 +62,6 @@
                     VerticalAlignment="Center"
                     Orientation="Horizontal" />
             </ScrollViewer>
-
         </Border>
     </Grid>
 </Window>

@@ -8,9 +8,13 @@ namespace DesktopTools.util
     /// </summary>
     public class Debounce
     {
-        public Action work { get; set; }
+        public Action? work { get; set; }
         public int timeout = 200;
         private Timer? timer;
+        public Debounce(int timeout)
+        {
+            this.timeout = timeout;
+        }
         public Debounce(int timeout, Action work)
         {
             this.timeout = timeout;
@@ -24,20 +28,11 @@ namespace DesktopTools.util
                 {
                     timer = new Timer(this.timeout);
                     timer.AutoReset = false;
-                    timer.Elapsed += (a, e) =>
-                    {
-                        work();
-                        if (timer != null)
-                        {
-                            timer.Stop();
-                            timer.Close();
-                            timer = null;
-                        }
-                    };
+                    timer.Elapsed += (a, e) => work();
                 }
+                timer.Stop();
+                timer.Start();
             }
-            timer.Stop();
-            timer.Start();
         }
     }
 }

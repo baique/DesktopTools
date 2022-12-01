@@ -1,10 +1,14 @@
-﻿using DesktopTools.component;
+﻿using DesktopTools.component.impl;
+using DesktopTools.component.model;
 using DesktopTools.util;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using Color = System.Windows.Media.Color;
@@ -26,7 +30,7 @@ namespace DesktopTools
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            ToggleWindow.addIgnorePtr(this);
+            SettingUtil.SelfPtr.Add(AppUtil.GetHwnd(this));
             AppUtil.ExcludeFromCapture(this);
             AppUtil.DisableAltF4(this);
             AppUtil.AlwaysToTop(this);
@@ -42,63 +46,107 @@ namespace DesktopTools
         }
         private void RawRefresh()
         {
-            Dispatcher.InvokeAsync(() =>
+            Dispatcher.Invoke(() =>
             {
-                this.bar.Children.Clear();
-                int addSize = 0;
                 var allWindow = ToggleWindow.GetAllWindow();
-                var flowMode = SettingUtil.GetSetting(SettingUtil.FlowModeKey, "0");
+                UIElement? prevItem = null;
                 foreach (var item in allWindow.OrderBy((item) => item.Key))
                 {
-                    StackPanel sp = new StackPanel
-                    {
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Orientation = Orientation.Vertical,
-                        Margin = "0" == flowMode ? new Thickness(5, 0, 5, 0) : new Thickness(0, 5, 0, 5)
-                    };
-
-                    Image image = new Image
-                    {
-                        Height = 18,
-                        Width = 18,
-                        Source = item.Value.Icon
-                    };
-                    var k = item.Key.ToString();
-                    if (k.StartsWith("NumPad"))
-                    {
-                        k = k.Substring(6);
-                    }
-                    TextBlock tb = new TextBlock
-                    {
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        FontSize = 8,
-                        Margin = new Thickness(2),
-                        Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
-                        TextAlignment = TextAlignment.Center,
-                        Text = k
-                    };
-                    sp.MouseLeftButtonDown += (a, e) =>
-                    {
-                        ToggleWindow.ToggleWindowToTop(item.Key, item.Value);
-                    };
-                    sp.MouseRightButtonDown += (a, e) =>
-                    {
-                        ToggleWindow.RemoveKeyWindow(item.Key);
-                    };
-                    sp.MouseEnter += (a, e) => { sp.ToolTip = item.Value.Title; };
-                    sp.Children.Add(image);
-                    sp.Children.Add(tb);
-                    this.bar.Children.Add(sp);
-                    addSize++;
+                    prevItem = addWindowItem(item.Key, item.Value, prevItem);
                 }
-                if (addSize > 0)
-                    this.Show();
-                else
-                    this.Hide();
+                ToggleViewVisible();
             });
         }
+
+        private void ToggleViewVisible()
+        {
+            if (this.bar.Children.Count > 0)
+                this.Show();
+            else
+                this.Hide();
+        }
+
+        private UIElement addWindowItem(Key key, WindowInfo value, UIElement? prevItem)
+        {
+            var k = key.ToString();
+            if (k.StartsWith("NumPad"))
+            {
+                k = k.Substring(6);
+            }
+            var name = "kbd_hook_" + k;
+            var n = this.bar.FindName(name) as UIElement;
+            if (n != null)
+            {
+                return n;
+            }
+            var flowMode = SettingUtil.GetSetting(SettingUtil.FlowModeKey, "0");
+            StackPanel sp = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Orientation = Orientation.Vertical,
+                Margin = "0" == flowMode ? new Thickness(5, 0, 5, 0) : new Thickness(0, 5, 0, 5)
+            };
+            RegisterName(name, sp);
+
+            if (value.Icon == null)
+            {
+                value.Icon = AppUtil.GetAppIcon(value.Pid, value.P);
+            }
+            var image = new Image
+            {
+                Width = 18,
+                Source = value.Icon
+            };
+
+            TextBlock tb = new TextBlock
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 8,
+                Margin = new Thickness(2),
+                Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                TextAlignment = TextAlignment.Center,
+                Text = k
+            };
+            sp.MouseLeftButtonDown += (a, e) =>
+            {
+                ToggleWindow.ToggleWindowToTop(key, value);
+            };
+            sp.MouseRightButtonDown += (a, e) =>
+            {
+                ToggleWindow.RemoveKeyWindow(key);
+            };
+            sp.ToolTip = value.Title;
+            sp.Children.Add(image);
+            sp.Children.Add(tb);
+            if (prevItem != null)
+            {
+                this.bar.Children.Insert(this.bar.Children.IndexOf(prevItem)+1, sp);
+            }
+            else
+            {
+                this.bar.Children.Add(sp);
+            }
+            value.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == "Title")
+                {
+                    Dispatcher.Invoke(() => sp.ToolTip = value.Title);
+                }
+                else if (e.PropertyName == "_Remove")
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        UnregisterName(name);
+                        this.bar.Children.Remove(sp);
+                        this.ToggleViewVisible();
+                    });
+                }
+            };
+            return sp;
+        }
+
         public void Refresh()
         {
             debounce.invoke();

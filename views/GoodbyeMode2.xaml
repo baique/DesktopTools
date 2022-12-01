@@ -103,7 +103,7 @@
                 VerticalContentAlignment="Center"
                 Panel.ZIndex="3"
                 Content="班"
-                FontFamily="{StaticResource Aa破竹体}"
+                FontFamily="{DynamicResource Aa破竹体}"
                 FontSize="160px"
                 Foreground="{DynamicResource fontTColor}" />
         </Canvas>

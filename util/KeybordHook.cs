@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DesktopTools.util;
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
@@ -99,6 +100,7 @@ namespace DesktopTools
         private const int WM_KEYUP = 0x101;//KEYUP
         private const int WM_SYSKEYDOWN = 0x104;//SYSKEYDOWN
         private const int WM_SYSKEYUP = 0x105;//SYSKEYUP
+        private static HwndSource VMSource = new HwndSource(0, 0, 0, 0, 0, "", IntPtr.Zero);
 
         public bool disabledAllKeyword = false;
 
@@ -115,8 +117,7 @@ namespace DesktopTools
                 // raise KeyDown
                 if (KeyDownEvent != null && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN))
                 {
-                    KeyEventArgs e = new KeyEventArgs(Keyboard.PrimaryDevice, new HwndSource(0, 0, 0, 0, 0, "", IntPtr.Zero), 0,
-                        KeyInterop.KeyFromVirtualKey(MyKeyboardHookStruct.vkCode));
+                    KeyEventArgs e = new KeyEventArgs(Keyboard.PrimaryDevice, VMSource, 0, KeyInterop.KeyFromVirtualKey(MyKeyboardHookStruct.vkCode));
                     bool stopEvent = false;
                     KeyDownEvent(() => { stopEvent = true; }, e);
                     if (stopEvent)
@@ -128,9 +129,7 @@ namespace DesktopTools
                 // 键盘抬起
                 if (KeyUpEvent != null && (wParam == WM_KEYUP || wParam == WM_SYSKEYUP))
                 {
-                    Key keyData = (Key)MyKeyboardHookStruct.vkCode;
-
-                    KeyEventArgs e = new KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, keyData);
+                    KeyEventArgs e = new KeyEventArgs(Keyboard.PrimaryDevice, VMSource, 0, KeyInterop.KeyFromVirtualKey(MyKeyboardHookStruct.vkCode));
                     bool stopEvent = false;
                     KeyUpEvent(() => { stopEvent = true; }, e);
                     if (stopEvent)
@@ -146,6 +145,7 @@ namespace DesktopTools
         ~KeyboardHook()
         {
             Stop();
+            VMSource.Dispose();
         }
     }
 }

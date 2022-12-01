@@ -8,9 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace DesktopTools.component
+namespace DesktopTools.component.impl
 {
-    public class SystemBackground : GlobalKeyboardEvent.Event
+    public class SystemBackground
     {
         public static string getImgPath()
         {
@@ -28,6 +28,7 @@ namespace DesktopTools.component
                 return new DateTime();
             }
         }
+
         public static async void ChangeBackground()
         {
             if (!IsEnableBiYing())
@@ -46,7 +47,7 @@ namespace DesktopTools.component
                         {
                             FileInfo f = new FileInfo(getImgPath());
                             var fn = f.FullName;
-                            App.Current.Dispatcher.Invoke(() =>
+                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
                             {
                                 try
                                 {
@@ -71,7 +72,7 @@ namespace DesktopTools.component
                                 }
                                 Win32.SystemParametersInfo(0x0014, 0, f.FullName, 0x2 | 0x1);
                             });
-                     
+
                         }
                     }
 
@@ -88,7 +89,7 @@ namespace DesktopTools.component
             }
             StringBuilder sb = new StringBuilder();
             Win32.SystemParametersInfo(0x0073, 65535, sb, 0);
-            if (Path.Equals(sb.ToString(), getImgPath()) || Path.Equals(sb.ToString(), getImgPath() + ".tmp.bmp"))
+            if (Equals(sb.ToString(), getImgPath()) || Equals(sb.ToString(), getImgPath() + ".tmp.bmp"))
             {
                 return;
             }
@@ -104,11 +105,6 @@ namespace DesktopTools.component
         private static bool IsEnableBiYing()
         {
             return "1".Equals(SettingUtil.GetSetting(SettingUtil.EnableBiYingKey));
-        }
-
-        public string? Key()
-        {
-            return SettingUtil.GetSettingOrDefValueIfNotExists(SettingUtil.ChangeBiYingBackgroundKey, "LeftCtrl + LeftAlt + B + N");
         }
 
     }

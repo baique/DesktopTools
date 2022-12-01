@@ -26,9 +26,13 @@ namespace DesktopTools
             if (proc != null)
             {
                 HandleRunningInstance(proc);
+                Application.Current.Shutdown();
                 return;
             }
+            // 历史版本错误的启动项移除
             SetSelfStarting(false, "desk_date");
+            // 历史版本错误的启动项移除
+            SetSelfStarting(false, "DesktopTools", @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
             SetSelfStarting(true, "DesktopTools", @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
             RefreshOpacityValue();
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException; ;
@@ -47,9 +51,11 @@ namespace DesktopTools
             {
                 //忽略现有的例程   
                 if (process.Id != current.Id)
+                {
                     //确保例程从EXE文件运行 
                     if (process.ProcessName == process.ProcessName)
                         return process;
+                }
             }
             return null;
         }
@@ -79,7 +85,6 @@ namespace DesktopTools
 #endif
                 MessageBox.Show("预期外的错误:" + exp.Message);
             }
-
             else
                 MessageBox.Show("预期外的错误");
             App.Current.Shutdown(1);
@@ -112,12 +117,6 @@ namespace DesktopTools
             //设置是否自动启动
             if (started)
             {
-                {
-                    string path = System.Windows.Forms.Application.ExecutablePath;
-                    Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(key);
-                    rk2.SetValue(exeName, @"""" + path + @"""");
-                    rk2.Close();
-                }
                 try
                 {
                     string path = System.Windows.Forms.Application.ExecutablePath;
@@ -127,7 +126,12 @@ namespace DesktopTools
                 }
                 catch
                 {
-
+                    {
+                        string path = System.Windows.Forms.Application.ExecutablePath;
+                        Microsoft.Win32.RegistryKey rk2 = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(key);
+                        rk2.SetValue(exeName, @"""" + path + @"""");
+                        rk2.Close();
+                    }
                 }
             }
             else

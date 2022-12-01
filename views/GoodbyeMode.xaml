@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="window"
     Title="GoodbyeMode"
-    Width="400"
+    Width="430"
     Height="160"
     AllowsTransparency="True"
     FontSize="18"
@@ -54,7 +54,7 @@
 
         <TextBlock
             x:Name="textBlock"
-            FontFamily="{StaticResource Aa破竹体}"
+            FontFamily="{DynamicResource Aa破竹体}"
             FontSize="48"
             Foreground="Black"
             IsHitTestVisible="False"

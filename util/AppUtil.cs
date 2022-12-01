@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -6,14 +7,18 @@ using System.Linq;
 using System.Management;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using VirtualDesktopSwitch;
 using static DesktopTools.util.Win32;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Application = System.Windows.Application;
 using Color = System.Drawing.Color;
 using Window = System.Windows.Window;
 
@@ -89,12 +94,32 @@ namespace DesktopTools.util
             }
             return null;
         }
+
+        [DllImport("gdi32.dll", SetLastError = true)]
+        private static extern bool DeleteObject(IntPtr hObject);
+
         public static ImageSource ToImageSource(Icon icon)
         {
-            return Imaging.CreateBitmapSourceFromHIcon(
-                icon.Handle,
+            Bitmap bitmap = icon.ToBitmap();
+            return ToImageSource(bitmap);
+        }
+
+        public static ImageSource ToImageSource(Bitmap bitmap)
+        {
+            IntPtr hBitmap = bitmap.GetHbitmap();
+
+            ImageSource wpfBitmap = Imaging.CreateBitmapSourceFromHBitmap(
+                hBitmap,
+                IntPtr.Zero,
                 Int32Rect.Empty,
                 BitmapSizeOptions.FromEmptyOptions());
+
+            if (!DeleteObject(hBitmap))
+            {
+                throw new Win32Exception();
+            }
+
+            return wpfBitmap;
         }
         /// <summary>
         /// 下载文件到字节数组
@@ -199,11 +224,11 @@ namespace DesktopTools.util
             double viewRawTop = -20000;
             Win32.SetWindowPos(ptr, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0004 | 0x0020 | 0x0040);
             //Hide on other window full screen
-            Task.Run(async () =>
+            Task.Run(() =>
             {
                 for (; ; )
                 {
-                    await Task.Delay(10);
+                    Thread.Sleep(1000);
                     if (SettingUtil.HasFullScreen && viewRawTop == -20000)
                     {
                         Application.Current.Dispatcher.Invoke(() =>
@@ -221,6 +246,7 @@ namespace DesktopTools.util
                             viewRawTop = -20000;
                         });
                     }
+
                     if (!VDM.IsWindowOnCurrentVirtualDesktop(ptr))
                     {
                         VDM.MoveWindowToDesktop(ptr, VDM.GetWindowDesktopId(ptr));

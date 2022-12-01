@@ -148,6 +148,21 @@ namespace DesktopTools.util
         }
         public delegate int HookProc(int nCode, Int32 wParam, IntPtr lParam);
 
+        [DllImport("user32.dll")]
+        public static extern bool PrintWindow(IntPtr hwnd, IntPtr hdcBlt, int nFlags);
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetWindowDC(IntPtr hwnd);
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetWindowRect(IntPtr hWnd, ref Rectangle rect);
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr CreateCompatibleDC(IntPtr hdc);
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr CreateCompatibleBitmap(IntPtr hdc, int nWidth, int nHeight);
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr SelectObject(IntPtr hdc, IntPtr hgdiobj);
+        [DllImport("gdi32.dll")]
+        public static extern int DeleteDC(IntPtr hdc);
+
         [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
         public static extern int SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr hInstance, int threadId);
 
@@ -336,5 +351,14 @@ namespace DesktopTools.util
 
         [DllImport("user32.dll", EntryPoint = "SystemParametersInfo")]
         public static extern int SystemParametersInfo(int uAction, int uParam, StringBuilder lpvParam, int fuWinIni);
+
+
+        public static string GetText(IntPtr hWnd)
+        {
+            int length = GetWindowTextLength(hWnd);
+            StringBuilder sb = new StringBuilder(length + 1);
+            GetWindowText(hWnd, sb, sb.Capacity);
+            return sb.ToString();
+        }
     }
 }

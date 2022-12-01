@@ -122,5 +122,7 @@ namespace DesktopTools.util
         public static string ChangeDisablePrintScreenStateKey = "change-disable-print-screen";
 
         public static bool HasFullScreen { get; internal set; }
+
+        public static List<IntPtr> SelfPtr = new List<IntPtr>();
     }
 }

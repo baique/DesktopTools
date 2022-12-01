@@ -1,4 +1,5 @@
 ﻿using DesktopTools.component;
+using DesktopTools.component.impl;
 using DesktopTools.util;
 using DesktopTools.views;
 using System;
@@ -9,11 +10,8 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
-using static DesktopTools.util.Win32;
 using Application = System.Windows.Application;
 using DateTime = System.DateTime;
-using MessageBox = System.Windows.Forms.MessageBox;
-using MessageBoxOptions = System.Windows.Forms.MessageBoxOptions;
 
 namespace DesktopTools
 {
@@ -44,16 +42,13 @@ namespace DesktopTools
         /// </summary>
         private bool outStatus = false;
         /// <summary>
-        /// 禁用录屏
-        /// </summary>
-        private DisablePrintScreenView? pvView;
-        /// <summary>
         /// 菜单自动隐藏
         /// </summary>
         private DispatcherTimer timeoutHide = new DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(1.5),
         };
+        private MainWindowInitEvent MainWindowEvent = new MainWindowInitEvent();
 
 
         public MainWindow()
@@ -63,6 +58,7 @@ namespace DesktopTools
             InitializeComponent();
             //初始化托盘区菜单
             InitNotifyIcon();
+            MainWindowEvent.Register();
         }
 
         /// <summary>
@@ -75,146 +71,13 @@ namespace DesktopTools
             ToggleMainWindow();
             HeartbeatStart(null, null);
             RegisterTimeJump();
-
-            GlobalKeyboardEvent.InitKeyWatch();
-            ToggleWindow.Register();
-            ToggleWindow.RestoreKeyWindow();
-            RegisterAutoChangeBackground();
-            RegisterGoodbyeMode();
-            RegisterDisableAutoLockScreen();
-            RegisterKeyboardEvent();
-            //RegisterDisablePrintScreen();
-
-            ToggleWindow.addIgnorePtr(this);
+            SettingUtil.SelfPtr.Add(AppUtil.GetHwnd(this));
             AppUtil.ExcludeFromCapture(this);
             AppUtil.DisableAltF4(this);
             AppUtil.AlwaysToTop(this);
             AppUtil.HideAltTab(this);
+            MainWindowEvent.HandlerMulti(this);
         }
-
-        #region 禁止录屏
-        private void RegisterDisablePrintScreen()
-        {
-            if ("1".Equals(SettingUtil.GetSetting(SettingUtil.DisablePrintScreenKey)))
-            {
-                if (pvView != null)
-                {
-                    return;
-                }
-                pvView = new DisablePrintScreenView();
-                pvView.Show();
-                pvView.Closed += (a, e) =>
-                {
-                    pvView = null;
-                };
-            }
-        }
-        private void ToggleDisablePrintScreen()
-        {
-            if (pvView == null)
-            {
-                pvView = new DisablePrintScreenView();
-                pvView.Show();
-                pvView.Closed += (a, e) =>
-                {
-                    pvView = null;
-                };
-            }
-            else
-            {
-
-                pvView.Close();
-            }
-        }
-        #endregion
-
-        #region 注册键盘事件
-        private void RegisterKeyboardEvent()
-        {
-            //需要注意此处有一定的顺序要求
-            //禁用自动锁屏
-            GlobalKeyboardEvent.Register(new DisableAutoLockScreen());
-            //录屏
-            //GlobalKeyboardEvent.Register(
-            //    () => SettingUtil.GetSettingOrDefValueIfNotExists(SettingUtil.ChangeDisablePrintScreenStateKey, "LeftAlt + M"),
-            //    (e) =>
-            //    {
-            //        ToggleDisablePrintScreen();
-            //        return true;
-            //    }
-            //);
-            //壁纸切换
-            GlobalKeyboardEvent.Register(new SystemBackground());
-            //紧急避险
-            GlobalKeyboardEvent.Register(
-                () => SettingUtil.GetSettingOrDefValueIfNotExists(SettingUtil.ErrorModeKey, "LeftCtrl + LeftShift + Space"),
-                e =>
-                {
-                    GlobalKeyboardEvent.GlobalKeybordEventStatus = false;
-                    GoodbyeModeComponent.GlobalEnable = false;
-                    WindowUpdate loading = new WindowUpdate();
-                    loading.ShowDialog();
-                    GoodbyeModeComponent.GlobalEnable = true;
-                    GlobalKeyboardEvent.GlobalKeybordEventStatus = true;
-                    return true;
-                }
-            );
-            //移除快捷键
-            GlobalKeyboardEvent.Register(
-                () => SettingUtil.GetSettingOrDefValueIfNotExists(SettingUtil.UnWindowBindOrChangeKey, "LeftCtrl + LeftAlt + Back"),
-                e =>
-                {
-                    if (MessageBox.Show("当前窗体将被移除全部快捷访问,是否继续？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification) == System.Windows.Forms.DialogResult.Yes) ToggleWindow.RemoveKeyWindow();
-                    return true;
-                }
-            );
-            //强制注册快捷键到窗体
-            GlobalKeyboardEvent.Register(() => SettingUtil.GetSettingOrDefValueIfNotExists(SettingUtil.ForceWindowBindOrChangeKey, "LeftCtrl + LeftAlt"), e =>
-            {
-                if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) || e.Key >= Key.D0 && e.Key <= Key.D9)
-                {
-                    ToggleWindow.RegisterKeyWindow(e.Key, GetForegroundWindow());
-                    return true;
-                };
-                return false;
-            });
-            //注册或切换窗体状态
-            GlobalKeyboardEvent.Register(() => SettingUtil.GetSettingOrDefValueIfNotExists(SettingUtil.WindowBindOrChangeKey, "LeftCtrl"), e =>
-            {
-                if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) || e.Key >= Key.D0 && e.Key <= Key.D9)
-                {
-                    if (ToggleWindow.ContainsKey(e.Key)) ToggleWindow.ToggleWindowToTop(e.Key);
-                    else ToggleWindow.RegisterKeyWindow(e.Key, GetForegroundWindow());
-                    return true;
-                }
-                return false;
-            });
-        }
-        #endregion
-
-        #region 禁止自动锁屏
-        private void RegisterDisableAutoLockScreen()
-        {
-            DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(5);
-            timer.Tick += (a, e) =>
-            {
-                if (!"1".Equals(SettingUtil.GetSetting(SettingUtil.EnableDisableLockScreenKey, "1"))) return;
-                DisableAutoLockScreen.TriggerUserMouseEvent();
-            };
-            timer.Start();
-        }
-        #endregion
-
-        #region 挥手模式
-        private void RegisterGoodbyeMode()
-        {
-            DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(45);
-            timer.Tick += (a, e) => { if (GoodbyeModeComponent.IsInGoodbyeTime()) GoodbyeModeComponent.Show(); };
-            timer.Start();
-        }
-        #endregion
 
         #region 时间跳动
         private void RegisterTimeJump()
@@ -228,28 +91,6 @@ namespace DesktopTools
                 this.DateNumber.Text = now.ToString("MM-dd ddd");
             };
             timer.Start();
-        }
-        #endregion
-
-        #region 自动切换壁纸
-        private void RegisterAutoChangeBackground()
-        {
-
-            DispatcherTimer autoChangeBackgroundTimer = new DispatcherTimer();
-            autoChangeBackgroundTimer.Interval = new TimeSpan(0, 2, 0);
-#if DEBUG
-            autoChangeBackgroundTimer.Interval = new TimeSpan(0, 0, 10);
-#endif
-            autoChangeBackgroundTimer.Tick += (a, e) =>
-            {
-                if (DateTime.Now.Subtract(SystemBackground.getLastChangeBackgroundTime()).TotalMinutes >= 60) SystemBackground.ChangeBackground();
-            };
-            autoChangeBackgroundTimer.Start();
-
-            DispatcherTimer checkTimer = new DispatcherTimer();
-            checkTimer.Interval = new TimeSpan(0, 0, 10);
-            checkTimer.Tick += (a, e) => SystemBackground.ChangeBackgroundIfModify();
-            checkTimer.Start();
         }
         #endregion
 
@@ -342,9 +183,6 @@ namespace DesktopTools
                 //移动完成更新现在位置
                 SettingUtil.SetSetting("main-view-left", "" + this.Left);
                 SettingUtil.SetSetting("main-view-top", "" + this.Top);
-#if DEBUG
-                Trace.WriteLine("更新高度：" + this.Top);
-#endif
             }
             catch { }
         }
@@ -358,8 +196,7 @@ namespace DesktopTools
         {
             try
             {
-                ToggleWindow.Close();
-                GlobalKeyboardEvent.close();
+                MainWindowEvent.UnRegister();
                 Notify.Visible = false;
                 Notify.Dispose();
             }
@@ -432,18 +269,17 @@ namespace DesktopTools
                 return;
             }
 
-            GlobalKeyboardEvent.GlobalKeybordEventStatus = false;
+            GlobalSystemKeyPressEvent.GlobalKeybordEventStatus = false;
             opendSettingView = new Setting();
             opendSettingView.Show();
             opendSettingView.Closed += (a, e) =>
             {
                 ToggleWindow.IconPanel().Refresh();
                 opendSettingView = null;
-                GlobalKeyboardEvent.GlobalKeybordEventStatus = true;
+                GlobalSystemKeyPressEvent.GlobalKeybordEventStatus = true;
                 if (!"1".Equals(SettingUtil.GetSetting(SettingUtil.EnableViewHeartbeatKey, ""))) HeartbeatStop(null, null);
                 else HeartbeatStart(null, null);
                 ToggleMainWindow();
-                RegisterDisablePrintScreen();
             };
         }
 

@@ -10,7 +10,7 @@
 		<ApplicationIcon>icon.ico</ApplicationIcon>
 		<SignAssembly>False</SignAssembly>
 		<Title>桌面工具</Title>
-		<Version>1.0.1.0</Version>
+		<Version>1.0.1.1</Version>
 		<Authors>baique</Authors>
 		<Description>桌面工具</Description>
 		<Copyright>Copyright @ baique</Copyright>
@@ -22,12 +22,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Resource Include="resource\font\clockicons.TTF" />
-		<Resource Include="resource\font\Aa破竹体.TTF" />
 		<Resource Include="icon.ico">
 		  <Pack>True</Pack>
 		  <PackagePath>\</PackagePath>
 		</Resource>
+		<Resource Include="resource\font\Aa破竹体.ttf" />
+		<Resource Include="resource\font\clockicons.TTF" />
 		<Resource Include="resource\image\exit.png" />
 		<Resource Include="resource\image\setting.png" />
 	</ItemGroup>
@@ -107,6 +107,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include=".github\release_node\V1.0.1.1.bate.md" />
 	  <None Include=".github\release_node\V1.0.1.0.md" />
 	  <None Include=".github\release_node\V1.0.1.0.bate.md" />
 	  <None Include=".github\release_node\V1.0.0.9.md" />
