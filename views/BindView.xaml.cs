@@ -57,7 +57,6 @@ namespace DesktopTools
                 {
                     prevItem = addWindowItem(item.Key, item.Value, prevItem);
                 }
-
                 prevFlowMode = SettingUtil.GetSetting(SettingUtil.FlowModeKey, "0");
                 ToggleViewVisible();
             });
@@ -141,7 +140,7 @@ namespace DesktopTools
             }
             else
             {
-                this.bar.Children.Add(sp);
+                this.bar.Children.Insert(0, sp);
             }
             value.PropertyChanged += (s, e) =>
             {

@@ -84,7 +84,11 @@ namespace DesktopTools.component.support
             {
                 if (item is ResourceHook)
                 {
-                    ((ResourceHook)item).UnRegister();
+                    try
+                    {
+                        ((ResourceHook)item).UnRegister();
+                    }
+                    catch { }
                 }
             }
         }
