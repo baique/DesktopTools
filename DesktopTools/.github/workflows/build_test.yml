@@ -1,0 +1,26 @@
+name: .NET Core Desktop Build And Release
+
+on: push
+    
+env:
+  APP_NAME: DesktopTools
+  DOTNET_VERSION: '6.0.401' # The .NET SDK version to use
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Install dependencies
+      run: dotnet restore /p:EnableWindowsTargeting=true
+
+    - name: Build
+      run: |
+        cd DesktopTools
+        dotnet publish -r win-x64 -c Release --sc false -f net6.0-windows -o ../publish/ -p:PublishSingleFile=true /p:EnableWindowsTargeting=true
+        dotnet publish -r win-x64 -c Release -f net6.0-windows -o ../publish/full/ -p:PublishSingleFile=true   --self-contained true /p:EnableWindowsTargeting=true /p:EnableCompressionInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true
+        MOVE ../publish/full/DesktopTools.exe ../publish/DesktopTools-full.exe
