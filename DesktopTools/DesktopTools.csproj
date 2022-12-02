@@ -24,6 +24,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Include="icon.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Resource Include="icon.ico">
 		  <Pack>True</Pack>
 		  <PackagePath>\</PackagePath>
