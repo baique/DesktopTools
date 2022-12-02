@@ -1,16 +1,21 @@
-﻿using DesktopTools.component.impl;
-using DesktopTools.component.support;
+﻿using BeanFramework.core.bean;
+using DesktopTools.component.impl;
 using System.Timers;
 
 namespace DesktopTools.component
 {
-    public class GoodbyeTimer : EventTrigger<MainWindow, bool>
+    [Bean(Name = "挥手模式")]
+    public class GoodbyeTimer : Component
     {
         private Timer? timer;
-        public bool Trigger(MainWindow? window)
+
+        public void Destroy()
+        {
+        }
+
+        public void Init()
         {
             RegisterGoodbyeMode();
-            return true;
         }
 
         #region 挥手模式

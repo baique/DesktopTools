@@ -35,8 +35,10 @@ namespace DesktopTools
             SetSelfStarting(false, "DesktopTools", @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
             SetSelfStarting(true, "DesktopTools", @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
             RefreshOpacityValue();
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException; ;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         }
+
+  
 
         /// <summary>
         /// 获取当前是否具有相同进程。

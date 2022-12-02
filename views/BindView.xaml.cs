@@ -1,4 +1,4 @@
-﻿using DesktopTools.component.impl;
+﻿using DesktopTools.component;
 using DesktopTools.component.model;
 using DesktopTools.util;
 using System;

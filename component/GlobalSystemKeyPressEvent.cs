@@ -1,16 +1,21 @@
-﻿using DesktopTools.component.support;
+﻿using BeanFramework.core.bean;
+using DesktopTools.component.support;
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Windows.Input;
 
 namespace DesktopTools.component
 {
-    public class GlobalSystemKeyPressEvent : GlobalEventTrigger<Key, bool>, EventTrigger<MainWindow, bool>, ResourceHook
+    [Bean(Name = "全局键盘钩子")]
+    public class GlobalSystemKeyPressEvent : Component
     {
         /// <summary>
         /// 全局键盘钩子
         /// </summary>
-        private static KeyboardHook k_hook = new KeyboardHook();
+        private KeyboardHook k_hook = new KeyboardHook();
+
+        [Import]
+        public List<EventTrigger<Key, bool>> events { get; set; } = new List<EventTrigger<Key, bool>>();
         /// <summary>
         /// 全局键盘事件是否响应
         /// </summary>
@@ -22,23 +27,28 @@ namespace DesktopTools.component
             {
                 return;
             }
-            if (Handler(e.Key))
+            foreach (var item in events)
             {
-                ((Action)done)();
+                if (item.Match(e.Key))
+                {
+                    if (item.Trigger(e.Key))
+                    {
+                        ((Action)done)();
+                        return;
+                    }
+                }
             }
         }
 
 
-        public new void UnRegister()
+        public void Destroy()
         {
-            base.UnRegister();
             k_hook.Stop();
         }
 
 
-        public new void Register()
+        public void Init()
         {
-            base.Register();
             k_hook.KeyDownEvent += new KeyEventHandler(hook_KeyPress);//钩住键按下
             k_hook.Start();//安装键盘钩子
         }

@@ -1,11 +1,12 @@
-﻿using DesktopTools.component.impl;
-using DesktopTools.component.support;
+﻿using BeanFramework.core.bean;
+using DesktopTools.component.impl;
 using DesktopTools.util;
 using System.Timers;
 
 namespace DesktopTools.component
 {
-    public class DisableAutoLockScreenTimer : EventTrigger<MainWindow, bool>
+    [Bean(Name = "禁止自动锁屏")]
+    public class DisableAutoLockScreenTimer
     {
         private Timer? timer;
         #region 禁止自动锁屏
@@ -22,10 +23,10 @@ namespace DesktopTools.component
             timer.Start();
         }
         #endregion
-        public bool Trigger(MainWindow? e)
+
+        public void Init()
         {
             RegisterDisableAutoLockScreen();
-            return true;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using DesktopTools.component.impl;
-using DesktopTools.component.support;
+﻿using BeanFramework.core.bean;
 using DesktopTools.util;
 using System;
 using System.Collections.Concurrent;
@@ -9,9 +8,10 @@ using static DesktopTools.util.Win32;
 
 namespace DesktopTools.component
 {
-    public class ViewEvent : EventTrigger<MainWindow, bool>, ResourceHook
+    [Bean(Name = "监听并执行变更事件")]
+    public class ViewEvent : Component
     {
-        class ProcEvent { public uint T { get; set; } public IntPtr H { get; set; } }
+        private class ProcEvent { public uint T { get; set; } public IntPtr H { get; set; } }
         private static ConcurrentQueue<ProcEvent> EventQueue = new ConcurrentQueue<ProcEvent>();
         private static CancellationTokenSource cts = new CancellationTokenSource();
         private static Debounce refreshTopmost = new Debounce(1500, () =>
@@ -30,7 +30,7 @@ namespace DesktopTools.component
             });
         }
 
-        public void Register()
+        public void Init()
         {
             Task.Run(() =>
             {
@@ -70,17 +70,18 @@ namespace DesktopTools.component
             });
         }
 
-        public void UnRegister()
+        public void Destroy()
         {
             cts.Cancel();
         }
 
-        public class BindViewRenameEvent : EventTrigger<MainWindow, bool>, ResourceHook
+        [Bean(Name = "监听窗口名称变更")]
+        public class BindViewRenameEvent : Component
         {
             private IntPtr nameChangedEventHook;
             private static WinEventDelegate onProc = new WinEventDelegate(OnProcMsg);
 
-            public void Register()
+            public void Init()
             {
                 nameChangedEventHook = SetWinEventHook(
                         WinEvents.EVENT_OBJECT_NAMECHANGE, WinEvents.EVENT_OBJECT_NAMECHANGE,
@@ -90,18 +91,19 @@ namespace DesktopTools.component
                     );
             }
 
-            public void UnRegister()
+            public void Destroy()
             {
                 UnhookWinEvent(nameChangedEventHook);
             }
         }
 
-        public class ViewToggleEvent : EventTrigger<MainWindow, bool>, ResourceHook
+        [Bean(Name = "前景窗口切换事件")]
+        public class ViewToggleEvent : Component
         {
             private IntPtr hook;
             private static WinEventDelegate onProc = new WinEventDelegate(OnProcMsg);
 
-            public void Register()
+            public void Init()
             {
                 hook = SetWinEventHook(
                         WinEvents.EVENT_SYSTEM_FOREGROUND, WinEvents.EVENT_SYSTEM_FOREGROUND,
@@ -111,18 +113,19 @@ namespace DesktopTools.component
                     );
             }
 
-            public void UnRegister()
+            public void Destroy()
             {
                 UnhookWinEvent(hook);
             }
         }
 
-        public class BindViewDestroyEvent : EventTrigger<MainWindow, bool>, ResourceHook
+        [Bean(Name = "窗口注销事件")]
+        public class BindViewDestroyEvent : Component
         {
             private static IntPtr destroyEventHook;
             private static WinEventDelegate onProc = new WinEventDelegate(OnProcMsg);
 
-            public void Register()
+            public void Init()
             {
                 destroyEventHook = SetWinEventHook(
                         WinEvents.EVENT_OBJECT_DESTROY, WinEvents.EVENT_OBJECT_DESTROY,
@@ -132,7 +135,7 @@ namespace DesktopTools.component
                     );
             }
 
-            public void UnRegister()
+            public void Destroy()
             {
                 UnhookWinEvent(destroyEventHook);
             }

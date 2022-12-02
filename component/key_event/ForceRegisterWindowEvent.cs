@@ -1,10 +1,12 @@
-﻿using DesktopTools.component.impl;
+﻿using BeanFramework.core.bean;
 using DesktopTools.component.support;
 using DesktopTools.util;
 using System.Windows.Input;
+using System.Xml.Linq;
 
-namespace DesktopTools.component
+namespace DesktopTools.component.key_event
 {
+    [Bean(Name = "快捷键强制绑定窗体")]
     public class ForceRegisterWindowEvent : EventTrigger<Key, bool>
     {
         public bool Match(Key key)

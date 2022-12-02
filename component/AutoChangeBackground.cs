@@ -1,19 +1,19 @@
-﻿using DesktopTools.component.impl;
-using DesktopTools.component.support;
+﻿using BeanFramework.core.bean;
+using DesktopTools.component.impl;
 using System;
 using Timer = System.Timers.Timer;
 
 namespace DesktopTools.component
 {
-    internal class AutoChangeBackground : EventTrigger<MainWindow, bool>
+    [Bean(Name = "自动切换壁纸")]
+    internal class AutoChangeBackground
     {
         private Timer? autoChangeBackgroundTimer;
         private Timer? checkTimer;
 
-        public bool Trigger(MainWindow? param)
+        public void Init()
         {
             RegisterAutoChangeBackground();
-            return true;
         }
 
         #region 自动切换壁纸

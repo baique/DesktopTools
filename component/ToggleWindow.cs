@@ -1,5 +1,5 @@
-﻿using DesktopTools.component.model;
-using DesktopTools.component.support;
+﻿using BeanFramework.core.bean;
+using DesktopTools.component.model;
 using DesktopTools.util;
 using System;
 using System.Collections.Generic;
@@ -12,14 +12,14 @@ using static DesktopTools.util.Win32;
 using MessageBox = System.Windows.Forms.MessageBox;
 using MessageBoxOptions = System.Windows.Forms.MessageBoxOptions;
 
-namespace DesktopTools.component.impl
+namespace DesktopTools.component
 {
-    public class ToggleWindow : EventTrigger<MainWindow, bool>, ResourceHook
+    [Bean(Name = "窗体切换实例")]
+    public class ToggleWindow : Component
     {
         private static object doubleWriteLock = new object();
         private static Dictionary<Key, WindowInfo> windowBinding = new Dictionary<Key, WindowInfo>();
         private static Dictionary<IntPtr, List<Key>> windowBindingIndex = new Dictionary<IntPtr, List<Key>>();
-        private static BindingView bv;
         private static CancellationTokenSource cts = new CancellationTokenSource();
         private static Dictionary<Key, WindowInfo> waitFlowWindowList = new Dictionary<Key, WindowInfo>();
 
@@ -27,6 +27,7 @@ namespace DesktopTools.component.impl
         {
             return windowBinding;
         }
+        private static BindingView bv;
 
         public static bool ContainsKey(Key keyData)
         {
@@ -163,6 +164,25 @@ namespace DesktopTools.component.impl
             bv.Refresh();
         }
 
+        public static void RemoveKeyWindow(params Key[] keys)
+        {
+            foreach (var key in keys)
+            {
+                var item = windowBinding[key];
+                var e = item.Ptr;
+                lock (doubleWriteLock)
+                {
+                    windowBinding.Remove(key);
+                    item.OnPropertyChanged("_Remove");
+                    windowBindingIndex[e].Remove(key);
+                    if (windowBindingIndex[e].Count == 0) windowBindingIndex.Remove(e);
+                    RemoveWindowFromReg(key, e);
+                }
+            }
+
+            bv.Refresh();
+        }
+
         public static void ToggleIconPanel()
         {
             if (windowBinding.Count > 0)
@@ -224,25 +244,6 @@ namespace DesktopTools.component.impl
             }
         }
 
-        public static void RemoveKeyWindow(params Key[] keys)
-        {
-            foreach (var key in keys)
-            {
-                var item = windowBinding[key];
-                var e = item.Ptr;
-                lock (doubleWriteLock)
-                {
-                    windowBinding.Remove(key);
-                    item.OnPropertyChanged("_Remove");
-                    windowBindingIndex[e].Remove(key);
-                    if (windowBindingIndex[e].Count == 0) windowBindingIndex.Remove(e);
-                    RemoveWindowFromReg(key, e);
-                }
-            }
-
-            bv.Refresh();
-        }
-
         private static void AddWindowToReg(Key keyData, IntPtr ptr)
         {
             var currentBinding = SettingUtil.GetSetting("last-binding-key-window");
@@ -264,7 +265,7 @@ namespace DesktopTools.component.impl
             SettingUtil.SetSetting("last-sys-update-time", Environment.TickCount64.ToString());
         }
 
-        public void Register()
+        public void Init()
         {
             App.Current.Dispatcher.Invoke(() =>
             {
@@ -324,7 +325,7 @@ namespace DesktopTools.component.impl
             });
         }
 
-        public void UnRegister()
+        public void Destroy()
         {
             cts.Cancel();
         }

@@ -1,9 +1,8 @@
-﻿using DesktopTools.component;
-using DesktopTools.component.impl;
+﻿using BeanFramework.core;
+using DesktopTools.component;
 using DesktopTools.util;
 using DesktopTools.views;
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.Windows;
 using System.Windows.Forms;
@@ -20,6 +19,7 @@ namespace DesktopTools
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static Context CTX = new Context();
         /// <summary>
         /// 托盘菜单
         /// </summary>
@@ -48,8 +48,6 @@ namespace DesktopTools
         {
             Interval = TimeSpan.FromSeconds(1.5),
         };
-        private MainWindowInitEvent MainWindowEvent = new MainWindowInitEvent();
-
 
         public MainWindow()
         {
@@ -58,7 +56,6 @@ namespace DesktopTools
             InitializeComponent();
             //初始化托盘区菜单
             InitNotifyIcon();
-            MainWindowEvent.Register();
         }
 
         /// <summary>
@@ -68,6 +65,7 @@ namespace DesktopTools
         /// <param name="e"></param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            CTX.Start(typeof(MainWindow));
             ToggleMainWindow();
             HeartbeatStart(null, null);
             RegisterTimeJump();
@@ -76,7 +74,6 @@ namespace DesktopTools
             AppUtil.DisableAltF4(this);
             AppUtil.AlwaysToTop(this);
             AppUtil.HideAltTab(this);
-            MainWindowEvent.HandlerMulti(this);
         }
 
         #region 时间跳动
@@ -196,13 +193,13 @@ namespace DesktopTools
         {
             try
             {
-                MainWindowEvent.UnRegister();
                 Notify.Visible = false;
                 Notify.Dispose();
             }
             catch { }
             finally
             {
+                CTX.Shutdown();
                 App.Current.Shutdown();
             }
 
