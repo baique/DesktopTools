@@ -6,7 +6,7 @@ using System.Timers;
 namespace DesktopTools.component
 {
     [Bean(Name = "禁止自动锁屏")]
-    public class DisableAutoLockScreenTimer
+    public class DisableAutoLockScreenTimer : Component
     {
         private Timer? timer;
         #region 禁止自动锁屏
@@ -27,6 +27,10 @@ namespace DesktopTools.component
         public void Init()
         {
             RegisterDisableAutoLockScreen();
+        }
+
+        public void Destroy()
+        {
         }
     }
 }
