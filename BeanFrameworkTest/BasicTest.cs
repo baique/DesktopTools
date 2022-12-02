@@ -33,7 +33,6 @@ namespace BeanFrameworkTest
             Assert.AreEqual(4, beans.Count);
 
             ctx.Shutdown();
-            Assert.Pass();
         }
     }
 }

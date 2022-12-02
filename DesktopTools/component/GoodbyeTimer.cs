@@ -22,7 +22,7 @@ namespace DesktopTools.component
         private void RegisterGoodbyeMode()
         {
             timer = new Timer();
-            timer.Interval = 5000;
+            timer.Interval = 20000;
             timer.AutoReset = true;
             timer.Elapsed += (a, e) =>
             {
