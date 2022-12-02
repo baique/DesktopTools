@@ -1,4 +1,4 @@
-name: .NET Core Desktop Build And Release
+name: tmp_build_test
 
 on: push
     
