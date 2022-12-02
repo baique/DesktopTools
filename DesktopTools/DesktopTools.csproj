@@ -22,13 +22,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove=".github\**" />
-	  <EmbeddedResource Remove=".github\**" />
-	  <None Remove=".github\**" />
-	  <Page Remove=".github\**" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<Resource Include="icon.ico">
 		  <Pack>True</Pack>
 		  <PackagePath>\</PackagePath>
