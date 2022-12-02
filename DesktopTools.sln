@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeanFramework", "BeanFramew
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DesktopTools", "DesktopTools\DesktopTools.csproj", "{EFD95C8B-EF44-4F02-9B69-9339684E22E1}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeanFrameworkTest", "BeanFrameworkTest\BeanFrameworkTest.csproj", "{42F328FE-B28F-49D1-87B4-73F7E0B2C2FF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{EFD95C8B-EF44-4F02-9B69-9339684E22E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EFD95C8B-EF44-4F02-9B69-9339684E22E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EFD95C8B-EF44-4F02-9B69-9339684E22E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42F328FE-B28F-49D1-87B4-73F7E0B2C2FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42F328FE-B28F-49D1-87B4-73F7E0B2C2FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42F328FE-B28F-49D1-87B4-73F7E0B2C2FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42F328FE-B28F-49D1-87B4-73F7E0B2C2FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

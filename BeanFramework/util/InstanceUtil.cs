@@ -1,4 +1,5 @@
-﻿using BeanFramework.core.bean;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace BeanFramework.util
@@ -58,6 +59,10 @@ namespace BeanFramework.util
                 {
                     return true;
                 }
+            }
+            if (source.BaseType != null)
+            {
+                return IsSupport(source.BaseType, target, isAttr);
             }
             return false;
         }
