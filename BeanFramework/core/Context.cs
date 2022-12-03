@@ -1,6 +1,9 @@
 ﻿using BeanFramework.core.bean;
 using BeanFramework.util;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace BeanFramework.core
 {
