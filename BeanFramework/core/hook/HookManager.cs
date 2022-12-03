@@ -1,4 +1,6 @@
-﻿namespace BeanFramework.core.hook
+﻿using System.Collections.Generic;
+
+namespace BeanFramework.core.hook
 {
     public class HookManager
     {

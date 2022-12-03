@@ -9,8 +9,9 @@ namespace DesktopTools.component.impl
     public class GoodbyeModeComponent
     {
         private static List<Window> activeWindows = new List<Window>();
-        public static bool IsInGoodbyeTime()
+        public static bool IsInGoodbyeTime(DateTime? timer = null)
         {
+            timer = timer ?? DateTime.Now;
             if (!GlobalEnable)
             {
                 return false;
@@ -25,9 +26,9 @@ namespace DesktopTools.component.impl
             if (type == "正常")
             {
 #if DEBUG 
-                if (DateTime.Now.Hour > h || DateTime.Now.Hour == h && DateTime.Now.Minute >= m)
+                if (timer.Value.Hour > h || timer.Value.Hour == h && timer.Value.Minute >= m)
 #else
-                if (DateTime.Now.Hour == h && DateTime.Now.Minute == m)
+                if (timer.Value.Hour == h && timer.Value.Minute == m)
 #endif
                 {
                     return true;
@@ -35,7 +36,7 @@ namespace DesktopTools.component.impl
             }
             else
             {
-                if (DateTime.Now.Hour > h || DateTime.Now.Hour == h && DateTime.Now.Minute >= m)
+                if (timer.Value.Hour > h || timer.Value.Hour == h && timer.Value.Minute >= m)
                 {
                     return true;
                 }

@@ -1,7 +1,5 @@
-﻿using BeanFramework.core;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 
@@ -16,6 +14,8 @@ namespace BeanFramework.core.bean
         public Type[] RelyType { get; set; } = new Type[0];
         public bool Loaded { get; set; } = false;
         public bool Created { get; set; } = false;
+        public bool Inited { get; set; } = false;
+        public bool IsComponentImpl { get; set; } = false;
         public BeanDefine(Context context, Type type)
         {
             _context = context;
@@ -58,9 +58,9 @@ namespace BeanFramework.core.bean
         /// <returns>是否成功</returns>
         public bool TryConstructor()
         {
-            var cs = Type.GetConstructors(BindingFlags.Public);
-            cs.OrderByDescending(f => f.GetParameters().Length);
-            foreach (var c in cs)
+            var cs = Type.GetConstructors();
+
+            foreach (var c in cs.OrderByDescending(f => f.GetParameters().Length))
             {
                 if (tryCreate(c))
                 {
@@ -101,11 +101,19 @@ namespace BeanFramework.core.bean
 
         public void Init()
         {
-            var com = Instance as Component;
-            if (com != null)
+            try
             {
-                com.Init();
-                return;
+                var com = Instance as Component;
+                if (com != null)
+                {
+                    IsComponentImpl = true;
+                    com.Init();
+                    return;
+                }
+            }
+            finally
+            {
+                Inited = true;
             }
         }
 
@@ -129,10 +137,11 @@ namespace BeanFramework.core.bean
                 {
                     return false;
                 }
+                ps[i] = bean;
             }
             try
             {
-                Instance = c.Invoke(ps) as Component;
+                Instance = c.Invoke(ps);
                 Created = Instance != null;
                 return true;
             }

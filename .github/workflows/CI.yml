@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+env:
+  APP_NAME: DesktopTools
+  DOTNET_VERSION: '6.0.401' # The .NET SDK version to use
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Release]
+
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}    
+    - name: Execute unit tests
+      run: dotnet test

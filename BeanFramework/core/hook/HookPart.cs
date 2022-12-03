@@ -1,4 +1,7 @@
-﻿namespace BeanFramework.core.hook
+﻿using System;
+using System.Collections.Generic;
+
+namespace BeanFramework.core.hook
 {
     public class HookPart<IN, OUT>
     {
