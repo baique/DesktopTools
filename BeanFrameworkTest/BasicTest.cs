@@ -30,7 +30,7 @@ namespace BeanFrameworkTest
 
             var beans = ctx.GetBeanList(typeof(CustomBeanDefine)) as List<CustomBeanDefine>;
             Assert.IsNotNull(beans);
-            Assert.AreEqual(5, beans.Count);
+            Assert.AreEqual(4, beans.Count);
 
             ctx.Shutdown();
         }
