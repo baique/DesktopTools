@@ -1,5 +1,4 @@
 using BeanFramework.core;
-using BeanFramework.core.bean;
 using BeanFrameworkTest.bean;
 using static BeanFrameworkTest.bean.BeanTest;
 
@@ -8,7 +7,7 @@ namespace BeanFrameworkTest
     public class BasicTest
     {
         /// <summary>
-        /// basic test
+        /// »ù´¡²âÊÔ
         /// </summary>
         [Test]
         public void Test()

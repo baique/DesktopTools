@@ -33,7 +33,7 @@ namespace DesktopTools
             SetSelfStarting(false, "desk_date");
             // 历史版本错误的启动项移除
             SetSelfStarting(false, "DesktopTools", @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
-            SetSelfStarting(true, "DesktopTools", @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run");
+            SetSelfStarting(true, "DesktopTools");
             RefreshOpacityValue();
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         }
