@@ -8,7 +8,7 @@ namespace BeanFrameworkTest
     public class BasicTest
     {
         /// <summary>
-        /// ÒÀÀµ×¢ÈëÄ£¿é²âÊÔ
+        /// basic test
         /// </summary>
         [Test]
         public void Test()
@@ -30,7 +30,7 @@ namespace BeanFrameworkTest
 
             var beans = ctx.GetBeanList(typeof(CustomBeanDefine)) as List<CustomBeanDefine>;
             Assert.IsNotNull(beans);
-            Assert.AreEqual(4, beans.Count);
+            Assert.AreEqual(5, beans.Count);
 
             ctx.Shutdown();
         }
