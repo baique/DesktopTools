@@ -2,7 +2,7 @@
 
 ![](https://img.shields.io/badge/language-WPF-red.svg)
 ![](https://img.shields.io/badge/license-MIT-green.svg)
-![](https://img.shields.io/badge/version-V1.0.1.1.bate2-blue.svg)
+![](https://img.shields.io/badge/version-V1.0.1.1-blue.svg)
 
 # 重要事项
 

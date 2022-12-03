@@ -57,6 +57,16 @@ namespace BeanFramework.core
 
         }
 
+        public BeanDefine? GetBeanDefine(Type type)
+        {
+            if (ContextBeanDefines.ContainsKey(type))
+            {
+                var define = ContextBeanDefines[type];
+                if (define.Created) return define;
+            }
+            return null;
+        }
+
         public object? GetBean(Type type)
         {
             if (ContextBeanDefines.ContainsKey(type))
@@ -94,6 +104,24 @@ namespace BeanFramework.core
                 addMethod.Invoke(list, new object[] { f });
             });
             return list;
+        }
+
+        public List<BeanDefine> GetBeanDefines(Type type)
+        {
+            List<BeanDefine> d = new List<BeanDefine>();
+            foreach (var item in ContextBeanDefines)
+            {
+                if (InstanceUtil.IsSupport(item.Key, type))
+                {
+                    if (item.Value.Instance != null) d.Add(item.Value);
+                }
+            }
+            return d.OrderBy(f =>
+            {
+                var com = f as Component;
+                if (com != null) return com.Order();
+                return 0;
+            }).ToList();
         }
 
         public void Shutdown()

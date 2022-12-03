@@ -14,6 +14,8 @@ namespace BeanFramework.core.bean
         public Type[] RelyType { get; set; } = new Type[0];
         public bool Loaded { get; set; } = false;
         public bool Created { get; set; } = false;
+        public bool Inited { get; set; } = false;
+        public bool IsComponentImpl { get; set; } = false;
         public BeanDefine(Context context, Type type)
         {
             _context = context;
@@ -57,7 +59,7 @@ namespace BeanFramework.core.bean
         public bool TryConstructor()
         {
             var cs = Type.GetConstructors();
-            
+
             foreach (var c in cs.OrderByDescending(f => f.GetParameters().Length))
             {
                 if (tryCreate(c))
@@ -99,11 +101,19 @@ namespace BeanFramework.core.bean
 
         public void Init()
         {
-            var com = Instance as Component;
-            if (com != null)
+            try
             {
-                com.Init();
-                return;
+                var com = Instance as Component;
+                if (com != null)
+                {
+                    IsComponentImpl = true;
+                    com.Init();
+                    return;
+                }
+            }
+            finally
+            {
+                Inited = true;
             }
         }
 

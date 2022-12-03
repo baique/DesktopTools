@@ -6,7 +6,7 @@ using Timer = System.Timers.Timer;
 namespace DesktopTools.component
 {
     [Bean(Name = "自动切换壁纸")]
-    internal class AutoChangeBackground : Component
+    public class AutoChangeBackground : Component
     {
         private Timer? autoChangeBackgroundTimer;
         private Timer? checkTimer;

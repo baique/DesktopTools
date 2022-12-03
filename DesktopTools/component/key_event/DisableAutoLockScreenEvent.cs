@@ -3,7 +3,6 @@ using DesktopTools.component.impl;
 using DesktopTools.component.support;
 using DesktopTools.util;
 using System.Windows.Input;
-using System.Xml.Linq;
 
 namespace DesktopTools.component.key_event
 {

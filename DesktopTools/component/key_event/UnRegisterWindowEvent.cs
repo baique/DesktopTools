@@ -8,7 +8,7 @@ using System.Xml.Linq;
 namespace DesktopTools.component.key_event
 {
     [Bean(Name = "快捷键接触绑定窗体")]
-    internal class UnRegisterWindowEvent : EventTrigger<Key, bool>
+    public class UnRegisterWindowEvent : EventTrigger<Key, bool>
     {
         public bool Match(Key key)
         {
