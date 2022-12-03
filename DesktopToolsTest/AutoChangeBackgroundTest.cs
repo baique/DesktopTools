@@ -9,7 +9,6 @@ namespace DesktopToolsTest
         [Test]
         public void Test()
         {
-            var defaultTime = SystemBackground.getLastChangeBackgroundTime();
             //取得默认状态
             var defSetting = SettingUtil.GetSetting(SettingUtil.ChangeBiYingBackgroundKey);
             try
@@ -20,8 +19,6 @@ namespace DesktopToolsTest
 
                 SystemBackground.ChangeBackground();
                 var lastChangeTime = SystemBackground.getLastChangeBackgroundTime();
-                Assert.IsTrue(lastChangeTime != defaultTime, "last change fail");
-
                 var lastChange = DateTime.Now.Subtract(lastChangeTime);
                 Assert.IsTrue(lastChange.Seconds < 5, "background change fail");
 
